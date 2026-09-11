@@ -1,0 +1,515 @@
+/* ---------------------------------------------------------------------------
+   Stanford Machine Learning - course notes
+   Shared stylesheet for every page in this set.
+
+   The notes are dense, deeply nested bullet points, so most of the work here is
+   making list levels legible: each level gets its own marker and a hanging
+   indent, and the vertical rhythm tightens as you go deeper.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --bg: #ffffff;
+  --bg-soft: #f6f7f9;
+  --bg-code: #f4f5f7;
+  --text: #1c1e21;
+  --text-soft: #5a6270;
+  --rule: #dfe2e7;
+  --link: #14539a;
+  --link-hover: #0d3a6d;
+
+  --term: #1c3387;
+  --hl-red: #c02020;
+  --hl-green: #217a1c;
+  --hl-purple: #6b1f9c;
+
+  --measure: 46rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171a;
+    --bg-soft: #1d2024;
+    --bg-code: #202429;
+    --text: #e6e8eb;
+    --text-soft: #a2abb8;
+    --rule: #333941;
+    --link: #78b0ef;
+    --link-hover: #a8cdf7;
+
+    --term: #8fa8ee;
+    --hl-red: #f08a80;
+    --hl-green: #7fc97a;
+    --hl-purple: #c69ae8;
+  }
+}
+
+/* --- base ---------------------------------------------------------------- */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.55 Georgia, "Times New Roman", serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+main {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+a { color: var(--link); }
+a:hover { color: var(--link-hover); }
+
+/* --- top bar ------------------------------------------------------------- */
+
+/* Sticky rather than fixed: the bar stays in the flow, so nothing underneath
+   needs compensating padding. --topbar-h is its measured height, reused below
+   to keep anchor jumps clear of it. */
+
+:root { --topbar-h: 2.55rem; }   /* measured, not estimated: 40.3px */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #101216;
+  padding: 0.6rem 1.25rem;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85rem;
+}
+
+/* Without this, following a contents link scrolls the section heading to the
+   very top of the viewport - underneath the sticky bar. */
+
+section[id] { scroll-margin-top: calc(var(--topbar-h) + 0.75rem); }
+
+.topbar a {
+  color: #e8eaed;
+  text-decoration: none;
+  margin-right: 1.25rem;
+}
+
+.topbar a:hover { text-decoration: underline; }
+
+/* --- headings ------------------------------------------------------------ */
+
+h1 {
+  font-size: 1.9rem;
+  line-height: 1.2;
+  margin: 1.2rem 0 1rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+  line-height: 1.25;
+  margin: 2.4rem 0 0.8rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid var(--rule);
+}
+
+h3 {
+  font-size: 1.08rem;
+  margin: 1.6rem 0 0.5rem;
+  color: var(--text);
+}
+
+section > h2:first-child { margin-top: 2rem; }
+
+/* --- navigation ---------------------------------------------------------- */
+
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1.25rem 0;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85rem;
+}
+
+.chapter-nav a { text-decoration: none; }
+.chapter-nav a:hover { text-decoration: underline; }
+.chapter-nav.bottom { margin-top: 3rem; }
+
+/* --- table of contents --------------------------------------------------- */
+
+.toc {
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 0.9rem 1.2rem;
+  margin: 1.5rem 0 2rem;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.9rem;
+}
+
+.toc h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-soft);
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: 0;
+}
+
+.toc ul { margin: 0; padding-left: 1.1rem; }
+.toc li { margin: 0.25rem 0; }
+.toc li::marker { color: var(--text-soft); }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+/* --- lists --------------------------------------------------------------- */
+
+/* The notes run four or five levels deep in places. Alternating markers and a
+   consistent indent are what keep that readable. */
+
+ul, ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+li { margin: 0.3rem 0; }
+
+li > ul,
+li > ol {
+  margin: 0.3rem 0 0.5rem;
+}
+
+ul { list-style-type: disc; }
+ul ul { list-style-type: circle; }
+ul ul ul { list-style-type: square; }
+ul ul ul ul { list-style-type: "– "; }
+ul ul ul ul ul { list-style-type: "· "; }
+
+li::marker { color: var(--text-soft); }
+
+/* --- text ---------------------------------------------------------------- */
+
+p { margin: 0.7rem 0; }
+
+strong { font-weight: 700; }
+em { font-style: italic; }
+
+sub, sup {
+  font-size: 0.72em;
+  line-height: 0;
+}
+
+/* Colour the author used to pick out terms and warnings. */
+.term { color: var(--term); font-weight: 600; }
+.hl-red { color: var(--hl-red); }
+.hl-green { color: var(--hl-green); }
+.hl-purple { color: var(--hl-purple); }
+.hl { color: var(--hl-red); }
+
+/* --- figures ------------------------------------------------------------- */
+
+figure {
+  margin: 1.2rem 0;
+  text-align: center;
+}
+
+figure img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+}
+
+figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  font-style: italic;
+}
+
+/* Drawn diagrams (chapter 21) rather than scanned slides: these are inline SVG
+   and take their colours from the theme, so no white plate behind them. */
+
+figure.diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram .box { fill: var(--bg-soft); stroke: var(--rule); stroke-width: 1.5; }
+.diagram .box-accent { fill: none; stroke: var(--term); stroke-width: 1.5; }
+.diagram .lbl { fill: var(--text); font-family: system-ui, sans-serif; font-size: 13px; }
+.diagram .lbl-sm { fill: var(--text-soft); font-family: system-ui, sans-serif; font-size: 11px; }
+.diagram .lbl-key { fill: var(--term); font-family: system-ui, sans-serif; font-size: 13px; font-weight: 600; }
+.diagram .arrow { stroke: var(--text-soft); stroke-width: 1.4; fill: none; }
+.diagram .arrow-head { fill: var(--text-soft); }
+.diagram .cell-on { fill: var(--term); }
+.diagram .cell-off { fill: var(--bg-soft); stroke: var(--rule); stroke-width: 1; }
+
+/* --- maths --------------------------------------------------------------- */
+
+/* Equations that were screenshots in the original are native MathML here, so
+   they scale, reflow, select, and can be read by a screen reader. */
+
+math { font-size: 1.05em; }
+
+math[display="block"] {
+  display: block;
+  margin: 1.1rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.15rem 0;
+}
+
+.eqn {
+  margin: 1.1rem 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--bg-soft);
+  border-left: 3px solid var(--term);
+  border-radius: 0 4px 4px 0;
+  overflow-x: auto;
+}
+
+.eqn math[display="block"] { margin: 0.35rem 0; }
+.eqn math[display="block"]:first-child { margin-top: 0; }
+.eqn math[display="block"]:last-child { margin-bottom: 0; }
+
+/* Set in the sans stack rather than the body serif. Georgia has only oldstyle
+   figures and no `lnum` feature, so a subscript zero renders at x-height and
+   reads as a letter o - unusable in notes that discuss theta-nought. */
+
+.eqn-note {
+  display: block;
+  margin-top: 0.45rem;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+/* Piecewise ("cases") definitions. These want a big brace and two left-aligned
+   rows, which an <mtable> cannot deliver: Chrome's MathML Core ignores both
+   columnalign and a CSS text-align on <mtd>, so each row centres over the
+   widest one. With a long first condition and a one-word second the two ended
+   up 130px out of line. A CSS grid does the alignment properly; the maths
+   inside each cell is still MathML. */
+
+.cases {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-wrap: wrap;
+}
+
+.cases-brace {
+  font-size: 2.9em;
+  line-height: 0.9;
+  font-weight: 300;
+  color: var(--text);
+}
+
+.cases-rows {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.2rem 1.3rem;
+  align-items: baseline;
+}
+
+.cases-row { display: contents; }
+
+.cases math[display="block"] { margin: 0; }
+
+@media (max-width: 34rem) {
+  .cases-rows { gap: 0.2rem 0.7rem; }
+}
+
+/* Pseudocode set as maths: one block-level <math> per line (see the note in the
+   converter - an mtable would centre every row). The lines want to sit closer
+   together than free-standing equations do. */
+
+.pseudocode math[display="block"] { margin: 0.12rem 0; }
+.pseudocode .eqn-note { margin-top: 0.7rem; }
+
+/* Worked code sitting under the equation it illustrates. The lighter rule
+   continues the equation block's accent line, so the pair reads as one unit. */
+
+.code-eg {
+  margin: -0.6rem 0 1.2rem;
+  padding-left: 0.9rem;
+  border-left: 3px solid var(--rule);
+}
+
+.code-eg pre { margin: 0.55rem 0 0; }
+.code-eg .eqn-note { margin-top: 0.4rem; }
+
+/* Two worked examples set against each other, as the slide has them. Side by
+   side while there is room, stacked below the breakpoint - the contrast is the
+   point, but not at the cost of a squeezed column. */
+
+.two-up {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.2rem;
+  margin: 1.2rem 0;
+}
+
+/* Grid items default to min-width:auto, so a long unbroken line inside the
+   <pre> would force the track wider than the screen and scroll the whole
+   page sideways. min-width:0 lets pre-wrap do its job. */
+.two-up > * { min-width: 0; }
+.two-up pre { margin: 0; height: 100%; }
+
+.eg-label {
+  margin: 0 0 0.4rem;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+@media (max-width: 40rem) {
+  .two-up { grid-template-columns: 1fr; }
+}
+
+/* --- code ---------------------------------------------------------------- */
+
+pre, code {
+  font-family: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+pre {
+  background: var(--bg-code);
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  padding: 0.8rem 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+code {
+  background: var(--bg-code);
+  border-radius: 3px;
+  padding: 0.08em 0.32em;
+  font-size: 0.87em;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+pre .comment { color: var(--text-soft); font-style: italic; }
+
+/* --- tables -------------------------------------------------------------- */
+
+/* Sans, for the same reason as the equation notes: Georgia's oldstyle zero sits
+   at x-height and is hard to tell from an o - unusable in a truth table of 0s
+   and 1s. tabular-nums also keeps numeric columns aligned. */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.2rem 0;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+}
+
+/* A table with many columns cannot shrink below the width its content needs, so
+   on a narrow screen it would push the whole page sideways. Wrapping it lets the
+   table scroll on its own while the page stays put. */
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 1.2rem 0;
+}
+
+.table-wrap table { margin: 0; }
+
+caption {
+  caption-side: top;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  text-align: left;
+}
+
+th, td {
+  border: 1px solid var(--rule);
+  padding: 0.45rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+th { background: var(--bg-soft); font-weight: 700; }
+
+/* Units and other qualifiers under a column name: present, but not competing
+   with the name itself. */
+th small {
+  display: block;
+  margin-top: 0.15rem;
+  font-weight: 400;
+  font-size: 0.86em;
+  color: var(--text-soft);
+}
+
+/* Used by the changelog to contrast the old and corrected wording. */
+.original { color: var(--hl-red); }
+.updated { color: var(--hl-green); }
+
+/* --- index page ---------------------------------------------------------- */
+
+.chapter-list { list-style: none; padding-left: 0; }
+
+.chapter-list li {
+  margin: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.chapter-list li:first-child { border-top: 1px solid var(--rule); }
+
+.chapter-list a {
+  display: block;
+  padding: 0.6rem 0.2rem;
+  text-decoration: none;
+}
+
+.chapter-list a:hover { background: var(--bg-soft); }
+
+.note {
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+/* --- small screens ------------------------------------------------------- */
+
+@media (max-width: 34rem) {
+  body { font-size: 15px; }
+  main { padding: 1rem 0.9rem 3rem; }
+  ul, ol { padding-left: 1.15rem; }
+  h1 { font-size: 1.55rem; }
+  h2 { font-size: 1.2rem; }
+}
+
+/* --- print --------------------------------------------------------------- */
+
+@media print {
+  .topbar, .chapter-nav, .toc { display: none; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  main { max-width: none; padding: 0; }
+  h2 { page-break-after: avoid; }
+  figure, pre, li { page-break-inside: avoid; }
+  a { color: #000; text-decoration: none; }
+}

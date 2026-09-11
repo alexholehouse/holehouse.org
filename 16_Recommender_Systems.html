@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>16: Recommender Systems &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>16: Recommender Systems</h1>
+
+<nav class="chapter-nav">
+  <a href="15_Anomaly_Detection.html" rel="prev">&larr; 15: Anomaly detection</a>
+  <a href="index.html">Index</a>
+  <a href="17_Large_Scale_Machine_Learning.html" rel="next">17: Large scale ML &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#recommender-systems-introduction">Recommender systems - introduction</a></li>
+    <li><a href="#content-based-recommendation">Content based recommendation</a></li>
+    <li><a href="#collaborative-filtering-overview">Collaborative filtering - overview</a></li>
+    <li><a href="#collaborative-filtering-algorithm">Collaborative filtering Algorithm</a></li>
+    <li><a href="#vectorization-low-rank-matrix-factorization">Vectorization: Low rank matrix factorization</a></li>
+    <li><a href="#implementation-detail-mean-normalization">Implementation detail: Mean Normalization</a></li>
+  </ul>
+</nav>
+<section id="recommender-systems-introduction">
+  <h2>Recommender systems - introduction</h2>
+  <ul>
+    <li>
+      Two motivations for talking about recommender systems
+      <ul>
+        <li>
+          <strong><span class="hl-red">Important application of ML systems</span></strong>
+          <ul>
+            <li>Many technology companies find recommender systems to be absolutely key</li>
+            <li>
+              Think about websites (amazon, Ebay, iTunes genius)
+              <ul>
+                <li>Try and recommend new content for you based on past purchases</li>
+                <li>Substantial part of Amazon's revenue generation</li>
+              </ul>
+            </li>
+            <li>Improvement in recommender system performance can bring in more income</li>
+            <li>
+              Kind of a funny problem
+              <ul>
+                <li>In academic learning, recommender systems receive a small amount of attention</li>
+                <li>But in industry it's an absolutely crucial tool</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Talk about the big ideas in machine learning
+          <ul>
+            <li>Not so much a technique, but an idea</li>
+            <li>
+              As seen, features are really important
+              <ul>
+                <li>There's a big idea in machine learning that for some problems you can learn what a good set of features are</li>
+                <li>So not select those features but learn them</li>
+              </ul>
+            </li>
+            <li>Recommender systems do this - try and identify the crucial and relevant features</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Example - predict movie ratings</h3>
+  <ul>
+    <li>
+      You're a company who sells movies
+      <ul>
+        <li>
+          You let users rate movies using a 1-5 star rating
+          <ul>
+            <li>To make the example nicer, allow 0-5 (makes math easier)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>You have five movies</li>
+    <li>And you have four users</li>
+    <li>
+      Admittedly, business isn't going well, but you're optimistic about the future as a result of your truly outstanding (if limited) inventory
+      <div class="table-wrap"><table>
+<caption>Five movies, four users. &#x201c;?&#x201d; means the user has not rated that film; ratings run 0 to 5.</caption>
+<tr><th scope="col">Movie</th><th scope="col">Alice (1)</th><th scope="col">Bob (2)</th><th scope="col">Carol (3)</th><th scope="col">Dave (4)</th></tr>
+<tr><th scope="row">Love at last</th><td>5</td><td>5</td><td>0</td><td>0</td></tr><tr><th scope="row">Romance forever</th><td>5</td><td>?</td><td>?</td><td>0</td></tr><tr><th scope="row">Cute puppies of love</th><td>?</td><td>4</td><td>0</td><td>?</td></tr><tr><th scope="row">Nonstop car chases</th><td>0</td><td>0</td><td>5</td><td>4</td></tr><tr><th scope="row">Swords vs. karate</th><td>0</td><td>0</td><td>5</td><td>0</td></tr>
+</table></div>
+<p class="eqn-note">The slide prints &#x201c;?&#x201d; for Dave&#x2019;s rating of <em>Swords vs. karate</em>, but the Y matrix encoding this same table gives it as 0, and the mean normalisation later in the chapter needs it to be 0 &#x2014; &#x3bc;<sub>5</sub> is stated as 1.25, the mean of (0,&nbsp;0,&nbsp;5,&nbsp;0). Corrected to 0 here.</p>
+    </li>
+    <li>
+      To introduce some notation
+      <ul>
+        <li>n<strong><sub>u</sub></strong> - Number of users (called ?<sup>nu</sup> occasionally as we can't subscript in superscript)</li>
+        <li>n<strong><sub>m </sub></strong>- Number of movies</li>
+        <li>r(i, j) - 1 if user j has rated movie i (i.e. bitmap)</li>
+        <li>y<sup>(i,j)</sup> - rating given by user j to movie i (defined only if r(i,j) = 1)</li>
+      </ul>
+    </li>
+    <li>
+      So for this example
+      <ul>
+        <li>n<strong><sub>u</sub></strong> = 4</li>
+        <li>n<strong><sub>m </sub></strong>= 5</li>
+        <li>
+          Summary of scoring
+          <ul>
+            <li>Alice and Bob gave good ratings to rom coms, but low scores to action films</li>
+            <li>Carol and Dave gave good ratings for action films but low ratings for rom coms</li>
+          </ul>
+        </li>
+        <li>We have the data given above</li>
+        <li>
+          The problem is as follows
+          <ul>
+            <li>Given r(i,j) and y<sup>(i,j)</sup> - go through and try and predict missing values (?s)</li>
+            <li>Come up with a learning algorithm that can fill in these missing values</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="content-based-recommendation">
+  <h2>Content based recommendation</h2>
+  <ul>
+    <li>
+      Using our example above, how do we predict?
+      <ul>
+        <li>
+          For each movie we have a feature which measures degree to which each film is a
+          <ul>
+            <li>Romance (x<strong><sub>1</sub></strong>)</li>
+            <li>Action (x<strong><sub>2</sub></strong>)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="table-wrap"><table>
+<caption>The same ratings, with two features per film: how much romance and how much action it contains.</caption>
+<tr><th scope="col">Movie</th><th scope="col">Alice (1)</th><th scope="col">Bob (2)</th><th scope="col">Carol (3)</th><th scope="col">Dave (4)</th><th scope="col">x<sub>1</sub><small>(romance)</small></th><th scope="col">x<sub>2</sub><small>(action)</small></th></tr>
+<tr><th scope="row">Love at last</th><td>5</td><td>5</td><td>0</td><td>0</td><td>0.9</td><td>0</td></tr><tr><th scope="row">Romance forever</th><td>5</td><td>?</td><td>?</td><td>0</td><td>1.0</td><td>0.01</td></tr><tr><th scope="row">Cute puppies of love</th><td>?</td><td>4</td><td>0</td><td>?</td><td>0.99</td><td>0</td></tr><tr><th scope="row">Nonstop car chases</th><td>0</td><td>0</td><td>5</td><td>4</td><td>0.1</td><td>1.0</td></tr><tr><th scope="row">Swords vs. karate</th><td>0</td><td>0</td><td>5</td><td>0</td><td>0</td><td>0.9</td></tr>
+</table></div>
+  <ul>
+    <li>
+      If we have features like these, each film can be recommended by a feature vector
+      <ul>
+        <li>Add an extra feature which is x<strong><sub>0</sub></strong> = 1 for each film</li>
+        <li>
+          So for each film we have a [3 x 1] vector, which for film number 1 ("Love at Last") would be
+          <div class="eqn">
+<math display="block"><mrow><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0.9</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">The leading 1 is the bias term; then romance 0.9, action 0.</span>
+</div>
+        </li>
+        <li>
+          i.e. for our dataset we have
+          <ul>
+            <li>
+              {x<sup>1</sup>, x<sup>2</sup>, x<sup>3</sup>, x<sup>4</sup>, x<sup>5</sup>}
+              <ul>
+                <li>Where each of these is a [3x1] vector with an x<strong><sub>0</sub></strong> = 1 and then a romance and an action score</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>To be consistent with our notation, n is going to be the number of features NOT counting the x<strong><sub>0</sub></strong> term, so n = 2</li>
+      </ul>
+    </li>
+    <li>
+      We could treat each rating for each user as a separate linear regression problem
+      <ul>
+        <li>For each user j we could learn a parameter vector</li>
+        <li>
+          Then predict that user j will rate movie i with
+          <ul>
+            <li>(θ<sup>j</sup>)<sup><em>T </em></sup>x<sup>i </sup>= stars</li>
+            <li>inner product of parameter vector and features</li>
+          </ul>
+        </li>
+        <li>
+          So, lets take user 1 (Alice) and see what she makes of the modern classic Cute Puppies of Love (CPOL)
+          <ul>
+            <li>
+              We have some parameter vector (θ<sup>1</sup>) associated with Alice
+              <ul>
+                <li>
+                  We'll explain later how we derived these values, but for now just take it that we have a vector
+                  <div class="eqn">
+<math display="block"><mrow><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+                </li>
+              </ul>
+            </li>
+            <li>
+              CPOL has a parameter vector (x<sup>3</sup>) associated with it
+              <div class="eqn">
+<math display="block"><mrow><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0.99</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+<div class="code-eg">
+<pre>import numpy as np
+
+theta1 = np.array([0, 5, 0])    <span class="comment"># Alice's parameters</span>
+x3 = np.array([1, 0.99, 0])     <span class="comment"># Cute Puppies of Love</span>
+
+theta1 @ x3   <span class="comment"># 4.95 - the predicted rating from the worked example</span></pre>
+<p class="eqn-note">The inner product computed: 0&times;1 + 5&times;0.99 + 0&times;0, which is the 4.95 stars derived above.</p>
+</div>
+            </li>
+            <li>
+              Our prediction will be equal to
+              <ul>
+                <li>(θ<sup>1</sup>)<sup><em>T </em></sup>x<sup>3 </sup>= (0 * 1) + (5 * 0.99) + (0 * 0)</li>
+                <li>
+                  = 4.95
+                  <ul>
+                    <li>Which may seem like a reasonable value</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          All we're doing here is applying a linear regression method for each user
+          <ul>
+            <li>So we determine a future rating based on their interest in romance and action based on previous films</li>
+          </ul>
+        </li>
+        <li>
+          We should also add one final piece of notation
+          <ul>
+            <li>m<sup>j</sup>, - Number of movies rated by the user (j)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>How do we learn (θ<sup>j</sup>)</h3>
+  <ul>
+    <li>
+      Create some parameters which give values as close as those seen in the data when applied
+      <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn><msup><mi>m</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+<span class="eqn-note">Ordinary least squares over just the films this user has actually rated; r(i,&nbsp;j) = 1 marks those.</span>
+</div>
+    </li>
+    <li>Sum over all values of i (all movies the user has used) when r(i,j) = 1 (i.e. all the films that the user has rated)</li>
+    <li>This is just like linear regression with least-squared error</li>
+    <li>
+      We can also add a regularization term to make our equation look as follows<br/>
+      <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn><msup><mi>m</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn><msup><mi>m</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+      <ul>
+        <li>
+          The regularization term goes from k=1 through to n, so (θ<sup>j</sup>) ends up being an n+1 feature vector
+          <ul>
+            <li>Don't regularize over the bias terms (0)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>If you do this you get a reasonable value</li>
+    <li>We're rushing through this a bit, but it's just a linear regression problem</li>
+    <li>
+      To make this a little bit clearer you can get rid of the m<sup>j</sup> term (it's just a constant so shouldn't make any difference to minimization)
+      <ul>
+        <li>
+          So to learn (θ<sup>j</sup>)
+          <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+<span class="eqn-note">m<sup>(j)</sup> is a constant, so dropping it does not change which &#x3b8; minimises the expression.</span>
+</div>
+        </li>
+        <li>
+          But for our recommender system we want to learn parameters for <em>all</em> users, so we add an extra summation term to this which means we determine the minimum (θ<sup>j</sup>) value for every user
+          <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mrow><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup></mrow></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>u</mi></msub></mrow></munderover><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>u</mi></msub></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+<span class="eqn-note">The same objective as above, summed over all users.</span>
+</div>
+        </li>
+        <li>
+          When you do this as a function of each (θ<sup>j</sup>) parameter vector you get the parameters for each user
+          <ul>
+            <li>So this is our optimization objective -&gt; J(θ<sup>1</sup>, ..., θ<sup>nu</sup>)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      In order to do the minimization we have the following gradient descent
+      <div class="eqn pseudocode">
+<math display="block"><mrow><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>:=</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>&#x2212;</mo><mi>&#x3b1;</mi><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mspace width="1em"/><mtext>(for</mtext><mspace width="0.3em"/><mi>k</mi><mo>=</mo><mn>0</mn><mtext>)</mtext></mrow></math>
+<math display="block"><mrow><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>:=</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>&#x2212;</mo><mi>&#x3b1;</mi><mo form="prefix">(</mo><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>+</mo><mi>&#x3bb;</mi><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo form="postfix">)</mo><mspace width="1em"/><mtext>(for</mtext><mspace width="0.3em"/><mi>k</mi><mo>&#x2260;</mo><mn>0</mn><mtext>)</mtext></mrow></math>
+<span class="eqn-note">The bias term k = 0 is not regularised, exactly as in linear and logistic regression.</span>
+</div>
+      <ul>
+        <li>
+          Slightly different to our previous gradient descent implementations
+          <ul>
+            <li>k = 0 and k != 0 versions</li>
+            <li>
+              We can define the middle term above as
+              <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">(</mo><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>+</mo><mi>&#x3bb;</mi><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo form="postfix">)</mo></mrow></math>
+</div>
+            </li>
+            <li>
+              Difference from linear regression
+              <ul>
+                <li>No 1/m terms (got rid of the 1/m term)</li>
+                <li>Otherwise very similar</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      This approach is called content-based approach because we assume we have features regarding the content which will help us identify things that make them appealing to a user
+      <ul>
+        <li>However, often such features are not available - next we discuss a non-content based approach!</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="collaborative-filtering-overview">
+  <h2>Collaborative filtering - overview</h2>
+  <ul>
+    <li>
+      The collaborative filtering algorithm has a very interesting property - does feature learning
+      <ul>
+        <li>i.e. it can learn for itself what features it needs to learn</li>
+      </ul>
+    </li>
+    <li>
+      Recall our original data set above for our five films and four raters
+      <ul>
+        <li>
+          Here we assume someone had calculated the "romance" and "action" amounts of the films
+          <ul>
+            <li>This can be very hard to do in reality</li>
+            <li>Often want more features than just two</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So - let's change the problem and pretend we have a data set where we don't know any of the features associated with the films
+      <div class="table-wrap"><table>
+<caption>Collaborative filtering turns the problem round: the feature values are now what we are trying to learn.</caption>
+<tr><th scope="col">Movie</th><th scope="col">Alice (1)</th><th scope="col">Bob (2)</th><th scope="col">Carol (3)</th><th scope="col">Dave (4)</th><th scope="col">x<sub>1</sub><small>(romance)</small></th><th scope="col">x<sub>2</sub><small>(action)</small></th></tr>
+<tr><th scope="row">Love at last</th><td>5</td><td>5</td><td>0</td><td>0</td><td>?</td><td>?</td></tr><tr><th scope="row">Romance forever</th><td>5</td><td>?</td><td>?</td><td>0</td><td>?</td><td>?</td></tr><tr><th scope="row">Cute puppies of love</th><td>?</td><td>4</td><td>0</td><td>?</td><td>?</td><td>?</td></tr><tr><th scope="row">Nonstop car chases</th><td>0</td><td>0</td><td>5</td><td>4</td><td>?</td><td>?</td></tr><tr><th scope="row">Swords vs. karate</th><td>0</td><td>0</td><td>5</td><td>0</td><td>?</td><td>?</td></tr>
+</table></div>
+      <ul>
+        <li>
+          Now let's make a different assumption
+          <ul>
+            <li>
+              We've polled each user and found out how much each user likes
+              <ul>
+                <li>Romantic films</li>
+                <li>Action films</li>
+              </ul>
+            </li>
+            <li>
+              Which has generated the following parameter set
+              <div class="eqn">
+<math display="block"><mrow><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width='0.8em'/><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width='0.8em'/><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width='0.8em'/><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Alice and Bob like romance, Carol and Dave like action.</span>
+</div>
+            </li>
+            <li>Alice and Bob like romance but hate action</li>
+            <li>Carol and Dave like action but hate romance</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If we can get these parameters from the users we can infer the missing values from our table
+      <ul>
+        <li>
+          Lets look at "Love at Last"
+          <ul>
+            <li>Alice and Bob loved it</li>
+            <li>Carol and Dave hated it</li>
+          </ul>
+        </li>
+        <li>
+          We know from the feature vectors Alice and Bob love romantic films, while Carol and Dave hate them
+          <ul>
+            <li>Based on the factor Alice and Bob liked "Love at Last" and Carol and Dave hated it we may be able to (correctly) conclude that "Love at Last" is a romantic film</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      This is a bit of a simplification in terms of the maths, but what we're really asking is
+      <ul>
+        <li>
+          "What feature vector should x<sup>1</sup> be so that
+          <ul>
+            <li>(θ<sup>1</sup>)<sup><em>T </em></sup>x<sup>1 </sup>is about 5</li>
+            <li>(θ<sup>2</sup>)<sup><em>T </em></sup>x<sup>1 </sup>is about 5</li>
+            <li>(θ<sup>3</sup>)<sup><em>T </em></sup>x<sup>1 </sup>is about 0</li>
+            <li>(θ<sup>4</sup>)<sup><em>T </em></sup>x<sup>1 </sup>is about 0</li>
+          </ul>
+        </li>
+        <li>
+          From this we can guess that x<sup>1 </sup>may be
+          <div class="eqn">
+<math display="block"><mrow><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>1.0</mn></mtd></mtr><mtr><mtd><mn>0.0</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Learned from the ratings rather than supplied &#x2014; and it comes out close to the 0.9 / 0 that was given by hand earlier.</span>
+</div>
+        </li>
+        <li>Using that same approach we should then be able to determine the remaining feature vectors for the other films</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Formalizing the collaborative filtering problem</h3>
+  <ul>
+    <li>
+      We can more formally describe the approach as follows
+      <ul>
+        <li>Given (θ<sup>1</sup>, ..., θ<sup>nu</sup>) (i.e. given the parameter vectors for each user's preferences)</li>
+        <li>
+          We must minimize an optimization function which tries to identify the best parameter vector associated with a film<br/>
+          <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mi>j</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+<span class="eqn-note">The mirror image of fitting a user: now the parameters are known and the features are what we solve for.</span>
+</div>
+          <ul>
+            <li>So we're summing over all the indices j for where we have data for movie i</li>
+            <li>We're minimizing this squared error</li>
+          </ul>
+        </li>
+        <li>
+          Like before, the above equation gives us a way to learn the features for one film
+          <ul>
+            <li>We want to learn all the features for <em>all</em> the films - so we need an additional summation term</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>How does this work with the previous recommendation system</h3>
+  <ul>
+    <li>
+      Content based recommendation systems
+      <ul>
+        <li>Saw that if we have a set of features for movie rating you can learn a user's preferences</li>
+      </ul>
+    </li>
+    <li>
+      Now
+      <ul>
+        <li>If you have your users preferences you can therefore determine a film's features</li>
+      </ul>
+    </li>
+    <li>This is a bit of a chicken &amp; egg problem</li>
+    <li>
+      What you can do is
+      <ul>
+        <li>Randomly guess values for θ</li>
+        <li>Then use collaborative filtering to generate x</li>
+        <li>Then use content based recommendation to improve θ</li>
+        <li>Use that to improve x</li>
+        <li>And so on</li>
+      </ul>
+    </li>
+    <li>
+      This actually works
+      <ul>
+        <li>Causes your algorithm to converge on a reasonable set of parameters</li>
+        <li>This is collaborative filtering</li>
+      </ul>
+    </li>
+    <li>We call it collaborative filtering because in this example the users are collaborating together to help the algorithm learn better features and help the system and the other users</li>
+  </ul>
+</section>
+<section id="collaborative-filtering-algorithm">
+  <h2>Collaborative filtering Algorithm</h2>
+  <ul>
+    <li>Here we combine the ideas from before to build a collaborative filtering algorithm</li>
+    <li>
+      Our starting point is as follows
+      <ul>
+        <li>
+          If we're given the film's features we can use that to work out the users' preference
+          <div class="eqn pseudocode">
+<math display="block"><mrow><mtext>Given</mtext><mspace width="0.4em"/><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mspace width="0.4em"/><mtext>estimate</mtext><mspace width="0.4em"/><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>:</mo></mrow></math>
+<math display="block"><mrow><mspace width="1.4em"/><munder><mo movablelimits="false">min</mo><mrow><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup></mrow></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>u</mi></msub></mrow></munderover><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>u</mi></msub></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+        </li>
+        <li>
+          If we're given the users' preferences we can use them to work out the film's features
+          <div class="eqn pseudocode">
+<math display="block"><mrow><mtext>Given</mtext><mspace width="0.4em"/><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mspace width="0.4em"/><mtext>estimate</mtext><mspace width="0.4em"/><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>:</mo></mrow></math>
+<math display="block"><mrow><mspace width="1.4em"/><munder><mo movablelimits="false">min</mo><mrow><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup></mrow></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>m</mi></msub></mrow></munderover><munder><mo>&#x2211;</mo><mrow><mi>j</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>m</mi></msub></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      One thing you could do is
+      <ul>
+        <li>Randomly initialize parameter</li>
+        <li>Go back and forward</li>
+      </ul>
+    </li>
+    <li>
+      But there's a more efficient algorithm which can solve θ and x simultaneously
+      <ul>
+        <li>Define a new optimization objective which is a function of x and θ</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn pseudocode">
+<math display="block"><mrow><mtext>Minimising</mtext><mspace width="0.4em"/><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mspace width="0.4em"/><mtext>and</mtext><mspace width="0.4em"/><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mspace width="0.4em"/><mtext>simultaneously:</mtext></mrow></math>
+<math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>m</mi></msub></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>u</mi></msub></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mrow><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup></mrow></munder><mspace width="0.5em"/><mi>J</mi><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow></math>
+<span class="eqn-note">Solving for both at once. The single sum over (i,&nbsp;j) with r(i,&nbsp;j)&nbsp;=&nbsp;1 replaces the nested sums above &#x2014; it runs over every rating that exists, once each.</span>
+</div>
+  <ul>
+    <li>
+      Understanding this optimization objective
+      <ul>
+        <li>
+          The squared error term is the same as the squared error term in the two individual objectives above
+          <div class="eqn">
+<math display="block"><mrow><munder><mo>&#x2211;</mo><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+          <ul>
+            <li>So it's summing over every movie rated by every user</li>
+            <li>
+              Note the ":" means, "for which"
+              <ul>
+                <li>Sum over all pairs (i,j) for which r(i,j) is equal to 1</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          The regularization terms
+          <ul>
+            <li>Are simply added to the end from the original two optimization functions</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      This newly defined function has the property that
+      <ul>
+        <li>If you held x constant and only solved θ then you solve the, "Given x, solve θ" objective above</li>
+        <li>Similarly, if you held θ constant you could solve x</li>
+      </ul>
+    </li>
+    <li>
+      In order to come up with just one optimization function we treat this function as a function of both film features x and user parameters θ
+      <ul>
+        <li>Only difference between this in the back-and-forward approach is that we minimize with respect to both x and θ simultaneously</li>
+      </ul>
+    </li>
+    <li>
+      When we're learning the features this way
+      <ul>
+        <li>Previously had a convention that we have an x<strong><sub>0</sub></strong> = 1 term</li>
+        <li>
+          When we're using this kind of approach we have no x<strong><sub>0</sub></strong>,
+          <ul>
+            <li>So now our vectors (both x and θ) are n-dimensional (not n+1)</li>
+          </ul>
+        </li>
+        <li>We do this because we are now learning all the features so if the system needs a feature always = 1 then the algorithm can learn one</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Algorithm Structure</h3>
+  <ul>
+    <li>
+      <strong>1)</strong> Initialize θ<sup>1</sup>, ..., θ<sup>nu </sup>and x<sup>1</sup>, ..., x<sup>nm</sup> to small random values
+      <ul>
+        <li>A bit like neural networks - initialize all parameters to small random numbers</li>
+      </ul>
+    </li>
+    <li>
+      <strong>2)</strong> Minimize cost function J(x<sup>1</sup>, ..., x<sup>nm</sup>, θ<sup>1</sup>, ...,θ<sup>nu</sup>) using gradient descent
+      <ul>
+        <li>
+          We find that the update rules look like this
+          <div class="eqn">
+<math display="block"><mrow><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>:=</mo><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>&#x2212;</mo><mi>&#x3b1;</mi><mo form="prefix">(</mo><munder><mo>&#x2211;</mo><mrow><mi>j</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>+</mo><mi>&#x3bb;</mi><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo form="postfix">)</mo></mrow></math>
+</div>
+          <div class="eqn">
+<math display="block"><mrow><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>:=</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>&#x2212;</mo><mi>&#x3b1;</mi><mo form="prefix">(</mo><munder><mo>&#x2211;</mo><mrow><mi>i</mi><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>+</mo><mi>&#x3bb;</mi><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">In collaborative filtering there is no bias term, so unlike the update above there is no separate case for k = 0. Every parameter is regularised.</span>
+</div>
+        </li>
+        <li>Where the top term is the partial derivative of the cost function with respect to x<strong><sub>k</sub></strong><sup>i</sup> while the bottom is the partial derivative of the cost function with respect to θ<strong><sub>k</sub></strong><sup>i</sup></li>
+        <li>So here we regularize EVERY parameters (no longer x<strong><sub>0 </sub></strong>parameter) so no special case update rule</li>
+      </ul>
+    </li>
+    <li>
+      <strong>3)</strong> Having minimized the values, given a user (user j) with parameters θ and movie (movie i) with learned features x, we predict a star rating of (θ<sup>j</sup>)<sup><em>T </em></sup>x<sup>i </sup>
+      <ul>
+        <li>This is the collaborative filtering algorithm, which should give pretty good predictions for how users like new movies</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="vectorization-low-rank-matrix-factorization">
+  <h2>Vectorization: Low rank matrix factorization</h2>
+  <ul>
+    <li>
+      Having looked at collaborative filtering algorithm, how can we improve this?
+      <ul>
+        <li>Given one product, can we determine other relevant products?</li>
+      </ul>
+    </li>
+    <li>
+      We start by working out another way of writing out our predictions
+      <ul>
+        <li>
+          So take all ratings by all users in our example above and group into a matrix Y
+          <div class="eqn">
+<math display="block"><mrow><mi>Y</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>5</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mo>?</mo></mtd><mtd><mo>?</mo></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mo>?</mo></mtd><mtd><mn>4</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">One row per film, one column per user.</span>
+</div>
+          <ul>
+            <li>5 movies</li>
+            <li>4 users</li>
+            <li>Get a [5 x 4] matrix</li>
+          </ul>
+        </li>
+        <li>
+          Given [Y] there's another way of writing out all the predicted ratings
+          <div class="eqn">
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd></mtr><mtr><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd></mtr><mtr><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Every user&#x2019;s predicted rating for every film. This whole matrix is X&#x398;<sup>T</sup>, which is why the method is also called low-rank matrix factorisation.</span>
+</div>
+          <ul>
+            <li>With this matrix of predictive ratings</li>
+            <li>We determine the (i,j) entry for EVERY movie</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      We can define another matrix X
+      <ul>
+        <li>Just like matrix we had for linear regression</li>
+        <li>
+          Take all the features for each movie and stack them in rows
+          <div class="eqn">
+<math display="block"><mrow><mi>X</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mo>&#x2212;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mtd><mtd><mo>&#x2212;</mo></mtd></mtr><mtr><mtd><mo>&#x2212;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mtd><mtd><mo>&#x2212;</mo></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd></mtr><mtr><mtd><mo>&#x2212;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mtd><mtd><mo>&#x2212;</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">One film per row.</span>
+</div>
+          <ul>
+            <li>Think of each movie as one example</li>
+          </ul>
+        </li>
+        <li>
+          Also define a matrix Θ<br/>
+          <div class="eqn">
+<math display="block"><mrow><mi>&#x398;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mo>&#x2212;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mtd><mtd><mo>&#x2212;</mo></mtd></mtr><mtr><mtd><mo>&#x2212;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mtd><mtd><mo>&#x2212;</mo></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd></mtr><mtr><mtd><mo>&#x2212;</mo></mtd><mtd><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mtd><mtd><mo>&#x2212;</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">One user per row. Capital &#x398; is the matrix; lower-case &#x3b8;<sup>(j)</sup> is one user's parameters.</span>
+</div>
+          <ul>
+            <li>Take each per user parameter vector and stack in rows</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Given our new matrices X and Θ
+      <ul>
+        <li>We can have a vectorized way of computing the prediction range matrix by doing X * Θ<sup><em>T</em></sup></li>
+      </ul>
+    </li>
+    <li>
+      We can given this algorithm another name - <strong><span class="hl-red">low rank matrix factorization</span></strong>
+      <ul>
+        <li>
+          This comes from the property that the X * Θ<sup><em>T </em></sup>calculation has a property in linear algebra that we create a <strong><span class="hl-red">low rank</span></strong> matrix
+          <ul>
+            <li>Don't worry about what a low rank matrix is</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Recommending new movies to a user</h3>
+  <ul>
+    <li>
+      Finally, having run the collaborative filtering algorithm, we can use the learned features to find related films
+      <ul>
+        <li>When you learn a set of features you don't know what the features will be - lets you identify the features which define a film</li>
+        <li>
+          Say we learn the following features
+          <ul>
+            <li>x<strong><sub>1</sub></strong> - romance</li>
+            <li>x<strong><sub>2</sub></strong> - action</li>
+            <li>x<strong><sub>3</sub></strong> - comedy</li>
+            <li>x<strong><sub>4</sub></strong> - ...</li>
+          </ul>
+        </li>
+        <li>So we have n features all together</li>
+        <li>
+          After you've learned features it's often very hard to come in and apply a human understandable metric to what those features are
+          <ul>
+            <li>Usually learn features which are very meaningful for understanding what users like</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Say you have movie i
+      <ul>
+        <li>Find a movie j which is similar to i, which you can recommend</li>
+        <li>Our features allow a good way to measure movie similarity</li>
+        <li>
+          If we have two movies x<sup>i</sup> and x<sup>j</sup>
+          <ul>
+            <li>
+              We want to minimize ||x<sup>i</sup> - x<sup>j</sup>||
+              <ul>
+                <li>i.e. the distance between those two movies</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Provides a good indicator of how similar two films are in the sense of user perception
+          <ul>
+            <li>NB - Maybe ONLY in terms of user perception</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="implementation-detail-mean-normalization">
+  <h2>Implementation detail: Mean Normalization</h2>
+  <ul>
+    <li>Here we have one final implementation detail - make algorithm work a bit better</li>
+    <li>
+      To show why we might need mean normalization let's consider an example where there's a user who hasn't rated <em>any</em> movies
+      <div class="table-wrap"><table>
+<caption>Eve has rated nothing at all.</caption>
+<tr><th scope="col">Movie</th><th scope="col">Alice (1)</th><th scope="col">Bob (2)</th><th scope="col">Carol (3)</th><th scope="col">Dave (4)</th><th scope="col">Eve (5)</th></tr>
+<tr><th scope="row">Love at last</th><td>5</td><td>5</td><td>0</td><td>0</td><td>?</td></tr><tr><th scope="row">Romance forever</th><td>5</td><td>?</td><td>?</td><td>0</td><td>?</td></tr><tr><th scope="row">Cute puppies of love</th><td>?</td><td>4</td><td>0</td><td>?</td><td>?</td></tr><tr><th scope="row">Nonstop car chases</th><td>0</td><td>0</td><td>5</td><td>4</td><td>?</td></tr><tr><th scope="row">Swords vs. karate</th><td>0</td><td>0</td><td>5</td><td>0</td><td>?</td></tr>
+</table></div>
+<div class="eqn">
+<math display="block"><mrow><mi>Y</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>5</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mo>?</mo></mtd><mtd><mo>?</mo></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mo>?</mo></mtd><mtd><mn>4</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>4</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">The same table as a matrix, with a column of unrated entries for Eve. Without mean normalisation every one of her predictions comes out at zero.</span>
+</div>
+      <ul>
+        <li>
+          Lets see what the algorithm does for this user
+          <ul>
+            <li>Say n = 2</li>
+            <li>We now have to learn θ<sup>5</sup> (which is an n-dimensional vector)</li>
+          </ul>
+        </li>
+        <li>
+          Looking in the first term of the optimization objective
+          <ul>
+            <li>There are <em>no</em> films for which r(i,j) = 1</li>
+            <li>So this term plays no role in determining θ<sup>5</sup></li>
+            <li>So we're just minimizing the final regularization term</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mrow><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>m</mi></msub><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><msub><mi>n</mi><mi>u</mi></msub><mo stretchy="false">)</mo></mrow></msup></mrow></munder><mspace width="0.5em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>:</mo><mi>r</mi><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn></mrow></munder><msup><mrow><mo stretchy="false">(</mo><msup><mrow><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>m</mi></msub></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>x</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mrow><msub><mi>n</mi><mi>u</mi></msub></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi></mrow></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mi>k</mi></mrow><mrow><mo stretchy="false">(</mo><mi>j</mi><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+<math display="block"><mrow><mtext>for Eve, this reduces to</mtext><mspace width="0.6em"/><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn></mrow></mfrac><mo form="prefix">[</mo><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mn>1</mn></mrow><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>&#x3b8;</mi><mrow><mn>2</mn></mrow><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></msubsup><mo stretchy="false">)</mo></mrow><mn>2</mn></msup><mo form="postfix">]</mo></mrow></math>
+<span class="eqn-note">Eve has rated nothing, so no term of the first sum involves her and the middle term does not involve &#x3b8; at all. Only the regularisation on her own parameters is left &#x2014; and that is minimised by setting them to zero, which predicts zero for every film.</span>
+</div>
+  <ul>
+    <li>
+      Of course, if the goal is to minimize this term then
+      <div class="eqn">
+<math display="block"><mrow><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+      <ul>
+        <li>Why - If there's no data to pull the values away from 0 this gives the min value</li>
+      </ul>
+    </li>
+    <li>
+      So this means we predict ANY movie to be zero
+      <ul>
+        <li>Presumably Eve doesn't hate all movies...</li>
+        <li>So if we're doing this we can't recommend any movies to her either</li>
+      </ul>
+    </li>
+    <li>Mean normalization should let us fix this problem</li>
+  </ul>
+  <h3>How does mean normalization work?</h3>
+  <ul>
+    <li>
+      Group all our ratings into matrix Y as before
+      <ul>
+        <li>
+          We now have a column of ?s which corresponds to Eve's rating
+          <div class="eqn">
+<math display="block"><mrow><mi>Y</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>5</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mo>?</mo></mtd><mtd><mo>?</mo></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mo>?</mo></mtd><mtd><mn>4</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>4</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>?</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+        </li>
+        <li>
+          Now we compute the average rating each movie obtained and store it in an n<strong><sub>m</sub></strong> - dimensional column vector
+          <div class="eqn">
+<math display="block"><mrow><mi>&#x3bc;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>2.5</mn></mtd></mtr><mtr><mtd><mn>2.5</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>2.25</mn></mtd></mtr><mtr><mtd><mn>1.25</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Each film&#x2019;s average over the users who did rate it. Verified against the matrix above.</span>
+</div>
+        </li>
+        <li>
+          If we look at all the movie ratings in [Y] we can subtract off the mean rating
+          <div class="eqn">
+<math display="block"><mrow><mi>Y</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>2.5</mn></mtd><mtd><mn>2.5</mn></mtd><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>2.5</mn></mrow></mtd><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>2.5</mn></mrow></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mn>2.5</mn></mtd><mtd><mo>?</mo></mtd><mtd><mo>?</mo></mtd><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>2.5</mn></mrow></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mo>?</mo></mtd><mtd><mn>2</mn></mtd><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>2</mn></mrow></mtd><mtd><mo>?</mo></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>2.25</mn></mrow></mtd><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>2.25</mn></mrow></mtd><mtd><mn>2.75</mn></mtd><mtd><mn>1.75</mn></mtd><mtd><mo>?</mo></mtd></mtr><mtr><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>1.25</mn></mrow></mtd><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>1.25</mn></mrow></mtd><mtd><mn>3.75</mn></mtd><mtd><mrow><mo form="prefix">&#x2212;</mo><mn>1.25</mn></mrow></mtd><mtd><mo>?</mo></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Every row now averages to zero. Predictions are made on this matrix and the film&#x2019;s mean added back, so Eve &#x2014; whose parameters are still zero &#x2014; is predicted to rate each film at its average rather than at zero.</span>
+</div>
+<div class="code-eg">
+<pre>nan = np.nan
+Y = np.array([[5,   5,   0, 0, nan],
+              [5, nan, nan, 0, nan],
+              [nan, 4,   0, nan, nan],
+              [0,   0,   5, 4, nan],
+              [0,   0,   5, 0, nan]])
+
+mu = np.nanmean(Y, axis=1)   <span class="comment"># [2.5, 2.5, 2., 2.25, 1.25] - the vector above</span>
+Y_norm = Y - mu[:, None]     <span class="comment"># the normalised matrix above; ?s stay ?</span>
+np.nanmean(Y_norm, axis=1)   <span class="comment"># [0., 0., 0., 0., 0.] - every film now averages 0</span></pre>
+<p class="eqn-note">Mean normalization computed with nan for the unrated cells: nanmean averages over only the ratings that exist, and broadcasting subtracts each film's mean from its whole row.</p>
+</div>
+          <ul>
+            <li>Means we normalize each film to have an average rating of 0</li>
+          </ul>
+        </li>
+        <li>
+          Now, we take the new set of ratings and use it with the collaborative filtering algorithm
+          <ul>
+            <li>Learn θ<sup>j</sup> and x<sup>i</sup> from the mean normalized ratings</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      For our prediction of user j on movie i, predict
+      <ul>
+        <li>
+          (θ<sup>j</sup>)<sup><em>T </em></sup>x<sup>i</sup> + μ<strong><sub>i</sub></strong>
+          <ul>
+            <li>Where these vectors are the mean normalized values</li>
+            <li>We have to add μ because we removed it from our θ values</li>
+          </ul>
+        </li>
+        <li>
+          So for user 5 the same argument applies, so
+          <div class="eqn">
+<math display="block"><mrow><msup><mi>&#x3b8;</mi><mrow><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Normalising does not give Eve parameters; it changes what predicting zero means.</span>
+</div>
+        </li>
+        <li>
+          So on any movie i we're going to predict
+          <ul>
+            <li>
+              (θ<sup>5</sup>)<sup><em>T </em></sup>x<sup>i </sup>+ μ<strong><sub>i</sub></strong>
+              <ul>
+                <li>Where (θ<sup>5</sup>)<sup><em>T </em></sup>x<sup>i </sup>= to 0 (still)</li>
+                <li>But we then add the mean (μ<strong><sub>i</sub></strong>) which means Eve has an average rating assigned to each movie for her</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      This makes sense
+      <ul>
+        <li>
+          If Eve hasn't rated any films, predict the average rating of the films based on everyone
+          <ul>
+            <li>This is the best we can do</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      As an aside - we spoke here about mean normalization for users with no ratings
+      <ul>
+        <li>If you have some movies with no ratings you can also play with versions of the algorithm where you normalize the columns</li>
+        <li>BUT this is probably less relevant - probably shouldn't recommend an unrated movie</li>
+      </ul>
+    </li>
+    <li>
+      To summarize, this shows how you do mean normalization preprocessing to allow your system to deal with users who have not yet made any ratings
+      <ul>
+        <li>Means we recommend the user we know little about the best average rated products</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="15_Anomaly_Detection.html" rel="prev">&larr; 15: Anomaly detection</a>
+  <a href="index.html">Index</a>
+  <a href="17_Large_Scale_Machine_Learning.html" rel="next">17: Large scale ML &rarr;</a>
+</nav>
+</main>
+</body>
+</html>

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01: Introduction &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>01: Introduction</h1>
+
+<nav class="chapter-nav">
+  <span></span>
+  <a href="index.html">Index</a>
+  <a href="02_Linear_Regression_with_One_Variable.html" rel="next">02: Linear regression &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#introduction-to-the-course">Introduction to the course</a></li>
+    <li><a href="#what-is-machine-learning">What is machine learning?</a></li>
+    <li><a href="#supervised-learning-introduction">Supervised learning - introduction</a></li>
+    <li><a href="#unsupervised-learning-introduction">Unsupervised learning - introduction</a></li>
+  </ul>
+</nav>
+<section id="introduction-to-the-course">
+  <h2>Introduction to the course</h2>
+  <ul>
+    <li>
+      We will learn about
+      <ul>
+        <li>State of the art</li>
+        <li>How to do the implementation</li>
+      </ul>
+    </li>
+    <li>
+      Applications of machine learning include
+      <ul>
+        <li>Search</li>
+        <li>Photo tagging</li>
+        <li>Spam filters</li>
+      </ul>
+    </li>
+    <li>
+      The AI dream of building machines as intelligent as humans
+      <ul>
+        <li>Many people believe best way to do that is mimic how humans learn</li>
+      </ul>
+    </li>
+    <li>
+      What the course covers
+      <ul>
+        <li>Learn about state of the art algorithms</li>
+        <li>But the algorithms and math alone are no good</li>
+        <li>Need to know how to get these to work in problems</li>
+      </ul>
+    </li>
+    <li>
+      Why is ML so prevalent?
+      <ul>
+        <li>Grew out of AI</li>
+        <li>
+          Build intelligent machines
+          <ul>
+            <li>
+              You can program a machine how to do some simple thing
+              <ul>
+                <li>For the most part hard-wiring AI is too difficult</li>
+              </ul>
+            </li>
+            <li>
+              Best way to do it is to have some way for machines to learn things themselves
+              <ul>
+                <li>A mechanism for learning - if a machine can learn from input then it does the hard work for you</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Examples</h3>
+  <ul>
+    <li>
+      Database mining
+      <ul>
+        <li>Machine learning has recently become so big partly because of the huge amount of data being generated</li>
+        <li>Large datasets from growth of automation web</li>
+        <li>
+          Sources of data include
+          <ul>
+            <li>
+              Web data (click-stream or click through data)
+              <ul>
+                <li>Mine to understand users better</li>
+                <li>Huge segment of silicon valley</li>
+              </ul>
+            </li>
+            <li>
+              Medical records
+              <ul>
+                <li>Electronic records -&gt; turn records into knowledge</li>
+              </ul>
+            </li>
+            <li>
+              Biological data
+              <ul>
+                <li>Gene sequences, ML algorithms give a better understanding of human genome</li>
+              </ul>
+            </li>
+            <li>
+              Engineering info
+              <ul>
+                <li>Data from sensors, log reports, photos etc</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Applications that we cannot program by hand
+      <ul>
+        <li>Autonomous helicopter</li>
+        <li>
+          Handwriting recognition
+          <ul>
+            <li>This is very inexpensive because when you write an envelope, algorithms can automatically route envelopes through the post</li>
+          </ul>
+        </li>
+        <li>
+          Natural language processing (NLP)
+          <ul>
+            <li>AI pertaining to language</li>
+          </ul>
+        </li>
+        <li>
+          Computer vision
+          <ul>
+            <li>AI pertaining to vision</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Self customizing programs
+      <ul>
+        <li>Netflix</li>
+        <li>Amazon</li>
+        <li>iTunes genius</li>
+        <li>
+          Take users info
+          <ul>
+            <li>Learn based on your behavior</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Understand human learning and the brain
+      <ul>
+        <li>If we can build systems that mimic (or try to mimic) how the brain works, this may push our own understanding of the associated neurobiology</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="what-is-machine-learning">
+  <h2>What is machine learning?</h2>
+  <ul>
+    <li>
+      Here we...
+      <ul>
+        <li>Define what it is</li>
+        <li>When to use it</li>
+      </ul>
+    </li>
+    <li>
+      Not a well defined definition
+      <ul>
+        <li>Couple of examples of how people have tried to define it</li>
+      </ul>
+    </li>
+    <li>
+      Arthur Samuel (1959)
+      <ul>
+        <li>
+          <strong><em>Machine learning:</em> <span class="hl-green">"</span></strong><strong><span class="hl-green">Field of study that gives computers the ability to learn without being explicitly programmed"</span></strong>
+          <ul>
+            <li>
+              Samuel wrote a checkers playing program
+              <ul>
+                <li>Had the program play 10000 games against itself</li>
+                <li>Work out which board positions were good and bad depending on wins/losses</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Tom Mitchell (1998)
+      <ul>
+        <li>
+          <em><strong>Well posed learning problem:</strong> <span class="hl-green">"</span></em><strong><span class="hl-green">A computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E."</span></strong>
+          <ul>
+            <li>
+              The checkers example,
+              <ul>
+                <li>E = 10000s games</li>
+                <li>T is playing checkers</li>
+                <li>P if you win or not</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Several types of learning algorithms
+      <ul>
+        <li>
+          <strong><span class="term">Supervised learning</span></strong>
+          <ul>
+            <li>Teach the computer how to do something, then let it use its new found knowledge to do it</li>
+          </ul>
+        </li>
+        <li>
+          <strong><span class="term">Unsupervised learning</span></strong>
+          <ul>
+            <li>Let the computer learn how to do something, and use this to determine structure and patterns in data</li>
+          </ul>
+        </li>
+        <li>Reinforcement learning</li>
+        <li>Recommender systems</li>
+      </ul>
+    </li>
+    <li>
+      This course
+      <ul>
+        <li>Look at practical advice for applying learning algorithms</li>
+        <li>Learning a set of tools and <strong>how</strong> to apply them</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="supervised-learning-introduction">
+  <h2>Supervised learning - introduction</h2>
+  <ul>
+    <li>Probably the most common problem type in machine learning</li>
+    <li>
+      Starting with an example
+      <ul>
+        <li>
+          How do we predict housing prices
+          <ul>
+            <li>Collect data regarding housing prices and how they relate to size in feet</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="01_Introduction_files/Image.png"/></figure>
+  <ul>
+    <li><strong><u>Example problem:</u></strong> "Given this data, a friend has a house 750 square feet - how much can they be expected to get?"<br/></li>
+    <li>
+      What approaches can we use to solve this?
+      <ul>
+        <li>
+          Straight line through data
+          <ul>
+            <li>Maybe $150 000</li>
+          </ul>
+        </li>
+        <li>
+          Second order polynomial
+          <ul>
+            <li>Maybe $200 000</li>
+          </ul>
+        </li>
+        <li>One thing we discuss later - how to choose straight or curved line?</li>
+        <li>Each of these approaches represent a way of doing supervised learning</li>
+      </ul>
+    </li>
+    <li>
+      <em>What does this mean? </em>
+      <ul>
+        <li>We gave the algorithm a data set where a "right answer" was provided</li>
+        <li>
+          So we know actual prices for houses
+          <ul>
+            <li>The idea is we can learn what makes the price a certain value from the <strong><span class="term">training data</span></strong></li>
+            <li>
+              The algorithm should then produce more right answers based on new training data where we don't know the price already
+              <ul>
+                <li>i.e. predict the price</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      We also call this a <strong><span class="term">regression problem</span></strong>
+      <ul>
+        <li>Predict continuous valued output (price)</li>
+        <li>No real discrete delineation</li>
+      </ul>
+    </li>
+    <li>
+      Another example
+      <ul>
+        <li>Can we define breast cancer as malignant or benign based on tumour size</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="01_Introduction_files/Image [1].png"/></figure>
+  <ul>
+    <li>
+      Looking at data
+      <ul>
+        <li>Five of each</li>
+        <li>Can you estimate prognosis based on tumor size?</li>
+        <li>
+          This is an example of a <strong><span class="term">classification problem</span></strong>
+          <ul>
+            <li>Classify data into one of two discrete classes - no in between, either malignant or not</li>
+            <li>
+              In classification problems, can have a discrete number of possible values for the output
+              <ul>
+                <li>
+                  e.g. maybe have four values
+                  <ul>
+                    <li>0 - benign</li>
+                    <li>1 - type 1</li>
+                    <li>2 - type 2</li>
+                    <li>3 - type 3</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>In classification problems we can plot data in a different way</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="01_Introduction_files/Image [2].png"/></figure>
+  <ul>
+    <li>
+      Use only one attribute (size)
+      <ul>
+        <li>In other problems may have multiple attributes</li>
+        <li>We may also, for example, know age and tumor size</li>
+      </ul>
+    </li>
+  </ul>
+  <strong><u><figure><img alt="" loading="lazy" src="01_Introduction_files/Image [3].png"/></figure></u></strong>
+  <ul>
+    <li>
+      Based on that data, you can try and define separate classes by
+      <ul>
+        <li>Drawing a straight line between the two groups</li>
+        <li>Using a more complex function to define the two groups (which we'll discuss later)</li>
+        <li>Then, when you have an individual with a specific tumor size and who is a specific age, you can hopefully use that information to place them into one of your classes</li>
+      </ul>
+    </li>
+    <li>
+      You might have many features to consider
+      <ul>
+        <li>Clump thickness</li>
+        <li>Uniformity of cell size</li>
+        <li>Uniformity of cell shape</li>
+      </ul>
+    </li>
+    <li>
+      The most exciting algorithms can deal with an infinite number of features
+      <ul>
+        <li>How do you deal with an infinite number of features?</li>
+        <li>
+          Neat mathematical trick in support vector machine (which we discuss later)
+          <ul>
+            <li>If you have an infinitely long list - we can develop an algorithm to deal with that</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <em><strong>Summary</strong></em>
+      <ul>
+        <li>Supervised learning lets you get the "right" data</li>
+        <li>Regression problem</li>
+        <li>Classification problem</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="unsupervised-learning-introduction">
+  <h2>Unsupervised learning - introduction</h2>
+  <ul>
+    <li>Second major problem type</li>
+    <li>
+      In unsupervised learning, we get unlabeled data
+      <ul>
+        <li>Just told - here is a data set, can you structure it</li>
+      </ul>
+    </li>
+    <li>
+      One way of doing this would be to cluster data into two groups
+      <ul>
+        <li>This is a <strong>clustering algorithm</strong></li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Clustering algorithm</h3>
+  <ul>
+    <li>
+      Example of clustering algorithm
+      <ul>
+        <li>
+          Google news
+          <ul>
+            <li>Groups news stories into cohesive groups</li>
+          </ul>
+        </li>
+        <li>
+          Used in many other problems as well
+          <ul>
+            <li>Genomics</li>
+            <li>
+              Microarray data
+              <ul>
+                <li>Have a group of individuals</li>
+                <li>On each measure expression of a gene</li>
+                <li>
+                  Run algorithm to cluster individuals into types of people
+                  <figure><img alt="" loading="lazy" src="01_Introduction_files/Image [4].png"/></figure>
+                </li>
+              </ul>
+            </li>
+            <li>
+              Organize computer clusters
+              <ul>
+                <li>Identify potential weak spots or distribute workload effectively</li>
+              </ul>
+            </li>
+            <li>
+              Social network analysis
+              <ul>
+                <li>Customer data</li>
+              </ul>
+            </li>
+            <li>
+              Astronomical data analysis
+              <ul>
+                <li>Algorithms give amazing results</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Basically
+      <ul>
+        <li>Can you automatically generate structure</li>
+        <li>Because we don't give it the answer, it's unsupervised learning</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Cocktail party algorithm</h3>
+  <ul>
+    <li>
+      Cocktail party problem
+      <ul>
+        <li>
+          Lots of overlapping voices - hard to hear what everyone is saying
+          <ul>
+            <li>Two people talking</li>
+            <li>Microphones at different distances from speakers</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="01_Introduction_files/Image [5].png"/></figure>
+  <ul>
+    <li>
+      Record slightly different versions of the conversation depending on where your microphone is
+      <ul>
+        <li>But overlapping none the less</li>
+      </ul>
+    </li>
+    <li>
+      Have recordings of the conversation from each microphone
+      <ul>
+        <li>Give them to a cocktail party algorithm</li>
+        <li>
+          Algorithm processes audio recordings
+          <ul>
+            <li>Determines there are two audio sources</li>
+            <li>Separates out the two sources</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Is this a very complicated problem
+      <ul>
+        <li>Algorithm can be done with one line of code!</li>
+        <li>
+          <code class="hl-green"><strong>W, s, v = np.linalg.svd((np.tile((x*x).sum(0), (x.shape[0], 1)) * x) @ x.T)</strong></code>
+          <ul>
+            <li>Not easy to identify</li>
+            <li>But, programs can be short!</li>
+            <li>
+              Using Python (with NumPy) for examples
+              <ul>
+                <li>Often prototype algorithms in Python to test as it's very fast</li>
+                <li>Only when you show it works migrate it to C++</li>
+                <li>Gives a much faster agile development</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Understanding this algorithm
+      <ul>
+        <li>
+          <code><strong>svd</strong></code> - linear algebra routine which is built into NumPy
+          <ul>
+            <li>In C++ this would be very complicated!</li>
+          </ul>
+        </li>
+        <li>Shown that using Python to prototype is a really good way to do this</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <span></span>
+  <a href="index.html">Index</a>
+  <a href="02_Linear_Regression_with_One_Variable.html" rel="next">02: Linear regression &rarr;</a>
+</nav>
+</main>
+</body>
+</html>

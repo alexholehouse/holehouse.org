@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05: Probability and Bayes' Rule &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>05: Probability and Bayes' Rule</h1>
+
+<nav class="chapter-nav">
+  <a href="04_Linear_Regression_with_multiple_variables.html" rel="prev">&larr; 04: Multivariate regression</a>
+  <a href="index.html">Index</a>
+  <a href="06_Logistic_Regression.html" rel="next">06: Logistic regression &rarr;</a>
+</nav>
+
+<div class="toc">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#a-note-on-this-chapter">A note on this chapter</a></li>
+    <li><a href="#the-vocabulary">The vocabulary</a></li>
+    <li><a href="#bayes-rule">Bayes' rule</a></li>
+    <li><a href="#a-worked-example-the-rare-disease">A worked example: the rare disease</a></li>
+    <li><a href="#maximum-likelihood-and-map">Maximum likelihood and MAP</a></li>
+    <li><a href="#generative-vs-discriminative">Generative vs discriminative classifiers</a></li>
+    <li><a href="#naive-bayes">Naive Bayes</a></li>
+    <li><a href="#naive-bayes-and-logistic-regression">Naive Bayes and logistic regression</a></li>
+    <li><a href="#where-bayes-lives-in-these-notes">Where Bayes lives in these notes</a></li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</div>
+
+<section id="a-note-on-this-chapter">
+  <h2>A note on this chapter</h2>
+  <ul>
+    <li>An addition, slotted into the original numbering
+      <ul>
+        <li>This slot held an unwritten programming tutorial (that material now lives in Appendix 1, as a NumPy primer)</li>
+        <li>Probability belongs here instead, because everything from chapter 06 onwards quietly relies on it: maximum likelihood in 06, Gaussians in 15, priors-in-disguise in 07 - and Bayes' theorem itself is never actually stated</li>
+      </ul>
+    </li>
+    <li>It also pays a debt
+      <ul>
+        <li>Chapter 11 compares Naive Bayes against other spam classifiers with a "cover later" that never came. This is the later</li>
+      </ul>
+    </li>
+    <li>Short by design - four ideas, each of which the rest of the notes will use
+      <ul>
+        <li>Conditional probability and Bayes' rule; maximum likelihood and MAP; generative vs discriminative; Naive Bayes</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="the-vocabulary">
+  <h2>The vocabulary</h2>
+  <ul>
+    <li>A probability distribution assigns a number in [0, 1] to each outcome, and the numbers sum to 1
+      <ul>
+        <li>P(A, B) - the <span class="term">joint</span>: both things happen</li>
+        <li>P(A | B) - the <span class="term">conditional</span>: A, given that B happened</li>
+        <li>P(A) - the <span class="term">marginal</span>: A, averaging over everything else</li>
+      </ul>
+    </li>
+    <li>Two rules connect them, and they are the only machinery this chapter needs</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><mi>A</mi><mo>&#x2223;</mo><mi>B</mi><mo stretchy="false">)</mo><mspace width="0.15em"/><mi>P</mi><mo stretchy="false">(</mo><mi>B</mi><mo stretchy="false">)</mo></mrow></math>
+<span class="eqn-note">The <span class="term">product rule</span>: "both" is "one of them" times "the other, given the first". Chaining it across a whole sequence is exactly how chapter 22 factorises a sentence.</span>
+  </div>
+  <div class="eqn">
+<math display="block"><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>B</mi><mo stretchy="false">)</mo><mo>=</mo><munder><mo>&#x2211;</mo><mi>A</mi></munder><mi>P</mi><mo stretchy="false">(</mo><mi>B</mi><mo>&#x2223;</mo><mi>A</mi><mo stretchy="false">)</mo><mspace width="0.15em"/><mi>P</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></mrow></math>
+<span class="eqn-note">The <span class="term">sum rule</span> (marginalization): the total probability of B is its probability under each scenario A, weighted by how likely each scenario is.</span>
+  </div>
+  <ul>
+    <li><span class="term">Independence</span>
+      <ul>
+        <li>A and B are independent when P(A, B) = P(A)P(B) - knowing one tells you nothing about the other</li>
+        <li>Almost nothing interesting is truly independent; the useful move is <em>assuming</em> it anyway and knowing what you paid - which is the whole story of Naive Bayes below, and of chapter 15's per-feature Gaussians</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="bayes-rule">
+  <h2>Bayes' rule</h2>
+  <ul>
+    <li>Write the product rule both ways round - P(A, B) = P(A | B)P(B) = P(B | A)P(A) - and divide
+      <ul>
+        <li>That's the entire derivation. Two lines, no further assumptions</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>A</mi><mo>&#x2223;</mo><mi>B</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>B</mi><mo>&#x2223;</mo><mi>A</mi><mo stretchy="false">)</mo><mspace width="0.15em"/><mi>P</mi><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo></mrow><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>B</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow></math>
+<span class="eqn-note">Bayes' rule. Read as a machine for reversing conditionals: from "how likely is the evidence, given the hypothesis" to "how likely is the hypothesis, given the evidence" &mdash; which is the direction you actually want, and the direction experiments don't give you.</span>
+  </div>
+  <ul>
+    <li>The named parts, because the rest of the notes use these words
+      <ul>
+        <li>P(A) - the <span class="term">prior</span>: what you believed before the evidence</li>
+        <li>P(B | A) - the <span class="term">likelihood</span>: how well the hypothesis predicts the evidence</li>
+        <li>P(A | B) - the <span class="term">posterior</span>: what you should believe after</li>
+        <li>P(B) - the evidence, computed by the sum rule; it just normalizes, so posterior &#x221D; likelihood &times; prior</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="a-worked-example-the-rare-disease">
+  <h2>A worked example: the rare disease</h2>
+  <ul>
+    <li>Chapter 11's cancer-screening numbers, taken seriously
+      <ul>
+        <li>0.5% of patients have the disease; the test catches 99% of true cases, and wrongly flags 5% of healthy patients</li>
+        <li>Your test is positive. How worried should you be?</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="code-eg">
+<pre>p_disease = 0.005          <span class="comment"># the prior - chapter 11's 0.5% prevalence</span>
+sens = 0.99                <span class="comment"># P(positive | disease)   - the likelihood</span>
+spec = 0.95                <span class="comment"># P(negative | healthy)</span>
+
+<span class="comment"># the sum rule: total probability of a positive test</span>
+p_pos = sens * p_disease + (1 - spec) * (1 - p_disease)   <span class="comment"># 0.0547</span>
+
+<span class="comment"># Bayes' rule</span>
+sens * p_disease / p_pos   <span class="comment"># 0.0905 - about 9%, not 99%</span></pre>
+<p class="eqn-note">A 99%-sensitive test and the posterior is still only 9% &mdash; because the 5% false-positive rate acting on the enormous healthy majority swamps the true cases. The prior does most of the work when classes are skewed.</p>
+  </div>
+  <ul>
+    <li>This is chapter 11's skewed-classes lesson, in its native language
+      <ul>
+        <li>Precision - "of everything we flagged, how much was real" - <em>is</em> a posterior: P(y = 1 | flagged)</li>
+        <li>Recall is a likelihood: P(flagged | y = 1). Chapter 11's whole error-metric machinery is Bayes' rule wearing engineering clothes</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="maximum-likelihood-and-map">
+  <h2>Maximum likelihood and MAP</h2>
+  <ul>
+    <li>Fitting parameters is a Bayes' rule question: what should we believe about &theta;, given data?
+      <ul>
+        <li>posterior &#x221D; likelihood &times; prior, now over parameters: p(&theta; | data) &#x221D; p(data | &theta;) p(&theta;)</li>
+      </ul>
+    </li>
+    <li><span class="term">Maximum likelihood</span> (MLE): ignore the prior, pick the &theta; that makes the data most probable</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mover><mi>&#x3B8;</mi><mo>^</mo></mover><mo>=</mo><munder><mo movablelimits="false">arg&#x2009;max</mo><mi>&#x3B8;</mi></munder><mspace width="0.4em"/><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mi>log</mi><mspace width="0.15em"/><mi>p</mi><mo stretchy="false">(</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2223;</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>;</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo></mrow></math>
+<span class="eqn-note">Log because products of many probabilities underflow and sums don't &mdash; and because maximising a log maximises the original. This single line is where two of the notes' cost functions come from: model y as Bernoulli and you get chapter 06's cross-entropy; model the residuals as Gaussian and you get chapter 02's squared error. Neither cost was an aesthetic choice &mdash; both are MLE under a stated noise model.</span>
+  </div>
+  <ul>
+    <li><span class="term">MAP</span> (maximum a posteriori): keep the prior</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mover><mi>&#x3B8;</mi><mo>^</mo></mover><mo>=</mo><munder><mo movablelimits="false">arg&#x2009;max</mo><mi>&#x3B8;</mi></munder><mspace width="0.4em"/><mrow><mo stretchy="false">[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mi>log</mi><mspace width="0.15em"/><mi>p</mi><mo stretchy="false">(</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2223;</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>;</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo>+</mo><mi>log</mi><mspace width="0.15em"/><mi>p</mi><mo stretchy="false">(</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow></mrow></math>
+<span class="eqn-note">One extra term. Now choose a Gaussian prior for the parameters &mdash; &theta;<sub>j</sub> &#x223C; N(0, &tau;&sup2;), "parameters are probably small" &mdash; and log p(&theta;) is a constant minus &Sigma;&theta;<sub>j</sub>&sup2;/2&tau;&sup2;. That is <em>chapter 07's regularization penalty</em>, derived rather than bolted on: L2 regularization is MAP estimation with a Gaussian prior, and &lambda; is just the noise-to-prior variance ratio. Chapter 07 said "prefer small parameters" as an instinct; this is the instinct as a theorem.</span>
+  </div>
+  <ul>
+    <li>The practical consequences fall out immediately
+      <ul>
+        <li>Big data swamps the prior: the likelihood has m terms and the prior has one, so MLE and MAP agree as m grows - regularization matters most exactly when data is scarce, which chapter 10's learning curves showed empirically</li>
+        <li>A tighter prior (smaller &tau;) is a bigger &lambda; - more shrinkage, more bias, less variance: chapter 10's dial, given a probabilistic handle</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="generative-vs-discriminative">
+  <h2>Generative vs discriminative classifiers</h2>
+  <ul>
+    <li>Two ways to build P(y | x), and the split organises half of machine learning
+      <ul>
+        <li><span class="term">Discriminative</span> - model P(y | x) directly. Chapter 06's logistic regression: fit the boundary, say nothing about how x arises</li>
+        <li><span class="term">Generative</span> - model each class's data, P(x | y), plus the class frequencies P(y), and let Bayes' rule flip the conditional at prediction time</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>y</mi><mo>&#x2223;</mo><mi>x</mi><mo stretchy="false">)</mo><mo>&#x221D;</mo><mi>P</mi><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2223;</mo><mi>y</mi><mo stretchy="false">)</mo><mspace width="0.15em"/><mi>P</mi><mo stretchy="false">(</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></math>
+<span class="eqn-note">Generative classification in one line: score each class by "how typical is this x of the class" times "how common is the class", and normalize. The rare-disease example above is exactly this with two classes.</span>
+  </div>
+  <ul>
+    <li>The trade
+      <ul>
+        <li>Generative models answer more questions - they can generate data, score how unusual an example is (chapter 15's anomaly detection is a generative model used without labels), and handle missing features by marginalizing</li>
+        <li>But they spend capacity modelling x, which the classification task never asked for; the discriminative model puts everything into the boundary</li>
+        <li>Model each class with chapter 15's multivariate Gaussian and you get Gaussian discriminant analysis - and the decision boundary comes out linear, closely related to what logistic regression fits directly</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="naive-bayes">
+  <h2>Naive Bayes</h2>
+  <ul>
+    <li>The generative recipe hits a wall on high-dimensional x
+      <ul>
+        <li>Chapter 11's spam representation: a 10,000-entry bitmap of which vocabulary words appear. P(x | y) is a distribution over 2<sup>10,000</sup> bitmaps - unlearnable</li>
+      </ul>
+    </li>
+    <li>The naive assumption: features are independent, <em>given the class</em></li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2223;</mo><mi>y</mi><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>&#x220F;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>&#x2223;</mo><mi>y</mi><mo stretchy="false">)</mo></mrow></math>
+<span class="eqn-note">One number per word per class &mdash; "how often does <em>discount</em> appear in spam" &mdash; instead of a distribution over every possible email. 20,000 parameters instead of 2<sup>10,000</sup>. The assumption is false (words travel in packs), which is why it's called naive; it works anyway because classification only needs the scores <em>ordered</em> correctly, not calibrated. Chapter 15 made the identical assumption when it multiplied per-feature Gaussians.</span>
+  </div>
+  <ul>
+    <li>Fitting is just counting, plus one guard
+      <ul>
+        <li>P(x<sub>j</sub> = 1 | spam) = fraction of spam emails containing word j - counting is the MLE here</li>
+        <li>The guard: a word never seen in training spam would get probability 0, and one zero annihilates the whole product. <span class="term">Laplace smoothing</span> adds one phantom occurrence of each outcome: (count + 1)/(total + 2)</li>
+        <li>Smoothing <em>is</em> a prior - the MAP section above, applied to counts</li>
+      </ul>
+    </li>
+    <li>And always work in logs - the products underflow otherwise
+      <ul>
+        <li>0.1<sup>400</sup> is exactly 0.0 in floating point; 400 log 0.1 = &minus;921 is a perfectly good number</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="code-eg">
+<pre>import numpy as np
+
+vocab = ["andrew", "buy", "deal", "discount", "now"]   <span class="comment"># chapter 11's vocabulary</span>
+
+X = np.array([[0,1,1,1,1],      <span class="comment"># emails as chapter 11's bitmaps -</span>
+              [0,1,0,1,1],      <span class="comment"># four spam:  buy/deal/discount/now</span>
+              [0,1,1,0,1],
+              [0,1,1,1,0],
+              [1,0,0,0,1],      <span class="comment"># four ham: andrew, sometimes buy/deal/now</span>
+              [1,0,1,0,0],
+              [1,0,0,0,0],
+              [1,1,0,0,1]])
+y = np.array([1,1,1,1, 0,0,0,0])
+
+phi_y    = y.mean()                                    <span class="comment"># P(spam) = 0.5</span>
+phi_spam = (X[y==1].sum(0) + 1) / ((y==1).sum() + 2)   <span class="comment"># per-word rates,</span>
+phi_ham  = (X[y==0].sum(0) + 1) / ((y==0).sum() + 2)   <span class="comment"># Laplace-smoothed</span>
+
+def p_spam(x):                     <span class="comment"># Bayes' rule, in logs</span>
+    ls = np.log(phi_y)   + (x*np.log(phi_spam) + (1-x)*np.log(1-phi_spam)).sum()
+    lh = np.log(1-phi_y) + (x*np.log(phi_ham)  + (1-x)*np.log(1-phi_ham)).sum()
+    return 1 / (1 + np.exp(lh - ls))
+
+p_spam(np.array([0,1,0,1,1]))   <span class="comment"># 0.971 - "buy discount now": spam</span>
+p_spam(np.array([1,0,0,0,1]))   <span class="comment"># 0.013 - "andrew ... now": not spam</span></pre>
+<p class="eqn-note">A complete spam classifier: count, smooth, apply Bayes' rule in log space. Note the last line &mdash; converting a log-odds difference to a probability is chapter 06's sigmoid, which is no coincidence (next section). Real systems differ only in vocabulary size.</p>
+  </div>
+</section>
+
+<section id="naive-bayes-and-logistic-regression">
+  <h2>Naive Bayes and logistic regression</h2>
+  <ul>
+    <li>The two spam classifiers of these notes are a matched pair
+      <ul>
+        <li>Work out Naive Bayes' log-odds, log P(spam | x) &minus; log P(ham | x), and it is <em>linear in x</em> - a weighted sum of word indicators plus a constant, pushed through a sigmoid</li>
+        <li>That is exactly logistic regression's form (chapter 06). Same hypothesis class; different way of choosing the weights</li>
+        <li>Naive Bayes picks them by counting each feature separately under its independence assumption; logistic regression picks them by directly optimising the classification objective, jointly</li>
+      </ul>
+    </li>
+    <li>Which wins is a data-budget question - and the course's own instructor wrote the definitive paper on it
+      <ul>
+        <li>Naive Bayes reaches its best performance very quickly (counting is easy to estimate from little data) but its ceiling is lower, since the independence assumption caps it</li>
+        <li>Logistic regression starts worse and ends better - given enough data, fitting the boundary directly beats fitting a wrong model of the data</li>
+        <li>This is chapter 10's bias/variance story: the generative assumption is bias you trade for variance - and it slots straight into chapter 11's algorithm-comparison plot, where Naive Bayes was one of the four contenders</li>
+      </ul>
+    </li>
+    <li>Rule of thumb
+      <ul>
+        <li>Tiny labelled set, or you need a baseline in an afternoon: Naive Bayes (chapter 11's "build a quick and dirty first version" advice, made concrete)</li>
+        <li>Real amounts of data: discriminative wins, and everything from chapter 06 to chapter 22 is on that side of the line</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="where-bayes-lives-in-these-notes">
+  <h2>Where Bayes lives in these notes</h2>
+  <ul>
+    <li>Now visible in hindsight, chapters that were speaking probability all along
+      <ul>
+        <li>Chapter 02's squared error - MLE under Gaussian noise</li>
+        <li>Chapter 06's cost - MLE under a Bernoulli model, as its notes say; its sigmoid converts log-odds to probability, as above</li>
+        <li>Chapter 07's regularization - MAP with a Gaussian prior</li>
+        <li>Chapter 15's anomaly detection - a generative model P(x), used with a threshold instead of a second class</li>
+        <li>Chapter 15's per-feature product - the Naive Bayes independence assumption without labels</li>
+        <li>Chapter 22's cross-entropy - MLE under a categorical model, at internet scale</li>
+        <li>Chapter 25's variant scoring - a log-odds ratio of masked conditionals</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="summary">
+  <h2>Summary</h2>
+  <ul>
+    <li>Two rules - product and sum - generate everything here; Bayes' rule is the product rule divided by itself</li>
+    <li>Posterior &#x221D; likelihood &times; prior: the machine for reversing conditionals, and with skewed classes the prior dominates - a 99% test can mean a 9% posterior</li>
+    <li>MLE maximises the likelihood and is where chapters 02 and 06 got their cost functions; MAP adds a prior, and a Gaussian prior <em>is</em> chapter 07's L2 penalty</li>
+    <li>Discriminative models fit P(y | x) directly; generative models fit P(x | y)P(y) and flip it with Bayes - buying generation, anomaly scores and missing-data handling at the price of modelling x</li>
+    <li>Naive Bayes assumes feature independence within a class, turning an impossible density estimate into counting - smoothed by a prior, computed in logs</li>
+    <li>Its log-odds are linear, making it logistic regression's generative twin: faster to its (lower) ceiling, overtaken as data grows - the promised backstory to chapter 11's comparison</li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="04_Linear_Regression_with_multiple_variables.html" rel="prev">&larr; 04: Multivariate regression</a>
+  <a href="index.html">Index</a>
+  <a href="06_Logistic_Regression.html" rel="next">06: Logistic regression &rarr;</a>
+</nav>
+</main>
+</body>
+</html>

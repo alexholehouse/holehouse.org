@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02: Linear Regression with One Variable &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>02: Linear Regression with One Variable</h1>
+
+<nav class="chapter-nav">
+  <a href="01_Introduction.html" rel="prev">&larr; 01: Introduction</a>
+  <a href="index.html">Index</a>
+  <a href="03_Linear_algebra_review.html" rel="next">03: Linear algebra &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#what-this-chapter-covers">What this chapter covers</a></li>
+    <li><a href="#linear-regression">Linear Regression</a></li>
+    <li><a href="#linear-regression-implementation-cost-function">Linear regression - implementation (cost function)</a></li>
+    <li><a href="#a-deeper-insight-into-the-cost-function-simplified-cost-function">A deeper insight into the cost function - simplified cost function</a></li>
+    <li><a href="#gradient-descent-algorithm">Gradient descent algorithm</a></li>
+    <li><a href="#linear-regression-with-gradient-descent">Linear regression with gradient descent</a></li>
+  </ul>
+</nav>
+<section id="what-this-chapter-covers">
+  <h2>What this chapter covers</h2>
+  <ul>
+    <li>
+      Chapter 01 was about what machine learning is - this is our first actual algorithm
+      <ul>
+        <li><strong>Linear regression with one variable</strong> - fit a straight line to some data</li>
+        <li>Deliberately the simplest useful thing, because the point is the machinery around it</li>
+      </ul>
+    </li>
+    <li>
+      Three pieces, and they show up again for essentially every algorithm in these notes
+      <ul>
+        <li><strong>Hypothesis</strong> - the function which does the predicting</li>
+        <li><strong>Cost function</strong> - a single number saying how wrong that function currently is</li>
+        <li><strong>Gradient descent</strong> - the procedure which changes the parameters to make that number smaller</li>
+      </ul>
+    </li>
+    <li>
+      Worth getting comfortable here rather than rushing on
+      <ul>
+        <li>This is the one problem simple enough to picture completely - two parameters, so the cost function is a surface you can actually look at</li>
+        <li>That stops being true almost immediately afterwards</li>
+        <li>But hypothesis -> cost -> minimize is exactly the pattern used for logistic regression, neural networks and everything after</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="linear-regression">
+  <h2>Linear Regression</h2>
+  <ul>
+    <li>
+      Housing price data example used earlier
+      <ul>
+        <li>Supervised learning regression problem</li>
+      </ul>
+    </li>
+    <li>
+      What do we start with?
+      <ul>
+        <li>Training set (this is your data set)</li>
+        <li>
+          Notation (<em>used throughout the course</em>)
+          <ul>
+            <li>m = number of <strong><span class="term">training examples</span></strong></li>
+            <li>x's = input variables / features</li>
+            <li>
+              y's = output variable "target" variables
+              <ul>
+                <li>(x,y) - single training example</li>
+                <li>
+                  (x<sup>i</sup>, y<sup>i</sup>) - specific example (i<sup>th</sup> training example)
+                  <ul>
+                    <li>i is an index to training set</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <table>
+  <caption>Training set — m = 47 examples</caption>
+  <tbody><tr><th scope="col">Size in feet<sup>2</sup> (x)</th><th scope="col">Price ($) in 1000's (y)</th></tr>
+  <tr><td>2104</td><td>460</td></tr>
+  <tr><td>1416</td><td>232</td></tr>
+  <tr><td>1534</td><td>315</td></tr>
+  <tr><td>852</td><td>178</td></tr>
+  <tr><td>…</td><td>…</td></tr>
+</tbody></table>
+  <ul>
+    <li>
+      With our training set defined - how do we used it?
+      <ul>
+        <li>Take training set</li>
+        <li>Pass into a learning algorithm</li>
+        <li>
+          Algorithm outputs a function (denoted <em>h </em>) (h = <strong><span class="term">hypothesis</span></strong>)
+          <ul>
+            <li>This function takes an input (e.g. size of new house)</li>
+            <li>Tries to output the estimated value of Y</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      How do we represent hypothesis <em>h </em>?
+      <ul>
+        <li>
+          Going to present h as;
+          <ul>
+            <li>
+              h<sub>θ</sub>(x) = θ<sub>0</sub> + θ<sub>1</sub>x
+              <ul>
+                <li>h(x) (shorthand)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>1</mn></msub><mi>x</mi></mrow></math>
+</div>
+  <ul>
+    <li>
+      What does this mean?
+      <ul>
+        <li>Means Y is a linear function of x!</li>
+        <li>
+          θ<sub>i</sub> are <strong><span class="term">parameters</span></strong>
+          <ul>
+            <li>θ<sub>0</sub> is zero condition</li>
+            <li>θ<sub>1</sub> is gradient</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      This kind of function is a linear regression with one variable
+      <ul>
+        <li>Also called <strong><span class="term">univariate linear regression</span></strong></li>
+      </ul>
+    </li>
+    <li>
+      So in summary
+      <ul>
+        <li>A hypothesis takes in some variable</li>
+        <li>Uses parameters determined by a learning system</li>
+        <li>Outputs a prediction based on that input</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="linear-regression-implementation-cost-function">
+  <h2>Linear regression - implementation (cost function)</h2>
+  <ul>
+    <li>A cost function lets us figure out how to fit the best straight line to our data</li>
+    <li>
+      Choosing values for θ<sub>i</sub> (parameters)
+      <ul>
+        <li>Different values give you different functions</li>
+        <li>If θ<sub>0</sub> is 1.5 and θ<sub>1</sub> is 0 then we get straight line parallel with X along 1.5 @ y</li>
+        <li>If θ<sub>1</sub> is &gt; 0 then we get a positive slope</li>
+      </ul>
+    </li>
+    <li>
+      Based on our training set we want to generate parameters which make the straight line
+      <ul>
+        <li>
+          Chosen these parameters so h<sub>θ</sub>(x) is close to y for our training examples
+          <ul>
+            <li>Basically, uses xs in training set with h<sub>θ</sub>(x) to give output which is as close to the actual y value as possible</li>
+            <li>Think of h<sub>θ</sub>(x) as a "y imitator" - it tries to convert the x into y, and considering we already have y we can evaluate how well h<sub>θ</sub>(x) does this</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      To formalize this;
+      <ul>
+        <li>We want to solve a <strong><span class="term">minimization problem</span></strong></li>
+        <li>
+          Minimize (h<sub>θ</sub>(x) - y)<sup>2 </sup>
+          <ul>
+            <li>i.e. minimize the difference between h(x) and y for each/any/every example</li>
+          </ul>
+        </li>
+        <li>Sum this over the training set</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>−</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+  <ul>
+    <li>
+      Minimize squared difference between predicted house price and actual house price
+      <ul>
+        <li>
+          1/2m
+          <ul>
+            <li>1/m - means we determine the average</li>
+            <li>1/2m the 2 makes the math a bit easier, and doesn't change the constants we determine at all (i.e. half the smallest value is still the smallest value!)</li>
+          </ul>
+        </li>
+        <li>Minimizing θ<sub>0</sub>/θ<sub>1</sub> means we get the values of θ<sub>0</sub> and θ<sub>1</sub> which find on average the minimal deviation of x from y when we use those parameters in our hypothesis function</li>
+      </ul>
+    </li>
+    <li>More cleanly, this is a cost function</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>−</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+  <ul>
+    <li>
+      And we want to minimize this cost function
+      <ul>
+        <li>Our cost function is (because of the summation term) inherently looking at ALL the data in the training set at any time</li>
+      </ul>
+    </li>
+    <li>
+      <strong>So to recap</strong>
+      <ul>
+        <li>
+          <strong>Hypothesis</strong> - is like your prediction machine, throw in an <em>x</em> value, get a putative <em>y</em> value
+          <figure><img alt="" loading="lazy" src="02_Linear_Regression_with_One_Variable_files/Image [10].png"/></figure>
+        </li>
+        <li>
+          <strong>Cost</strong> - is a way to, using your training data, determine values for your θ values which make the hypothesis as accurate as possible
+          <div class="eqn">
+<math display="block"><mrow><munder><mi>minimize</mi><mrow><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub></mrow></munder><mspace width="0.35em"></mspace><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">J(θ<sub>0</sub>,θ<sub>1</sub>) is the cost function.</span>
+</div>
+          <ul>
+            <li>
+              This cost function is also called the squared error cost function
+              <ul>
+                <li>This cost function is reasonable choice for most regression functions</li>
+                <li>Probably most commonly used function</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>In case J(θ<sub>0</sub>,θ<sub>1</sub>) is a bit abstract, going into what it does, why it works and how we use it in the coming sections</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Cost function - a deeper look</h3>
+  <ul>
+    <li>
+      Lets consider some intuition about the cost function and why we want to use it
+      <ul>
+        <li>The cost function determines parameters</li>
+        <li>The value associated with the parameters determines how your hypothesis behaves, with different values generate different</li>
+      </ul>
+    </li>
+    <li>
+      Simplified hypothesis
+      <ul>
+        <li>Assumes θ<sub>0</sub> = 0</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><msub><mi>θ</mi><mn>1</mn></msub><mi>x</mi><mspace width="2em"></mspace><mo>(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>=</mo><mn>0</mn><mo>)</mo></mrow></math>
+<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>−</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+<math display="block"><mrow><munder><mi>minimize</mi><mrow><msub><mi>θ</mi><mn>1</mn></msub></mrow></munder><mspace width="0.35em"></mspace><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo></mrow></math>
+</div>
+<div class="code-eg">
+<pre>import numpy as np
+
+x = np.array([1, 2, 3])   <span class="comment"># the simplified data set used above</span>
+y = np.array([1, 2, 3])
+m = 3
+
+def J(theta1):            <span class="comment"># cost with theta0 = 0</span>
+    return ((theta1 * x - y) ** 2).sum() / (2 * m)
+
+J(1)      <span class="comment"># 0.0    - a perfect fit</span>
+J(0.5)    <span class="comment"># 0.583  - the ~0.58 read off the plot above</span>
+J(0)      <span class="comment"># 2.333  - the ~2.3 read off the plot above</span></pre>
+<p class="eqn-note">The three worked values from the bullets above, computed rather than read off the plot.</p>
+</div>
+  <ul>
+    <li>
+      Cost function and goal here are very similar to when we have θ<sub>0</sub>, but with a simpler parameter
+      <ul>
+        <li>Simplified hypothesis makes visualizing cost function J() a bit easier</li>
+      </ul>
+    </li>
+    <li>So hypothesis passes through 0,0</li>
+    <li>
+      Two key functions we want to understand
+      <ul>
+        <li>
+          h<sub>θ</sub>(x)
+          <ul>
+            <li>Hypothesis is a function of x - function of what the size of the house is</li>
+          </ul>
+        </li>
+        <li>
+          J(θ<sub>1</sub>)
+          <ul>
+            <li>Is a function of the parameter of θ<sub>1</sub></li>
+          </ul>
+        </li>
+        <li>
+          So for example
+          <ul>
+            <li>θ<sub>1</sub> = 1</li>
+            <li>J(θ<sub>1</sub>) = 0</li>
+          </ul>
+        </li>
+        <li>
+          Plot
+          <ul>
+            <li>θ<sub>1</sub> vs J(θ<sub>1</sub>)</li>
+            <li>
+              Data
+              <ul>
+                <li>
+                  1)
+                  <ul>
+                    <li>θ<sub>1</sub> = 1</li>
+                    <li>J(θ<sub>1</sub>) = 0</li>
+                  </ul>
+                </li>
+                <li>
+                  2)
+                  <ul>
+                    <li>θ<sub>1</sub> = 0.5</li>
+                    <li>J(θ<sub>1</sub>) = ~0.58</li>
+                  </ul>
+                </li>
+                <li>
+                  3)
+                  <ul>
+                    <li>θ<sub>1</sub> = 0</li>
+                    <li>J(θ<sub>1</sub>) = ~2.3</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If we compute a range of values plot
+      <ul>
+        <li>
+          J(θ<sub>1</sub>) vs θ<sub>1</sub> we get a polynomial (looks like a quadratic)
+          <figure><img alt="" loading="lazy" src="02_Linear_Regression_with_One_Variable_files/Image [13].png"/></figure>
+        </li>
+      </ul>
+    </li>
+    <li>
+      The optimization objective for the learning algorithm is find the value of θ<sub>1</sub> which minimizes J(θ<sub>1</sub>)
+      <ul>
+        <li>So, here θ<sub>1</sub> = 1 is the best value for θ<sub>1</sub></li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="a-deeper-insight-into-the-cost-function-simplified-cost-function">
+  <h2>A deeper insight into the cost function - simplified cost function</h2>
+  <ul>
+    <li>
+      Assume you're familiar with contour plots or contour figures
+      <ul>
+        <li>Using same cost function, hypothesis and goal as previously</li>
+        <li>It's OK to skip parts of this section if you don't understand contour plots</li>
+      </ul>
+    </li>
+    <li>
+      Using our original complex hypothesis with two variables,
+      <ul>
+        <li>
+          So cost function is
+          <ul>
+            <li>J(θ<sub>0</sub>, θ<sub>1</sub>)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Example,
+      <ul>
+        <li>
+          Say
+          <ul>
+            <li>θ<sub>0</sub> = 50</li>
+            <li>θ<sub>1</sub> = 0.06</li>
+          </ul>
+        </li>
+        <li>
+          Previously we plotted our cost function by plotting
+          <ul>
+            <li>θ<sub>1</sub> vs J(θ<sub>1</sub>)</li>
+          </ul>
+        </li>
+        <li>
+          Now we have two parameters
+          <ul>
+            <li>Plot becomes a bit more complicated</li>
+            <li>
+              Generates a 3D surface plot where axis are
+              <ul>
+                <li>X = θ<sub>1</sub></li>
+                <li>Z = θ<sub>0</sub></li>
+                <li>Y = J(θ<sub>0</sub>,θ<sub>1</sub>)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="02_Linear_Regression_with_One_Variable_files/Image [14].png"/></figure>
+  <ul>
+    <li>We can see that the height (y) indicates the value of the cost function, so find where y is at a minimum<br/></li>
+    <li>
+      Instead of a surface plot we can use a <strong><span class="term">contour figures/plots</span></strong>
+      <ul>
+        <li>Set of ellipses in different colors</li>
+        <li>Each colour is the same value of J(θ<sub>0</sub>, θ<sub>1</sub>), but obviously plot to different locations because θ<sub>1</sub> and θ<sub>0</sub> will vary</li>
+        <li>Imagine a bowl shape function coming out of the screen so the middle is the concentric circles</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="02_Linear_Regression_with_One_Variable_files/Image [15].png"/></figure>
+  <ul>
+    <li>
+      Each point (like the red one above) represents a pair of parameter values for θ<sub>0</sub> and θ<sub>1</sub>
+      <ul>
+        <li>
+          Our example here put the values at
+          <ul>
+            <li>θ<sub>0</sub> = ~800</li>
+            <li>θ<sub>1</sub> = ~-0.15</li>
+          </ul>
+        </li>
+        <li>
+          Not a good fit
+          <ul>
+            <li>i.e. these parameters give a value on our contour plot far from the center</li>
+          </ul>
+        </li>
+        <li>
+          If we have
+          <ul>
+            <li>θ<sub>0</sub> = ~360</li>
+            <li>θ<sub>1</sub> = 0</li>
+            <li>This gives a better hypothesis, but still not great - not in the center of the contour plot</li>
+          </ul>
+        </li>
+        <li>Finally we find the minimum, which gives the best hypothesis</li>
+      </ul>
+    </li>
+    <li>
+      Doing this by eye/hand is a pain in the ass
+      <ul>
+        <li>What we really want is an efficient algorithm for finding the minimum for θ<sub>0</sub> and θ<sub>1</sub></li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="gradient-descent-algorithm">
+  <h2>Gradient descent algorithm</h2>
+  <ul>
+    <li>Minimize cost function J</li>
+    <li>
+      Gradient descent
+      <ul>
+        <li>Used all over machine learning for minimization</li>
+      </ul>
+    </li>
+    <li>Start by looking at a general J() function</li>
+    <li>
+      Problem
+      <ul>
+        <li>We have J(θ<sub>0</sub>, θ<sub>1</sub>)</li>
+        <li>We want to get <strong><span class="term">min J(θ<sub>0</sub>, θ<sub>1</sub>)</span></strong></li>
+      </ul>
+    </li>
+    <li>
+      Gradient descent applies to more general functions
+      <ul>
+        <li>J(θ<sub>0</sub>, θ<sub>1</sub>, θ<sub>2</sub> .... θ<sub>n</sub>)</li>
+        <li>min J(θ<sub>0</sub>, θ<sub>1</sub>, θ<sub>2</sub> .... θ<sub>n</sub>)</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>How does it work?</h3>
+  <ul>
+    <li>
+      Start with initial guesses
+      <ul>
+        <li>Start at 0,0 (or any other value)</li>
+        <li>Keeping changing θ<sub>0</sub> and θ<sub>1</sub> a little bit to try and reduce J(θ<sub>0</sub>,θ<sub>1</sub>)</li>
+      </ul>
+    </li>
+    <li>Each time you change the parameters, you select the gradient which reduces J(θ<sub>0</sub>,θ<sub>1</sub>) the most possible</li>
+    <li>Repeat</li>
+    <li>Do so until you converge to a local minimum</li>
+    <li>
+      Has an interesting property
+      <ul>
+        <li>
+          Where you start can determine which minimum you end up
+          <figure><img alt="" loading="lazy" src="02_Linear_Regression_with_One_Variable_files/Image [16].png"/></figure>
+        </li>
+        <li>Here we can see one initialization point led to one local minimum</li>
+        <li>The other led to a different one</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>A more formal definition</h3>
+  <ul>
+    <li>Do the following until convergence</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msub><mi>θ</mi><mi>j</mi></msub><mo>≔</mo><msub><mi>θ</mi><mi>j</mi></msub><mo>−</mo><mi>α</mi><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">for j = 0 and j = 1</span>
+</div>
+  <ul>
+    <li>
+      What does this all mean?
+      <ul>
+        <li>Update θ<sub>j</sub> by setting it to (θ<sub>j</sub> - α) times the partial derivative of the cost function with respect to θ<sub>j</sub></li>
+      </ul>
+    </li>
+    <li>
+      Notation
+      <ul>
+        <li>
+          :=
+          <ul>
+            <li>Denotes assignment</li>
+            <li>NB a = b is a <em>truth assertion</em></li>
+          </ul>
+        </li>
+        <li>
+          α (alpha)
+          <ul>
+            <li>Is a number called the <strong><span class="term">learning rate</span></strong></li>
+            <li>
+              Controls how big a step you take
+              <ul>
+                <li>If α is big have an aggressive gradient descent</li>
+                <li>If α is small take tiny steps</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Derivative term<br/>
+      <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo></mrow></math>
+</div>
+      <ul>
+        <li>Not going to talk about it now, derive it later</li>
+      </ul>
+    </li>
+    <li>
+      There is a subtlety about how this gradient descent algorithm is implemented
+      <ul>
+        <li>Do this for θ<sub>0</sub> and θ<sub>1</sub></li>
+        <li>For j = 0 and j = 1 means we <strong><span class="hl-red">simultaneously </span></strong>update both</li>
+        <li>
+          How do we do this?
+          <ul>
+            <li>
+              Compute the right hand side for both θ<sub>0 </sub>and θ<sub>1</sub>
+              <ul>
+                <li>So we need a temp value</li>
+              </ul>
+            </li>
+            <li>Then, update θ<sub>0 </sub>and θ<sub>1</sub> at the same time</li>
+            <li>We show this graphically below</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>temp0</mi><mo>≔</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>−</mo><mi>α</mi><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mn>0</mn></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><mi>temp1</mi><mo>≔</mo><msub><mi>θ</mi><mn>1</mn></msub><mo>−</mo><mi>α</mi><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mn>1</mn></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><msub><mi>θ</mi><mn>0</mn></msub><mo>≔</mo><mi>temp0</mi></mrow></math>
+<math display="block"><mrow><msub><mi>θ</mi><mn>1</mn></msub><mo>≔</mo><mi>temp1</mi></mrow></math>
+<span class="eqn-note">Both parameters are updated from the <em>old</em> values — compute both temps first.</span>
+</div>
+<div class="code-eg">
+<pre>alpha = 0.1
+h = theta0 + theta1 * x   <span class="comment"># hypothesis for every example</span>
+
+temp0 = theta0 - alpha * (h - y).mean()
+temp1 = theta1 - alpha * ((h - y) * x).mean()
+theta0, theta1 = temp0, temp1   <span class="comment"># update together, at the end</span></pre>
+<p class="eqn-note">One simultaneous update, exactly as the equations above &mdash; both temps are computed from the old values before either parameter changes.</p>
+</div>
+  <ul>
+    <li>
+      If you implement the non-simultaneous update it's not gradient descent, and will behave weirdly
+      <ul>
+        <li>But it might look sort of right - so it's important to remember this!</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Understanding the algorithm</h3>
+  <ul>
+    <li>
+      To understand gradient descent, we'll return to a simpler function where we minimize one parameter to help explain the algorithm in more detail
+      <ul>
+        <li>min θ<sub>1</sub> J(θ<sub>1</sub>) where θ<sub>1</sub> is a real number</li>
+      </ul>
+    </li>
+    <li>
+      Two key terms in the algorithm
+      <ul>
+        <li>Alpha</li>
+        <li>Derivative term</li>
+      </ul>
+    </li>
+    <li>
+      Notation nuances
+      <ul>
+        <li>
+          Partial derivative vs. derivative
+          <ul>
+            <li>Use partial derivative when we have multiple variables but only derive with respect to one</li>
+            <li>Use derivative when we are deriving with respect to all the variables</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Derivative term
+      <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo></mrow></math>
+</div>
+      <ul>
+        <li>
+          Derivative says
+          <ul>
+            <li>Lets take the tangent at the point and look at the slope of the line</li>
+            <li>So moving towards the minimum (down) will create a negative derivative, alpha is always positive, so will update J(θ<sub>1</sub>) to a smaller value</li>
+            <li>Similarly, if the slope is positive the derivative term is positive, so θ<sub>1</sub> is made smaller - again moving towards the minimum</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Alpha term (α)
+      <ul>
+        <li>What happens if alpha is too small or too large</li>
+        <li>
+          Too small
+          <ul>
+            <li>Take baby steps</li>
+            <li>Takes too long</li>
+          </ul>
+        </li>
+        <li>
+          Too large
+          <ul>
+            <li>Can overshoot the minimum and fail to converge</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      When you get to a local minimum
+      <ul>
+        <li>Gradient of tangent/derivative is 0</li>
+        <li>So derivative term = 0</li>
+        <li>alpha * 0 = 0</li>
+        <li>So θ<sub>1</sub> = θ<sub>1</sub>- 0</li>
+        <li>So θ<sub>1</sub> remains the same</li>
+      </ul>
+    </li>
+    <li>
+      As you approach the global minimum the derivative term gets smaller, so your update gets smaller, even if alpha is fixed
+      <ul>
+        <li>Means as the algorithm runs you take smaller steps as you approach the minimum</li>
+        <li>So no need to change alpha over time</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="linear-regression-with-gradient-descent">
+  <h2>Linear regression with gradient descent</h2>
+  <ul>
+    <li>Apply gradient descent to minimize the squared error cost function J(θ<sub>0</sub>, θ<sub>1</sub>)</li>
+    <li>Now we have a partial derivative</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo><mo>=</mo><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mi>j</mi></msub></mrow></mfrac><mspace width="0.25em"></mspace><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>−</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+<math display="block"><mrow><mo>=</mo><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mi>j</mi></msub></mrow></mfrac><mspace width="0.25em"></mspace><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>+</mo><msub><mi>θ</mi><mn>1</mn></msub><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>−</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+  <ul>
+    <li>
+      So here we're just expanding out the first expression
+      <ul>
+        <li>J(θ<sub>0</sub>, θ<sub>1</sub>) = 1/2m....</li>
+        <li>h<sub>θ</sub>(x) = θ<sub>0</sub> + θ<sub>1</sub>*x</li>
+      </ul>
+    </li>
+    <li>
+      So we need to determine the derivative for each parameter - i.e.
+      <ul>
+        <li>When j = 0</li>
+        <li>When j = 1</li>
+      </ul>
+    </li>
+    <li>
+      Figure out what this partial derivative is for the θ<sub>0</sub> and θ<sub>1</sub> case
+      <ul>
+        <li>When we derive this expression in terms of j = 0 and j = 1 we get the following</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>j</mi><mo>=</mo><mn>0</mn><mo>:</mo><mspace width="0.5em"></mspace><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mn>0</mn></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>−</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow></mrow></math>
+<math display="block"><mrow><mi>j</mi><mo>=</mo><mn>1</mn><mo>:</mo><mspace width="0.5em"></mspace><mfrac><mrow><mo>∂</mo></mrow><mrow><mo>∂</mo><msub><mi>θ</mi><mn>1</mn></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>θ</mi><mn>0</mn></msub><mo>,</mo><msub><mi>θ</mi><mn>1</mn></msub><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>θ</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>−</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mo>⋅</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup></mrow></math>
+</div>
+<div class="code-eg">
+<pre>theta = np.zeros(2)
+for _ in range(2000):
+    h = theta[0] + theta[1] * x
+    grad0 = (h - y).mean()           <span class="comment"># the j = 0 derivative</span>
+    grad1 = ((h - y) * x).mean()     <span class="comment"># the j = 1 derivative</span>
+    theta = theta - 0.1 * np.array([grad0, grad1])
+
+theta   <span class="comment"># [0., 1.]  -> h(x) = 0 + 1x, the perfect fit, found by descent</span></pre>
+<p class="eqn-note">Batch gradient descent run to convergence on the simple data set: it lands on θ<sub>0</sub> = 0, θ<sub>1</sub> = 1 with cost zero.</p>
+</div>
+  <ul>
+    <li>
+      To check this you need to know multivariate calculus
+      <ul>
+        <li>So we can plug these values back into the gradient descent algorithm</li>
+      </ul>
+    </li>
+    <li>
+      How does it work
+      <ul>
+        <li>Risk of meeting different local optimum</li>
+        <li>
+          The linear regression cost function is always a <strong><span class="term">convex function</span></strong> - always has a single minimum
+          <ul>
+            <li>Bowl shaped</li>
+            <li>
+              One global optima
+              <ul>
+                <li>So gradient descent will always converge to global optima</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          In action
+          <ul>
+            <li>
+              Initialize values to
+              <ul>
+                <li>θ<sub>0</sub> = 900</li>
+                <li>θ<sub>1</sub> = -0.1</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="02_Linear_Regression_with_One_Variable_files/Image [23].png"/></figure>
+  <ul>
+    <li>End up at a global minimum</li>
+    <li>
+      This is actually <strong><span class="term">Batch Gradient Descent</span></strong>
+      <ul>
+        <li>
+          Refers to the fact that over each step you look at all the training data
+          <ul>
+            <li>Each step compute over m training examples</li>
+          </ul>
+        </li>
+        <li>
+          Sometimes non-batch versions exist, which look at small data subsets
+          <ul>
+            <li>We'll look at other forms of gradient descent (to use when m is too large) later in the course</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      There exists an analytical solution for finding the minimum directly
+      <ul>
+        <li><strong><span class="term">Normal equations</span></strong> method</li>
+        <li>Gradient descent scales better to large data sets though</li>
+        <li>Used in lots of contexts and machine learning</li>
+      </ul>
+    </li>
+  </ul>
+  <p><strong>What's next - important extensions</strong><br/><em>Two extension to the algorithm</em></p>
+  <ul>
+    <li>
+      <strong>1) Normal equation for analytic solution</strong>
+      <ul>
+        <li>To solve the minimization problem we can solve it [ min J(θ<sub>0</sub>, θ<sub>1</sub>) ] exactly using an analytic method which avoids the iterative approach used by gradient descent</li>
+        <li>Normal equations method</li>
+        <li>
+          Has advantages and disadvantages
+          <ul>
+            <li>
+              Advantage
+              <ul>
+                <li>No longer an alpha term</li>
+                <li>Can be much faster for some problems</li>
+              </ul>
+            </li>
+            <li>
+              Disadvantage
+              <ul>
+                <li>Much more complicated</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>We discuss the normal equation in the <strong><span class="hl">linear regression with multiple features</span></strong> section</li>
+      </ul>
+    </li>
+    <li>
+      <strong>2) We can learn with a larger number of features</strong>
+      <ul>
+        <li>
+          So may have other parameters which contribute towards a price
+          <ul>
+            <li>
+              e.g. with houses
+              <ul>
+                <li>Size</li>
+                <li>Age</li>
+                <li>Number bedrooms</li>
+                <li>Number floors</li>
+              </ul>
+            </li>
+            <li>x1, x2, x3, x4</li>
+          </ul>
+        </li>
+        <li>
+          With multiple features becomes hard to plot
+          <ul>
+            <li>Can't really plot in more than 3 dimensions</li>
+            <li>
+              Notation becomes more complicated too
+              <ul>
+                <li>Best way to get around this is the notation of linear algebra</li>
+                <li>Gives notation and set of things you can do with matrices and vectors</li>
+                <li>e.g. Matrix</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>X</mi><mo>=</mo><mrow><mo>[</mo><mtable>
+<mtr><mtd><mn>2104</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>45</mn></mtd></mtr>
+<mtr><mtd><mn>1416</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>40</mn></mtd></mtr>
+<mtr><mtd><mn>1534</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>30</mn></mtd></mtr>
+<mtr><mtd><mn>852</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>36</mn></mtd></mtr>
+</mtable><mo>]</mo></mrow></mrow></math>
+</div>
+  <div class="eqn">
+<math display="block"><mrow><mi>y</mi><mo>=</mo><mrow><mo>[</mo><mtable>
+<mtr><mtd><mn>460</mn></mtd></mtr>
+<mtr><mtd><mn>232</mn></mtd></mtr>
+<mtr><mtd><mn>315</mn></mtd></mtr>
+<mtr><mtd><mn>178</mn></mtd></mtr>
+</mtable><mo>]</mo></mrow></mrow></math>
+</div>
+  <ul>
+    <li>
+      We see here this matrix shows us
+      <ul>
+        <li>Size</li>
+        <li>Number of bedrooms</li>
+        <li>Number floors</li>
+        <li>Age of home</li>
+      </ul>
+    </li>
+    <li>
+      All in one variable
+      <ul>
+        <li>Block of numbers, take all data organized into one big block</li>
+      </ul>
+    </li>
+    <li>
+      Vector
+      <ul>
+        <li>Shown as <em>y</em></li>
+        <li>Shows us the prices</li>
+      </ul>
+    </li>
+    <li>Need linear algebra for more complex linear regression models</li>
+    <li>
+      Linear algebra is good for making computationally efficient models (as seen later too)
+      <ul>
+        <li>Provide a good way to work with large sets of data sets</li>
+        <li>Typically vectorization of a problem is a common optimization technique</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="01_Introduction.html" rel="prev">&larr; 01: Introduction</a>
+  <a href="index.html">Index</a>
+  <a href="03_Linear_algebra_review.html" rel="next">03: Linear algebra &rarr;</a>
+</nav>
+</main>
+</body>
+</html>

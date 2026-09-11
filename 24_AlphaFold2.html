@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>24: AlphaFold2 &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>24: AlphaFold2</h1>
+
+<nav class="chapter-nav">
+  <a href="23_Diffusion_Models.html" rel="prev">&larr; 23: Diffusion models</a>
+  <a href="index.html">Index</a>
+  <a href="25_ESM2_and_ESM_C.html" rel="next">25: ESM2 and ESM-C &rarr;</a>
+</nav>
+
+<div class="toc">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#a-note-on-this-chapter">A note on this chapter</a></li>
+    <li><a href="#the-problem">The problem</a></li>
+    <li><a href="#the-key-input-msas-and-coevolution">The key input: MSAs and coevolution</a></li>
+    <li><a href="#the-architecture-at-a-glance">The architecture at a glance</a></li>
+    <li><a href="#the-evoformer">The Evoformer</a></li>
+    <li><a href="#the-structure-module">The structure module</a></li>
+    <li><a href="#training-losses-and-recycling">Training, losses and recycling</a></li>
+    <li><a href="#confidence-plddt-and-pae">Confidence: pLDDT and PAE</a></li>
+    <li><a href="#limits">Limits</a></li>
+    <li><a href="#after-alphafold2">After AlphaFold2</a></li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</div>
+
+<section id="a-note-on-this-chapter">
+  <h2>A note on this chapter</h2>
+  <ul>
+    <li>An addition, like chapters 20-23 - and the one furthest from the 2011 course in subject, but not in machinery
+      <ul>
+        <li>Attention (chapter 21) appears here in four distinct costumes; the masked-token objective (chapter 22) turns up as an auxiliary loss; diffusion (chapter 23) is where the successor went</li>
+      </ul>
+    </li>
+    <li>This is a description of how AlphaFold2 works, piece by piece - not of how to run it</li>
+  </ul>
+</section>
+
+<section id="the-problem">
+  <h2>The problem</h2>
+  <ul>
+    <li>A protein is a chain of amino acids that folds into a specific three-dimensional structure
+      <ul>
+        <li>The structure largely determines the function, and the sequence largely determines the structure</li>
+        <li>Predicting structure from sequence was an open problem for fifty years - experimental determination is slow and expensive</li>
+      </ul>
+    </li>
+    <li>What AlphaFold2 (DeepMind, 2020) did
+      <ul>
+        <li>For most single-domain proteins, predictions competitive with experiment</li>
+        <li>Assessed blind at CASP14 - the community's held-out test set, structures solved but not yet published</li>
+        <li>Chapter 10 discipline at the scale of a whole field: the assessment being genuinely blind is why the result was believed immediately rather than argued about for years</li>
+      </ul>
+    </li>
+    <li>Framed in this course's terms
+      <ul>
+        <li>Input x: a sequence (length r, alphabet of 20). Output y: 3D coordinates for every atom</li>
+        <li>A supervised learning problem (chapter 01) - with ~170,000 known structures as the labelled training set</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="the-key-input-msas-and-coevolution">
+  <h2>The key input: MSAs and coevolution</h2>
+  <ul>
+    <li>The single most important input is not the sequence alone but a <span class="term">multiple sequence alignment</span> (MSA)
+      <ul>
+        <li>The same protein collected from many organisms and aligned column-by-column - often thousands of variants</li>
+      </ul>
+    </li>
+    <li>Why that carries structural information
+      <ul>
+        <li>If two positions are in contact in the folded structure, a mutation at one tends to be compensated by a mutation at the other - or the protein breaks and the organism is not around to be sequenced</li>
+        <li>So contacting positions <em>co-vary</em> down the columns of the alignment</li>
+        <li>Statistical dependence between columns (the correlations chapter 14's covariance matrix measures) is a fingerprint of physical proximity - evolution has been running the mutagenesis experiment for us</li>
+      </ul>
+    </li>
+    <li>Pre-AlphaFold methods computed these correlations explicitly and predicted contact maps from them
+      <ul>
+        <li>AlphaFold2 instead hands the raw alignment to the network and lets it learn what to extract - the feature-learning argument of chapters 08 and 16, applied to evolution's data</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="the-architecture-at-a-glance">
+  <h2>The architecture at a glance</h2>
+  <ul>
+    <li>Two internal representations, refined together, then turned into coordinates
+      <ul>
+        <li><span class="term">MSA representation</span> - a [s &times; r] array: one row per aligned sequence, one column per residue</li>
+        <li><span class="term">Pair representation</span> - a [r &times; r] array: one cell per <em>pair</em> of residues, holding what the model currently believes about their relationship (distance, orientation)</li>
+      </ul>
+    </li>
+  </ul>
+  <figure class="diagram">
+    <svg viewBox="0 0 720 300" role="img" aria-label="AlphaFold2 architecture: sequence and MSA feed two representations, refined by the Evoformer, turned into coordinates by the structure module, with recycling">
+      <rect class="box" x="10" y="118" width="92" height="44" rx="4"/>
+      <text class="lbl" x="24" y="136">sequence</text>
+      <text class="lbl-sm" x="30" y="152">+ MSA</text>
+      <path class="arrow" d="M102 128 L138 92"/>
+      <polygon class="arrow-head" points="140,90 131,92 137,99"/>
+      <path class="arrow" d="M102 152 L138 188"/>
+      <polygon class="arrow-head" points="140,190 137,181 131,188"/>
+      <rect class="box" x="144" y="58" width="128" height="46" rx="4"/>
+      <text class="lbl" x="160" y="78">MSA rep.</text>
+      <text class="lbl-sm" x="160" y="94">[s &#215; r]</text>
+      <rect class="box" x="144" y="176" width="128" height="46" rx="4"/>
+      <text class="lbl" x="160" y="196">pair rep.</text>
+      <text class="lbl-sm" x="160" y="212">[r &#215; r]</text>
+      <rect class="box-accent" x="304" y="40" width="180" height="200" rx="6"/>
+      <text class="lbl-key" x="330" y="30">Evoformer &#215; 48</text>
+      <rect class="box" x="318" y="58" width="152" height="52" rx="4"/>
+      <text class="lbl-sm" x="330" y="80">row + column</text>
+      <text class="lbl-sm" x="330" y="96">attention on MSA</text>
+      <rect class="box" x="318" y="170" width="152" height="52" rx="4"/>
+      <text class="lbl-sm" x="330" y="192">triangle updates</text>
+      <text class="lbl-sm" x="330" y="208">on pairs</text>
+      <path class="arrow" d="M380 110 L380 166"/>
+      <polygon class="arrow-head" points="380,168 376,160 384,160"/>
+      <text class="lbl-sm" x="390" y="142">outer product</text>
+      <path class="arrow" d="M408 166 L408 114"/>
+      <polygon class="arrow-head" points="408,112 404,120 412,120"/>
+      <text class="lbl-sm" x="418" y="146">bias</text>
+      
+      <path class="arrow" d="M272 81 L314 81"/>
+      <polygon class="arrow-head" points="316,81 308,77 308,85"/>
+      <path class="arrow" d="M272 199 L314 199"/>
+      <polygon class="arrow-head" points="316,199 308,195 308,203"/>
+      <rect class="box" x="516" y="96" width="128" height="88" rx="4"/>
+      <text class="lbl" x="532" y="122">structure</text>
+      <text class="lbl" x="532" y="140">module &#215; 8</text>
+      <text class="lbl-sm" x="532" y="162">frames + IPA</text>
+      <path class="arrow" d="M484 140 L512 140"/>
+      <polygon class="arrow-head" points="514,140 506,136 506,144"/>
+      <path class="arrow" d="M644 140 L678 140"/>
+      <polygon class="arrow-head" points="680,140 672,136 672,144"/>
+      <text class="lbl" x="646" y="120">3D +</text>
+      <text class="lbl-sm" x="640" y="170">pLDDT</text>
+      <path class="arrow" d="M580 184 L580 268 L208 268 L208 226"/>
+      <polygon class="arrow-head" points="208,224 204,232 212,232"/>
+      <text class="lbl-sm" x="330" y="262">recycling &#215; 3 - feed the answer back in and refine</text>
+    </svg>
+    <figcaption>The three stages: build two representations, refine them together through 48 Evoformer blocks, then let the structure module turn the result into coordinates &mdash; and recycle the whole thing a few times.</figcaption>
+  </figure>
+  <ul>
+    <li>The design principle
+      <ul>
+        <li>Keep a "what does each sequence say about each position" view and a "what is the relationship between every pair of positions" view, and let them inform each other repeatedly</li>
+        <li>Structure lives in the pair view; evidence lives in the MSA view</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="the-evoformer">
+  <h2>The Evoformer</h2>
+  <ul>
+    <li>48 identical blocks, each refining both representations - four distinct mechanisms per block</li>
+    <li>1) Row-wise attention on the MSA, biased by the pair representation
+      <ul>
+        <li>Within one aligned sequence, each residue attends to the others - chapter 21's self-attention along the row</li>
+        <li>With one addition: a learned bias from the pair representation is added to the attention scores</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mtext>softmax</mtext><mo form="prefix">(</mo><mfrac><mrow><msub><mi>q</mi><mi>i</mi></msub><mo>&#x22C5;</mo><msub><mi>k</mi><mi>j</mi></msub></mrow><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mfrac><mo>+</mo><msub><mi>b</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">Chapter 21's scaled dot-product score with one extra term: b<sub>ij</sub> comes from the pair representation's cell (i, j). If the model currently believes residues i and j are close, their attention is boosted &mdash; the pair view steers where the MSA view looks.</span>
+  </div>
+  <ul>
+    <li>2) Column-wise attention on the MSA
+      <ul>
+        <li>Down a column - the same position across organisms - letting evidence flow between sequences</li>
+        <li>Rows and columns alternating is how information gets everywhere without attending over the full s &times; r array at once (chapter 21's O(n&sup2;) cost, managed)</li>
+      </ul>
+    </li>
+    <li>3) Outer product mean: MSA &rarr; pair
+      <ul>
+        <li>For each pair of columns (i, j), take the outer product of their representations averaged over sequences - a learned generalisation of "measure the covariation between column i and column j"</li>
+        <li>The coevolution statistic that older methods hand-crafted, rediscovered as a differentiable layer</li>
+      </ul>
+    </li>
+    <li>4) Triangle updates on the pair representation
+      <ul>
+        <li>Distances obey constraints: if i is close to k and k is close to j, then the (i, j) distance is bounded - the triangle inequality</li>
+        <li>So the pair cell (i, j) is updated by attending over every third residue k, along the triangle's edges (i, k) and (j, k) - both a multiplicative update and a triangle-attention variant</li>
+        <li>Geometry is never imposed; the update pattern just makes geometric consistency easy to learn</li>
+      </ul>
+    </li>
+    <li>Plus the transformer usuals from chapter 21 - residual connections, normalisation, and feed-forward transitions after each attention</li>
+  </ul>
+</section>
+
+<section id="the-structure-module">
+  <h2>The structure module</h2>
+  <ul>
+    <li>The stage that turns representations into an actual fold - 8 blocks, sharing weights
+      <ul>
+        <li>Each residue is given a <span class="term">rigid frame</span>: a rotation and a translation - its backbone treated as a small rigid body floating in space</li>
+        <li>All frames start at the origin, and the module iteratively moves them</li>
+      </ul>
+    </li>
+    <li><span class="term">Invariant Point Attention</span> (IPA) - the third costume attention wears here
+      <ul>
+        <li>Attention scores get an extra geometric term: each residue emits query and key <em>points</em> in its own frame, and the score depends on the distance between them in global space</li>
+        <li>Built so the result is unchanged if the whole structure is rotated or translated - the answer should not depend on where the molecule happens to sit, so the invariance is baked into the architecture rather than learned</li>
+        <li>The same reasoning as feature scaling in chapter 04: don't make the network spend capacity learning something you can guarantee by construction</li>
+      </ul>
+    </li>
+    <li>After the frames settle, predicted torsion angles place the side-chain atoms, giving all-atom coordinates</li>
+  </ul>
+</section>
+
+<section id="training-losses-and-recycling">
+  <h2>Training, losses and recycling</h2>
+  <ul>
+    <li>The main loss: <span class="term">FAPE</span> (frame-aligned point error)
+      <ul>
+        <li>For every residue's frame, express every atom's predicted and true positions in that local frame, and penalise the distance between them - averaged over all frames and atoms</li>
+        <li>Comparing in local frames makes the loss invariant to global rotation/translation, and clamping large errors keeps single disasters from dominating - the same robustness instinct as capping a cost function</li>
+      </ul>
+    </li>
+    <li>Auxiliary losses, trained jointly
+      <ul>
+        <li>A <span class="term">distogram</span> head: predict the distance distribution for every pair - multiclass classification (chapters 08/22) over distance bins, supervising the pair representation directly</li>
+        <li>A <span class="term">masked-MSA</span> head: hide MSA entries and predict them - literally chapter 22's masked-language objective, keeping the MSA representation honest</li>
+        <li>The confidence heads (next section), trained to predict the model's own error</li>
+      </ul>
+    </li>
+    <li><span class="term">Recycling</span>
+      <ul>
+        <li>The final representations and predicted structure are fed back in as inputs and the whole network runs again - typically 3 extra passes</li>
+        <li>An iterative-refinement loop, the gradient-descent instinct of chapter 02 applied at the scale of whole predictions: start somewhere, improve repeatedly</li>
+      </ul>
+    </li>
+    <li>Self-distillation
+      <ul>
+        <li>After training on the ~170k known structures, predict structures for ~350k unlabelled sequences, keep the confident ones, and retrain on the enlarged set</li>
+        <li>Manufacturing labels from unlabelled data - the self-supervision theme of chapter 20 again, with the model's own confidence as the filter</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="confidence-plddt-and-pae">
+  <h2>Confidence: pLDDT and PAE</h2>
+  <ul>
+    <li>The part that gets underrated - AlphaFold2 tells you when to trust it
+      <ul>
+        <li><span class="term">pLDDT</span> - per-residue confidence, 0-100, predicted by a head trained to estimate the local accuracy of the model's own output</li>
+        <li><span class="term">PAE</span> - predicted aligned error: for every pair of residues, the expected error in the position of one when aligned on the frame of the other. This is what you need for judging whether the <em>relative placement of two domains</em> is trustworthy</li>
+      </ul>
+    </li>
+    <li>Both are learned predictions of the model's own error, and they are well calibrated
+      <ul>
+        <li>A calibrated confidence estimate is what turns a prediction into something usable in practice - chapter 06 made the same point about h(x) being a probability rather than a bare label</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="limits">
+  <h2>Limits</h2>
+  <ul>
+    <li>It predicts <em>a</em> structure, and does that well for proteins that have one
+      <ul>
+        <li>It is not a folding simulation; it says little about dynamics or the conformational ensemble</li>
+        <li>Low pLDDT frequently means genuinely disordered rather than merely uncertain - a low-confidence region is itself biological signal</li>
+      </ul>
+    </li>
+    <li>Effects of point mutations, binding, and conditions are largely outside what it was trained to do</li>
+    <li>Shallow MSAs hurt - the coevolution signal is the fuel, and orphan sequences don't carry it (which is where chapter 25's single-sequence models come in)</li>
+  </ul>
+</section>
+
+<section id="after-alphafold2">
+  <h2>After AlphaFold2</h2>
+  <ul>
+    <li>AlphaFold-Multimer extended the recipe to protein complexes</li>
+    <li>AlphaFold3 (2024) restructured it
+      <ul>
+        <li>The structure module is replaced by a <span class="term">diffusion</span> model over raw atom coordinates - chapter 23's noise-to-structure loop, conditioned on the trunk's representations</li>
+        <li>Coverage extends to nucleic acids, ligands and modifications; the price is sampling multiple draws and ranking by confidence</li>
+      </ul>
+    </li>
+    <li>That a diffusion head could replace the carefully hand-built structure module is the chapter 23 thesis in action: given good conditioning, "denoise your way to the answer" is a remarkably general decoder</li>
+  </ul>
+</section>
+
+<section id="summary">
+  <h2>Summary</h2>
+  <ul>
+    <li>The problem: sequence in, all-atom 3D structure out - supervised learning against the protein data bank, judged blind at CASP</li>
+    <li>The decisive input is the MSA: contacting residues co-vary across evolution, so alignment statistics encode geometry</li>
+    <li>Two representations - MSA [s &times; r] and pair [r &times; r] - refined by 48 Evoformer blocks: row and column attention (pair-biased), outer-product mean, and triangle updates that make geometric consistency learnable</li>
+    <li>The structure module poses each residue as a rigid frame and moves them with Invariant Point Attention - rotation/translation invariance by construction</li>
+    <li>Trained with FAPE plus distogram, masked-MSA (chapter 22's objective) and confidence heads; recycled ~3 times; boosted by self-distillation</li>
+    <li>pLDDT and PAE are calibrated self-error estimates - the feature that makes the predictions usable</li>
+    <li>AlphaFold3 swapped the structure module for a diffusion decoder (chapter 23) - the architecture is modular enough that its final act could be replaced wholesale</li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="23_Diffusion_Models.html" rel="prev">&larr; 23: Diffusion models</a>
+  <a href="index.html">Index</a>
+  <a href="25_ESM2_and_ESM_C.html" rel="next">25: ESM2 and ESM-C &rarr;</a>
+</nav>
+</main>
+</body>
+</html>

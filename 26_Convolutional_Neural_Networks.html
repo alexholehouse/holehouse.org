@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>26: Convolutional Neural Networks &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>26: Convolutional Neural Networks</h1>
+
+<nav class="chapter-nav">
+  <a href="25_ESM2_and_ESM_C.html" rel="prev">&larr; 25: ESM2 and ESM-C</a>
+  <a href="index.html">Index</a>
+  <a href="A1_Python_and_NumPy.html" rel="next">Appendix 1: Python and NumPy &rarr;</a>
+</nav>
+
+<div class="toc">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#a-note-on-this-chapter">A note on this chapter</a></li>
+    <li><a href="#why-fully-connected-fails-on-images">Why fully-connected fails on images</a></li>
+    <li><a href="#the-convolution-operation">The convolution operation</a></li>
+    <li><a href="#why-it-works">Why it works: three ideas</a></li>
+    <li><a href="#pooling">Pooling</a></li>
+    <li><a href="#the-architecture">The architecture</a></li>
+    <li><a href="#training-a-cnn">Training a CNN</a></li>
+    <li><a href="#the-imagenet-moment">The ImageNet moment</a></li>
+    <li><a href="#from-sliding-windows-to-convnets">From sliding windows to convnets</a></li>
+    <li><a href="#cnns-and-transformers">CNNs and transformers</a></li>
+    <li><a href="#summary">Summary</a></li>
+  </ul>
+</div>
+
+<section id="a-note-on-this-chapter">
+  <h2>A note on this chapter</h2>
+  <ul>
+    <li>An addition, and it fills the most conspicuous gap in the set
+      <ul>
+        <li>The notes go from fully-connected networks (chapters 08-09) straight to transformers (chapter 21), skipping the architecture that started the deep learning era</li>
+        <li>Chapter 20's ImageNet-era hardware and training toolkit exist because of this architecture</li>
+      </ul>
+    </li>
+    <li>The best way in is something these notes already built
+      <ul>
+        <li>Chapter 18 detected pedestrians and text by cropping a patch, running a classifier, sliding the window, and repeating</li>
+        <li>A convolutional network <em>is</em> that idea - with the detector learned, and the sliding built into the arithmetic</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="why-fully-connected-fails-on-images">
+  <h2>Why fully-connected fails on images</h2>
+  <ul>
+    <li>The parameter explosion, in chapter 08's own numbers
+      <ul>
+        <li>A 100 x 100 grayscale image is 10,000 inputs; chapter 08's quadratic-feature approach needed ~50,000,000 features</li>
+        <li>A fully-connected layer is no better: 10,000 inputs to just 100 hidden units is a million weights in the first layer alone</li>
+        <li>Overfitting (chapter 10) on anything but an enormous training set, and slow with it</li>
+      </ul>
+    </li>
+    <li>The deeper problem: a fully-connected net doesn't know it's looking at an image
+      <ul>
+        <li>To chapters 08-09, pixel (3, 7) and pixel (90, 12) are just feature 307 and feature 9,012 - shuffle every image's pixels with the same permutation and the network learns exactly as well</li>
+        <li>But images have structure: nearby pixels are related, and a cat in the top-left corner is the same cat as one in the centre</li>
+        <li>A fully-connected net has to <em>relearn</em> every pattern at every position it might appear - the same edge detector, ten thousand times over</li>
+      </ul>
+    </li>
+    <li>Convolution builds both facts - locality and translation - into the architecture
+      <ul>
+        <li>The same move as chapter 24's Invariant Point Attention: don't spend parameters learning something you can guarantee by construction</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="the-convolution-operation">
+  <h2>The convolution operation</h2>
+  <ul>
+    <li>The ingredients
+      <ul>
+        <li>A <span class="term">filter</span> (or kernel) - a small grid of learned weights, typically 3 x 3 or 5 x 5</li>
+        <li>Slide it over the image; at each position, take the element-wise product with the patch underneath and sum - one number per position</li>
+        <li>The grid of those numbers is a <span class="term">feature map</span>: where in the image the filter's pattern occurs</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><munderover><mo>&#x2211;</mo><mrow><mi>a</mi><mo>=</mo><mn>1</mn></mrow><mi>f</mi></munderover><munderover><mo>&#x2211;</mo><mrow><mi>b</mi><mo>=</mo><mn>1</mn></mrow><mi>f</mi></munderover><msub><mi>W</mi><mrow><mi>a</mi><mi>b</mi></mrow></msub><mspace width="0.15em"/><msub><mi>X</mi><mrow><mi>i</mi><mo>+</mo><mi>a</mi><mo>,</mo><mspace width="0.15em"/><mi>j</mi><mo>+</mo><mi>b</mi></mrow></msub><mo>+</mo><msub><mi>w</mi><mn>0</mn></msub></mrow></math>
+<span class="eqn-note">One output cell: the f &times; f filter W dotted with the image patch at position (i, j), plus a bias w<sub>0</sub> &mdash; the course&#x27;s usual subscript-0 convention. It is chapter 18's sliding window written as arithmetic &mdash; and each output cell is just one of chapter 08's logistic-unit sums, waiting for its activation function. (Strictly this is cross-correlation; the "convolution" of the name flips the filter first, and since W is learned the distinction changes nothing.)</span>
+  </div>
+  <ul>
+    <li>Two knobs
+      <ul>
+        <li><span class="term">Stride</span> s - how far the window moves each step; stride 2 halves the output size</li>
+        <li><span class="term">Padding</span> p - a border of zeros so the filter can centre on edge pixels; "same" padding keeps the output the size of the input</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mtext>output size</mtext><mo>=</mo><mrow><mo stretchy="false">&#x230A;</mo><mfrac><mrow><mi>n</mi><mo>+</mo><mn>2</mn><mi>p</mi><mo>&#x2212;</mo><mi>f</mi></mrow><mi>s</mi></mfrac><mo stretchy="false">&#x230B;</mo></mrow><mo>+</mo><mn>1</mn></mrow></math>
+<span class="eqn-note">For an n &times; n input: a 6 &times; 6 image under a 3 &times; 3 filter with no padding and stride 1 gives (6 &minus; 3)/1 + 1 = 4, a 4 &times; 4 map &mdash; checked by the code below.</span>
+  </div>
+  <div class="code-eg">
+<pre>import numpy as np
+
+def conv2d(X, W, stride=1):
+    f = W.shape[0]
+    out = (X.shape[0] - f) // stride + 1
+    Y = np.zeros((out, out))
+    for i in range(out):
+        for j in range(out):
+            patch = X[i*stride : i*stride+f, j*stride : j*stride+f]
+            Y[i, j] = (patch * W).sum()   <span class="comment"># dot the filter with the patch</span>
+    return Y
+
+X = np.zeros((6, 6))
+X[:, :3] = 1.0                  <span class="comment"># bright left half, dark right half</span>
+
+W = np.array([[1., 0, -1],      <span class="comment"># a vertical-edge filter:</span>
+              [1., 0, -1],      <span class="comment"># bright-on-the-left minus</span>
+              [1., 0, -1]])     <span class="comment"># bright-on-the-right</span>
+
+conv2d(X, W)   <span class="comment"># [[0., 3., 3., 0.],</span>
+               <span class="comment">#  [0., 3., 3., 0.],</span>
+               <span class="comment">#  [0., 3., 3., 0.],</span>
+               <span class="comment">#  [0., 3., 3., 0.]]  - lights up exactly on the edge</span></pre>
+<p class="eqn-note">Ten lines of chapter 03 matrix arithmetic. The filter responds with zero on the flat regions and 3 along the boundary &mdash; a feature detector. In a CNN this filter's nine numbers are not designed but <em>learned</em> by chapter 09's backpropagation, because "detect edges" is what reduces the classification cost.</p>
+  </div>
+</section>
+
+<section id="why-it-works">
+  <h2>Why it works: three ideas</h2>
+  <ul>
+    <li>1) <span class="term">Local connectivity</span>
+      <ul>
+        <li>Each output looks at an f &times; f patch, not the whole image - nearby pixels are the ones that form patterns together</li>
+      </ul>
+    </li>
+    <li>2) <span class="term">Weight sharing</span>
+      <ul>
+        <li>The <em>same</em> nine numbers scan every position - one edge detector for the whole image, not ten thousand copies</li>
+        <li>This is where the parameter count collapses</li>
+      </ul>
+    </li>
+    <li>3) <span class="term">Translation equivariance</span>
+      <ul>
+        <li>Shift the input, and the feature map shifts with it - a pattern is detected wherever it appears, by construction, with no retraining</li>
+        <li>The fully-connected net's relearn-it-everywhere problem, deleted</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="code-eg">
+<pre>fc_layer   = 10_000 * 100 + 100     <span class="comment"># 1,000,100 - chapter 08's image into 100 FC units</span>
+conv_layer = 3 * 3 * 1 * 16 + 16    <span class="comment"># 160       - sixteen 3x3 filters cover the same image</span>
+
+fc_layer // conv_layer              <span class="comment"># 6,250x fewer parameters</span></pre>
+<p class="eqn-note">The weight-sharing arithmetic: a convolutional layer's parameter count depends on the filter size and the number of filters &mdash; not on the image size at all. Chapter 07's overfitting-vs-parameters trade-off, won by architecture instead of by penalty.</p>
+  </div>
+</section>
+
+<section id="pooling">
+  <h2>Pooling</h2>
+  <ul>
+    <li>Between convolutions, shrink the maps
+      <ul>
+        <li><span class="term">Max pooling</span>: split the map into (usually) 2 x 2 blocks and keep each block's maximum - "was the feature found anywhere in this neighbourhood?"</li>
+        <li>Quarters the computation for the next layer, and makes the representation tolerant of small shifts - the feature's exact pixel matters less and less as you go deeper</li>
+        <li>No parameters at all</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="code-eg">
+<pre>def maxpool2(A):                    <span class="comment"># 2x2 blocks, stride 2</span>
+    return A.reshape(A.shape[0]//2, 2, A.shape[1]//2, 2).max(axis=(1, 3))
+
+maxpool2(conv2d(X, W))   <span class="comment"># [[3., 3.],</span>
+                         <span class="comment">#  [3., 3.]]  - "an edge was found in each quadrant"</span></pre>
+<p class="eqn-note">The 4 &times; 4 edge map pooled to 2 &times; 2. Detail is deliberately thrown away &mdash; what survives is <em>whether</em> and roughly <em>where</em> the feature occurred, which is what the next layer needs.</p>
+  </div>
+</section>
+
+<section id="the-architecture">
+  <h2>The architecture</h2>
+  <ul>
+    <li>The repeating unit: convolution &rarr; ReLU (chapter 20) &rarr; pool
+      <ul>
+        <li>Each layer has many filters, so its output is a <em>stack</em> of feature maps - the channels. The next layer's filters see all channels at once: f &times; f &times; c<sub>in</sub> weights per filter</li>
+        <li>As the network deepens, the maps get spatially smaller and the channels more numerous - less "where", more "what"</li>
+      </ul>
+    </li>
+  </ul>
+  <figure class="diagram">
+    <svg viewBox="0 0 700 190" role="img" aria-label="A convolutional network: image through repeated convolution and pooling stages, then flattened into a softmax classifier">
+      <rect class="box" x="10" y="55" width="70" height="70" rx="4"/>
+      <text class="lbl-sm" x="24" y="94">image</text>
+      <path class="arrow" d="M80 90 L112 90"/>
+      <polygon class="arrow-head" points="114,90 106,86 106,94"/>
+      <text class="lbl-sm" x="78" y="74">conv</text>
+      <rect class="box" x="130" y="70" width="52" height="52" rx="3"/>
+      <rect class="box" x="122" y="62" width="52" height="52" rx="3"/>
+      <rect class="box" x="114" y="54" width="52" height="52" rx="3"/>
+      <text class="lbl-sm" x="120" y="84">maps</text>
+      <path class="arrow" d="M184 90 L216 90"/>
+      <polygon class="arrow-head" points="218,90 210,86 210,94"/>
+      <text class="lbl-sm" x="184" y="74">pool</text>
+      <rect class="box" x="230" y="76" width="30" height="30" rx="3"/>
+      <rect class="box" x="224" y="70" width="30" height="30" rx="3"/>
+      <rect class="box" x="218" y="64" width="30" height="30" rx="3"/>
+      <path class="arrow" d="M262 90 L294 90"/>
+      <polygon class="arrow-head" points="296,90 288,86 288,94"/>
+      <text class="lbl-sm" x="258" y="74">conv</text>
+      <rect class="box" x="316" y="82" width="22" height="22" rx="2"/>
+      <rect class="box" x="309" y="75" width="22" height="22" rx="2"/>
+      <rect class="box" x="302" y="68" width="22" height="22" rx="2"/>
+      <rect class="box" x="295" y="61" width="22" height="22" rx="2"/>
+      <path class="arrow" d="M340 90 L372 90"/>
+      <polygon class="arrow-head" points="374,90 366,86 366,94"/>
+      <text class="lbl-sm" x="338" y="74">pool</text>
+      <rect class="box" x="384" y="78" width="14" height="14" rx="2"/>
+      <rect class="box" x="379" y="73" width="14" height="14" rx="2"/>
+      <rect class="box" x="374" y="68" width="14" height="14" rx="2"/>
+      <rect class="box" x="369" y="63" width="14" height="14" rx="2"/>
+      <path class="arrow" d="M400 90 L432 90"/>
+      <polygon class="arrow-head" points="434,90 426,86 426,94"/>
+      <text class="lbl-sm" x="396" y="74">flatten</text>
+      <rect class="box" x="436" y="40" width="18" height="100" rx="3"/>
+      <path class="arrow" d="M456 90 L488 90"/>
+      <polygon class="arrow-head" points="490,90 482,86 482,94"/>
+      <rect class="box" x="492" y="55" width="120" height="70" rx="4"/>
+      <text class="lbl-sm" x="506" y="86">fully connected</text>
+      <text class="lbl-sm" x="514" y="102">+ softmax</text>
+      <path class="arrow" d="M612 90 L644 90"/>
+      <polygon class="arrow-head" points="646,90 638,86 638,94"/>
+      <text class="lbl" x="650" y="94">"cat"</text>
+      <text class="lbl-sm" x="60" y="170">edges &#x2192; textures &#x2192; parts &#x2192; objects: each stage detects patterns in the previous stage's detections</text>
+    </svg>
+    <figcaption>Convolution and pooling repeated, then a small classifier on top. Spatial size falls, channel count grows &mdash; the network trades "where" for "what".</figcaption>
+  </figure>
+  <ul>
+    <li>The head is familiar
+      <ul>
+        <li>Flatten the final maps into a vector, one or two fully-connected layers, then softmax over the classes - chapter 22's output head; chapter 08's one-hot classes</li>
+        <li>The convolutional stages are a learned feature extractor; the head is chapter 06's classifier sitting on learned features - the arc from chapter 08 ("a network learns its own features") made literal</li>
+      </ul>
+    </li>
+    <li>Bookkeeping for a small digit classifier - chapter 18's character recognition problem, done properly</li>
+  </ul>
+  <div class="table-wrap"><table>
+    <caption>A LeNet-style network for 28 &times; 28 digit images. Almost all parameters sit in the little head; the feature extractor is nearly free.</caption>
+    <tr><th scope="col">Layer</th><th scope="col">Output shape</th><th scope="col">Parameters</th></tr>
+    <tr><th scope="row">input</th><td>28 &times; 28 &times; 1</td><td>0</td></tr>
+    <tr><th scope="row">conv 5&times;5, 8 filters + ReLU</th><td>24 &times; 24 &times; 8</td><td>208</td></tr>
+    <tr><th scope="row">max pool 2&times;2</th><td>12 &times; 12 &times; 8</td><td>0</td></tr>
+    <tr><th scope="row">conv 5&times;5, 16 filters + ReLU</th><td>8 &times; 8 &times; 16</td><td>3,216</td></tr>
+    <tr><th scope="row">max pool 2&times;2</th><td>4 &times; 4 &times; 16</td><td>0</td></tr>
+    <tr><th scope="row">flatten</th><td>256</td><td>0</td></tr>
+    <tr><th scope="row">fully connected, 100 + ReLU</th><td>100</td><td>25,700</td></tr>
+    <tr><th scope="row">softmax, 10 classes</th><td>10</td><td>1,010</td></tr>
+    <tr><th scope="row"><strong>total</strong></th><td></td><td><strong>30,134</strong></td></tr>
+  </table></div>
+  <ul>
+    <li>For comparison: a single fully-connected layer from the raw 784 pixels to 100 units costs 78,500 parameters - more than this entire network, before it has classified anything</li>
+  </ul>
+</section>
+
+<section id="training-a-cnn">
+  <h2>Training a CNN</h2>
+  <ul>
+    <li>Nothing in this section is new, which is the point
+      <ul>
+        <li>The loss is softmax cross-entropy (chapters 06 and 22); the gradients come from backpropagation (chapter 09) - weight sharing just means each filter weight accumulates gradient from every position it visited, exactly like the Δ accumulators of chapter 09</li>
+        <li>The optimizer, initialization, normalization and dropout are chapter 20's toolkit; batch norm in particular grew up inside these networks</li>
+        <li>Data augmentation - shifts, crops, flips, small distortions - is chapter 18's artificial data synthesis, and it works so well here precisely because the label survives those transformations</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="the-imagenet-moment">
+  <h2>The ImageNet moment</h2>
+  <ul>
+    <li>The pieces of this chapter are old - LeNet read cheques in the 1990s (chapter 08's "postcode reading" aside is this very architecture)
+      <ul>
+        <li>What was missing was chapter 20's list: data, hardware, and the training toolkit</li>
+      </ul>
+    </li>
+    <li>2012: AlexNet
+      <ul>
+        <li>A CNN trained on GPUs, with ReLU and dropout, on ImageNet's million labelled images</li>
+        <li>It nearly halved the best error rate in the field's flagship competition - not an increment, a discontinuity</li>
+        <li>Chapter 11's "more data beats a cleverer algorithm" and chapter 20's toolkit, meeting the right architecture: this result is where the modern era of chapters 20-25 actually begins</li>
+      </ul>
+    </li>
+    <li>What the trained filters turned out to be
+      <ul>
+        <li>First layer: edge and colour detectors - nobody asked for Sobel filters, but that is what gradient descent built, our hand-designed edge filter above rediscovered from data</li>
+        <li>Deeper layers: textures, then parts, then whole objects - the feature hierarchy chapter 08 promised ("a network learns its own features"), visible in the weights</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="from-sliding-windows-to-convnets">
+  <h2>From sliding windows to convnets</h2>
+  <ul>
+    <li>Chapter 18's pipeline, revisited with this chapter in hand
+      <ul>
+        <li>The pedestrian detector cropped a patch, classified it, slid over, and repeated - re-computing everything for each of thousands of overlapping windows</li>
+        <li>Convolution shares that computation: neighbouring windows overlap almost entirely, and a convolutional pass computes every window's features once. The whole sliding-window loop becomes a single forward pass</li>
+      </ul>
+    </li>
+    <li>Modern detection goes further
+      <ul>
+        <li>One network predicts boxes and classes over the whole image directly - chapter 18's separate detect / segment / classify stages collapse into one model trained end-to-end</li>
+        <li>Ceiling analysis (chapter 18) still applies, but the ceiling being analysed is now one network's components rather than a pipeline of hand-built stages</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="cnns-and-transformers">
+  <h2>CNNs and transformers</h2>
+  <ul>
+    <li>The two architectures make opposite bets
+      <ul>
+        <li>A convolution hard-codes <em>which</em> positions interact (a local window, everywhere the same); attention (chapter 21) learns which positions interact, per input</li>
+        <li>Convolution's assumptions - locality, translation - are an <span class="term">inductive bias</span>: chapter 10's bias/variance trade-off applied to architecture. Strong assumptions help when data is scarce, and cost you when data is abundant and the assumptions bind</li>
+      </ul>
+    </li>
+    <li>Vision transformers
+      <ul>
+        <li>Cut the image into 16 &times; 16 patches, embed each patch as a token, and run chapter 21's transformer on the sequence - images entering by the front door of chapter 22's pipeline</li>
+        <li>With enough data they match or beat CNNs; with little data the CNN's built-in bias still wins - exactly what the chapter 10 framing predicts</li>
+      </ul>
+    </li>
+    <li>In practice the bet is often hedged: convolutional early layers for cheap local features, attention above them - and multimodal assistants (chapter 20) ingest images through exactly such vision encoders</li>
+  </ul>
+</section>
+
+<section id="summary">
+  <h2>Summary</h2>
+  <ul>
+    <li>Fully-connected layers scale with image size and relearn every pattern at every position; convolution fixes both by construction</li>
+    <li>A convolution slides a small learned filter everywhere - chapter 18's sliding window as arithmetic, with the detector learned by chapter 09's backprop</li>
+    <li>Local connectivity, weight sharing and translation equivariance are the three ideas; the parameter count drops thousands-fold (6,250&times; in the worked example)</li>
+    <li>Pooling throws away exact position to keep "was it there" - tolerance and cheapness at once</li>
+    <li>Stack conv-ReLU-pool, finish with softmax: a learned feature hierarchy under chapter 06's classifier, trained with chapter 20's toolkit and chapter 18's augmentation</li>
+    <li>AlexNet on ImageNet in 2012 is where this architecture met enough data and compute - the opening event of everything in chapters 20-25</li>
+    <li>Convolution is a hard-coded, local, everywhere-identical attention pattern; the transformer learns its pattern instead. Which wins is a data-budget question, and chapter 10 already gave the framework for it</li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="25_ESM2_and_ESM_C.html" rel="prev">&larr; 25: ESM2 and ESM-C</a>
+  <a href="index.html">Index</a>
+  <a href="A1_Python_and_NumPy.html" rel="next">Appendix 1: Python and NumPy &rarr;</a>
+</nav>
+</main>
+</body>
+</html>

@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08: Neural Networks - Representation &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>08: Neural Networks - Representation</h1>
+
+<nav class="chapter-nav">
+  <a href="07_Regularization.html" rel="prev">&larr; 07: Regularization</a>
+  <a href="index.html">Index</a>
+  <a href="09_Neural_Networks_Learning.html" rel="next">09: Neural networks II &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#neural-networks-overview-and-summary">Neural networks - Overview and summary</a></li>
+    <li><a href="#model-representation-1">Model representation 1</a></li>
+    <li><a href="#model-representation-ii">Model representation II</a></li>
+    <li><a href="#neural-network-example-computing-a-complex-nonlinear-function-of-the-input">Neural network example - computing a complex, nonlinear function of the input</a></li>
+    <li><a href="#multiclass-classification">Multiclass classification</a></li>
+  </ul>
+</nav>
+<section id="neural-networks-overview-and-summary">
+  <h2>Neural networks - Overview and summary</h2>
+  <h3>Why do we need neural networks?</h3>
+  <ul>
+    <li>
+      Say we have a complex supervised learning classification problem
+      <ul>
+        <li>Can use logistic regression with many polynomial terms</li>
+        <li>Works well when you have 1-2 features</li>
+        <li>If you have 100 features</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image.png"/></figure>
+  <ul>
+    <li>
+      e.g. our housing example
+      <ul>
+        <li>100 house features, predict odds of a house being sold in the next 6 months</li>
+        <li>
+          Here, if you included all the quadratic terms (second order)
+          <ul>
+            <li>There are lots of them (x<sub>1</sub><sup>2</sup> ,x<sub>1</sub>x<sub>2</sub>, x<sub>1</sub>x<sub>4</sub> ..., x<sub>1</sub>x<sub>100</sub>)</li>
+            <li>For the case of n = 100, you have about 5000 features</li>
+            <li>Number of features grows O(n<sup>2</sup>)</li>
+            <li>This would be computationally expensive to work with as a feature set</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      A way around this to only include a subset of features
+      <ul>
+        <li>However, if you don't have enough features, often a model won't let you fit a complex dataset</li>
+      </ul>
+    </li>
+    <li>
+      If you include the cubic terms
+      <ul>
+        <li>e.g. (x<sub>1</sub><sup>2</sup>x<sub>2</sub>, x<sub>1</sub>x<sub>2</sub>x<sub>3</sub>, x<sub>1</sub>x<sub>4</sub>x<sub>23</sub> etc)</li>
+        <li>There are even more features grows O(n<sup>3</sup>)</li>
+        <li>About 170 000 features for n = 100</li>
+      </ul>
+    </li>
+    <li>Not a good way to build classifiers when n is large</li>
+  </ul>
+  <h3>Example: Problems where n is large - computer vision</h3>
+  <ul>
+    <li>
+      Computer vision sees a matrix of pixel intensity values
+      <ul>
+        <li>Look at matrix - explain what those numbers represent</li>
+      </ul>
+    </li>
+    <li>
+      To build a car detector
+      <ul>
+        <li>
+          Build a training set of
+          <ul>
+            <li>Not cars</li>
+            <li>Cars</li>
+          </ul>
+        </li>
+        <li>Then test against a car</li>
+      </ul>
+    </li>
+    <li>
+      How can we do this
+      <ul>
+        <li>Plot two pixels (two pixel locations)</li>
+        <li>Plot car or not car on the graph</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [1].png"/></figure>
+  <ul>
+    <li>Need a non-linear hypothesis to separate the classes</li>
+    <li>
+      Feature space
+      <ul>
+        <li>If we used 50 x 50 pixels --&gt; 2500 pixels, so n = 2500</li>
+        <li>If RGB then 7500</li>
+        <li>If 100 x 100 then --&gt; 50 000 000 (quadratic) features</li>
+      </ul>
+    </li>
+    <li>
+      Too big - wayyy too big
+      <ul>
+        <li>So - simple logistic regression here is not appropriate for large complex systems</li>
+        <li>Neural networks are much better for a complex nonlinear hypothesis even when feature space is huge</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Neurons and the brain</h3>
+  <ul>
+    <li>
+      <strong><span class="term">Neural networks</span></strong> (<strong><span class="term">NNs</span></strong>) were originally motivated by looking at machines which replicate the brain's functionality
+      <ul>
+        <li>Looked at here as a machine learning technique</li>
+      </ul>
+    </li>
+    <li>
+      Origins
+      <ul>
+        <li>To build learning systems, why not mimic the brain?</li>
+        <li>Used a lot in the 80s and 90s</li>
+        <li>Popularity diminished in late 90s</li>
+        <li>
+          Recent major resurgence
+          <ul>
+            <li>NNs are computationally expensive, so only recently large scale neural networks became computationally feasible</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Brain
+      <ul>
+        <li>
+          Does loads of crazy things
+          <ul>
+            <li>Hypothesis is that the brain has a single learning algorithm</li>
+          </ul>
+        </li>
+        <li>
+          Evidence for hypothesis
+          <ul>
+            <li>
+              Auditory cortex --&gt; takes sound signals
+              <ul>
+                <li>If you cut the wiring from the ear to the auditory cortex</li>
+                <li>Re-route optic nerve to the auditory cortex</li>
+                <li>Auditory cortex learns to see</li>
+              </ul>
+            </li>
+            <li>
+              Somatosensory cortex (touch processing)
+              <ul>
+                <li>If you rewire optic nerve to somatosensory cortex then it learns to see</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          With different tissue learning to see, maybe they all learn in the same way
+          <ul>
+            <li>Brain learns by itself how to learn</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Other examples
+      <ul>
+        <li>
+          Seeing with your tongue
+          <ul>
+            <li>
+              Brainport
+              <ul>
+                <li>Grayscale camera on head</li>
+                <li>Run wire to array of electrodes on tongue</li>
+                <li>Pulses onto tongue represent image signal</li>
+                <li>Lets people see with their tongue</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Human echolocation
+          <ul>
+            <li>Blind people being trained in schools to interpret sound and echo</li>
+            <li>Lets them move around</li>
+          </ul>
+        </li>
+        <li>
+          Haptic belt direction sense
+          <ul>
+            <li>Belt which buzzes towards north</li>
+            <li>Gives you a sense of direction</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Brain can process and learn from data from any source</li>
+  </ul>
+</section>
+<section id="model-representation-1">
+  <h2>Model representation 1</h2>
+  <ul>
+    <li>
+      How do we represent neural networks (NNs)?
+      <ul>
+        <li>Neural networks were developed as a way to simulate networks of neurones</li>
+      </ul>
+    </li>
+    <li>What does a neurone look like</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [2].png"/></figure>
+  <ul>
+    <li>
+      Three things to notice
+      <ul>
+        <li>Cell body</li>
+        <li>Number of input wires (dendrites)</li>
+        <li>Output wire (axon)</li>
+      </ul>
+    </li>
+    <li>
+      Simple level
+      <ul>
+        <li>Neurone gets one or more inputs through dendrites</li>
+        <li>Does processing</li>
+        <li>Sends output down axon</li>
+      </ul>
+    </li>
+    <li>
+      Neurons communicate through electric spikes
+      <ul>
+        <li>Pulse of electricity via axon to another neurone</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Artificial neural network - representation of a neurone</h3>
+  <ul>
+    <li>
+      In an artificial neural network, a neurone is a logistic unit
+      <ul>
+        <li>Feed input via input wires</li>
+        <li>Logistic unit does computation</li>
+        <li>Sends output down output wires</li>
+      </ul>
+    </li>
+    <li>That logistic computation is just like our previous logistic regression hypothesis calculation</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [3].png"/></figure>
+  <ul>
+    <li>
+      Very simple model of a neuron's computation
+      <ul>
+        <li>
+          Often good to include an x<sub>0</sub> input - the <strong><span class="term">bias unit</span></strong>
+          <ul>
+            <li>This is equal to 1</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      This is an artificial neurone with a sigmoid (logistic) activation function
+      <ul>
+        <li>Θ vector may also be called the <strong><span class="term">weights<em> </em></span></strong>of a model</li>
+      </ul>
+    </li>
+    <li>
+      The above diagram is a single neurone
+      <ul>
+        <li>Below we have a group of neurones strung together</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [4].png"/></figure>
+  <ul>
+    <li>
+      Here, input is x<sub>1</sub>, x<sub>2</sub><sup> </sup>and x<sub>3</sub><sup> </sup>
+      <ul>
+        <li>We could also call input activation on the first layer - i.e. (a<sub>1</sub><sup>1</sup>, a<sub>2</sub><sup>1 </sup>and a<sub>3</sub><sup>1 </sup>)</li>
+        <li>Three neurones in layer 2 (a<sub>1</sub><sup>2</sup>, a<sub>2</sub><sup>2 </sup>and a<sub>3</sub><sup>2 </sup>)</li>
+        <li>
+          Final fourth neurone which produces the output
+          <ul>
+            <li>Which again we *could* call a<sub>1</sub><sup>3 </sup></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>First layer is the <strong><span class="term">input layer</span></strong></li>
+    <li>Final layer is the <strong><span class="term">output layer</span></strong> - produces value computed by a hypothesis</li>
+    <li>
+      Middle layer(s) are called the <strong><span class="term">hidden layers</span></strong>
+      <ul>
+        <li>You don't observe the values processed in the hidden layer</li>
+        <li>Not a great name</li>
+        <li>Can have many hidden layers</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Neural networks - notation</h3>
+  <ul>
+    <li>
+      <strong><span class="hl-red"> a<sub>i</sub><sup>(j)</sup> - activation of unit <em>i </em>in layer <em>j </em></span></strong>
+      <ul>
+        <li>So, a<sub>1</sub><sup>2</sup> - is the <strong><span class="term">activation</span></strong> of the 1st unit in the second layer</li>
+        <li>By activation, we mean the value which is computed and output by that node</li>
+      </ul>
+    </li>
+    <li>
+      <strong><span class="hl-red"> Θ<sup>(j)</sup> - matrix of parameters controlling the function mapping from layer <em>j</em> to layer <em>j</em> + 1</span></strong>
+      <ul>
+        <li>Parameters for controlling <strong><span class="term">mapping</span></strong> from one layer to the next</li>
+        <li>
+          If network has
+          <ul>
+            <li>s<sub>j</sub> units in layer <em>j</em> and</li>
+            <li>s<sub>j+1</sub> units in layer j + 1</li>
+            <li>
+              Then Θ<sup>j</sup> will be of dimensions [s<sub>j+1 X </sub>s<sub>j</sub> + 1]
+              <ul>
+                <li>
+                  Because
+                  <ul>
+                    <li>s<sub>j+1 </sub>is equal to the number of units in layer (j + 1)</li>
+                    <li>is equal to the number of units in layer j, plus an additional unit</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Looking at the Θ matrix
+          <ul>
+            <li>Column length is the number of units in the following layer</li>
+            <li>Row length is the number of units in the current layer + 1 (because we have to map the bias unit)</li>
+            <li>
+              So, if we had two layers - 101 and 21 units in each
+              <ul>
+                <li>Then Θ<sup>j</sup> would be = [21 x 102]</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      What are the computations which occur?
+      <ul>
+        <li>We have to calculate the activation for each node</li>
+        <li>
+          That activation depends on
+          <ul>
+            <li>The input(s) to the node</li>
+            <li>The parameter associated with that node (from the Θ vector associated with that layer)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Below we have an example of a network, with the associated calculations for the four nodes below</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [5].png"/></figure>
+<div class="eqn">
+<math display="block"><mrow><msubsup><mi>a</mi><mn>1</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>3</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><msubsup><mi>a</mi><mn>2</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>3</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><msubsup><mi>a</mi><mn>3</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>3</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><msubsup><mi>a</mi><mn>1</mn><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>0</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>1</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>2</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>3</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">The three layer-2 activations, then the hypothesis computed from them. Each is a logistic unit over the previous layer plus its bias term.</span>
+</div>
+  <ul>
+    <li>
+      As you can see
+      <ul>
+        <li>
+          We calculate each of the layer-2 activations based on the input values with the bias term (which is equal to 1)
+          <ul>
+            <li>i.e. x<sub>0</sub> to x<sub>3</sub></li>
+          </ul>
+        </li>
+        <li>We then calculate the final hypothesis (i.e. the single node in layer 3) using exactly the same logic, except in input is not x values, but the activation values from the preceding layer</li>
+      </ul>
+    </li>
+    <li>
+      The activation value on each hidden unit (e.g. a<sub>1</sub><sup>2</sup> ) is equal to the sigmoid function applied to the linear combination of inputs
+      <ul>
+        <li>
+          Three input units
+          <ul>
+            <li>
+              So Θ<sup>(1) </sup>is the matrix of parameters governing the mapping of the input units to hidden units
+              <ul>
+                <li>Θ<sup>(1)</sup> here is a [3 x 4] dimensional matrix</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Three hidden units
+          <ul>
+            <li>
+              Then Θ<sup>(2) </sup>is the matrix of parameters governing the mapping of the hidden layer to the output layer
+              <ul>
+                <li>Θ<sup>(2)</sup> here is a [1 x 4] dimensional matrix (i.e. a row vector)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>One output unit</li>
+      </ul>
+    </li>
+    <li>
+      Something conceptually important (that I hadn't really grasped the first time) is that
+      <ul>
+        <li>
+          <strong><span class="hl-red">Every input/activation goes to every node in following layer</span></strong>
+          <ul>
+            <li>
+              Which means each "layer transition" uses a matrix of parameters with the following significance
+              <ul>
+                <li>For the sake of consistency with later nomenclature, we're using j,i and l as our variables here (although later in this section we use j to show the layer we're on)</li>
+                <li>
+                  <strong>Θ</strong><sub>ji</sub><sup>l</sup>
+                  <ul>
+                    <li>j (first of two subscript numbers)= ranges from 1 to the number of units in layer l+1</li>
+                    <li>i (second of two subscript numbers) = ranges from 0 to the number of units in layer l</li>
+                    <li>l is the layer you're moving FROM</li>
+                  </ul>
+                </li>
+                <li>This is perhaps more clearly shown in my slightly over the top example below</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [6].png"/></figure>
+    </li>
+    <li>
+      For example
+      <ul>
+        <li>
+          Θ<sub><strong><span class="hl-green">1</span><span class="hl-red">3</span></strong></sub><sup><strong><span class="hl">1</span></strong> </sup>= means
+          <ul>
+            <li><strong><span class="hl-green">1</span></strong> - we're mapping to node 1 in layer l+1</li>
+            <li><strong><span class="hl-red">3</span></strong> - we're mapping from node 3 in layer l</li>
+            <li><strong><span class="hl">1</span></strong> - we're mapping from layer 1</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="model-representation-ii">
+  <h2>Model representation II</h2>
+  <p><em>Here we'll look at how to carry out the computation efficiently through a vectorized implementation. We'll also consider </em></p>
+  <p><em>why NNs are good and how we can use them to learn complex non-linear things</em></p>
+  <ul>
+    <li>
+      Below is our original problem from before
+      <ul>
+        <li>Sequence of steps to compute output of hypothesis are the equations below</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [7].png"/></figure>
+<div class="eqn">
+<math display="block"><mrow><msubsup><mi>a</mi><mn>1</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>3</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><msubsup><mi>a</mi><mn>2</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>2</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>3</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><msubsup><mi>a</mi><mn>3</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>3</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msubsup><msub><mi>x</mi><mn>3</mn></msub><mo form="postfix">)</mo></mrow></math>
+<math display="block"><mrow><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><msubsup><mi>a</mi><mn>1</mn><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msubsup><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>0</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>1</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>2</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>3</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">The three layer-2 activations, then the hypothesis computed from them. Each is a logistic unit over the previous layer plus its bias term.</span>
+</div>
+  <ul>
+    <li>
+      Define some additional terms
+      <ul>
+        <li>z<sub>1</sub><sup>2</sup> = Θ<sub>10</sub><sup>1</sup>x<sub>0 </sub>+ Θ<sub>11</sub><sup>1</sup>x<sub>1 </sub>+ Θ<sub>12</sub><sup>1</sup>x<sub>2 </sub>+ Θ<sub>13</sub><sup>1</sup>x3</li>
+        <li>
+          Which means that
+          <ul>
+            <li>a<sub>1</sub><sup>2</sup> = g(z<sub>1</sub><sup>2</sup>)</li>
+          </ul>
+        </li>
+        <li>NB, superscript numbers are the layer associated</li>
+      </ul>
+    </li>
+    <li>
+      Similarly, we define the others as
+      <ul>
+        <li>z<sub>2</sub><sup>2</sup> and z<sub>3</sub><sup>2</sup></li>
+        <li>These values are just a linear combination of the values</li>
+      </ul>
+    </li>
+    <li>
+      If we look at the block we just redefined
+      <ul>
+        <li>We can vectorize the neural network computation</li>
+        <li>
+          So lets define
+          <ul>
+            <li>x as the feature vector x</li>
+            <li>z<sup>2</sup> as the vector of z values from the second layer</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>x</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msub><mi>x</mi><mn>0</mn></msub></mtd></mtr><mtr><mtd><msub><mi>x</mi><mn>1</mn></msub></mtd></mtr><mtr><mtd><msub><mi>x</mi><mn>2</mn></msub></mtd></mtr><mtr><mtd><msub><mi>x</mi><mn>3</mn></msub></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="1.4em"/><msup><mi>z</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msubsup><mi>z</mi><mn>1</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><msubsup><mi>z</mi><mn>2</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><msubsup><mi>z</mi><mn>3</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+<div class="code-eg">
+<pre>x = np.array([1, 0.5, -1.2, 0.8])   <span class="comment"># x0 = 1 plus three features</span>
+Theta1 = np.array([[ 0.1, -0.4,  0.6,  0.2],   <span class="comment"># [3 x 4]: three hidden units,</span>
+                   [-0.3,  0.5, -0.1,  0.7],   <span class="comment"># each seeing all four inputs</span>
+                   [ 0.2,  0.1,  0.3, -0.5]])
+
+z2 = Theta1 @ x                       <span class="comment"># [3]  - one z per hidden unit</span>
+a2 = g(z2)                            <span class="comment"># [3]  - their activations</span>
+a2 = np.concatenate(([1], a2))        <span class="comment"># [4]  - add the bias unit a0 = 1</span></pre>
+<p class="eqn-note">The two vectorized steps above, as code: one matrix multiply computes every hidden unit's z at once, one call to g turns them into activations.</p>
+</div>
+  <ul>
+    <li>z<sup>2</sup> is a 3x1 vector</li>
+    <li>
+      We can vectorize the computation of the neural network as as follows in two steps
+      <ul>
+        <li>
+          z<sup>2</sup> = Θ<sup>(1)</sup>x
+          <ul>
+            <li>i.e. Θ<sup>(1)</sup> is the matrix defined above</li>
+            <li>x is the feature vector</li>
+          </ul>
+        </li>
+        <li>
+          a<sup>2</sup> = g(z<sup>(2)</sup>)
+          <ul>
+            <li>To be clear, z<sup>2</sup> is a 3x1 vector</li>
+            <li>a<sup>2</sup> is also a 3x1 vector</li>
+            <li>g() applies the sigmoid (logistic) function element wise to each member of the z<sup>2</sup> vector</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      To make the notation with input layer make sense;
+      <ul>
+        <li>
+          a<sup>1</sup> = x
+          <ul>
+            <li>a<sup>1</sup> is the activations in the input layer</li>
+            <li>Obviously the "activation" for the input layer is just the input!</li>
+          </ul>
+        </li>
+        <li>
+          So we define x as a<sup>1</sup> for clarity
+          <ul>
+            <li>
+              So
+              <ul>
+                <li>a<sup>1</sup> is the vector of inputs</li>
+                <li>a<sup>2</sup> is the vector of values calculated by the g(z<sup>2</sup>) function</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Having calculated the z<sup>2</sup> vector, we need to calculate a<sub>0</sub><sup>2</sup> for the final hypothesis calculation</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><mi>g</mi><mo form="prefix">(</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>0</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>0</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>1</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>1</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>2</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>2</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>&#x398;</mi><mrow><mn>1</mn><mn>3</mn></mrow><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><msubsup><mi>a</mi><mn>3</mn><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msubsup><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">a<sub>0</sub><sup>(2)</sup> is the bias unit, added to a<sup>(2)</sup> to make it a 4x1 vector &mdash; it is picked out in red on the original slide.</span>
+</div>
+  <ul>
+    <li>
+      To take care of the extra bias unit add a<sub>0</sub><sup>2</sup> = 1
+      <ul>
+        <li>So add a<sub>0</sub><sup>2</sup> to a<sup>2</sup> making it a 4x1 vector</li>
+      </ul>
+    </li>
+    <li>
+      So,
+      <ul>
+        <li>
+          z<sup>3</sup> = Θ<sup>2</sup>a<sup>2</sup>
+          <ul>
+            <li>This is the inner term of the above equation</li>
+          </ul>
+        </li>
+        <li>h<sub>Θ</sub>(x) = a<sup>3</sup> = g(z<sup>3</sup>)</li>
+      </ul>
+    </li>
+    <li>
+      This process is also called <strong><span class="term">forward propagation</span></strong>
+      <ul>
+        <li>
+          Start off with activations of input unit
+          <ul>
+            <li>i.e. the x vector as input</li>
+          </ul>
+        </li>
+        <li>Forward propagate and calculate the activation of each layer sequentially</li>
+        <li>This is a vectorized version of this implementation</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Neural networks learning its own features</h3>
+  <ul>
+    <li>Diagram below looks a lot like logistic regression</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [10].png"/></figure>
+  <ul>
+    <li>
+      Layer 3 is a logistic regression node
+      <ul>
+        <li>The hypothesis output = g(Θ<sub>10</sub><sup>2 </sup>a<sub>0</sub><sup>2</sup> + Θ<sub>11</sub><sup>2 </sup>a<sub>1</sub><sup>2</sup> + Θ<sub>12</sub><sup>2 </sup>a<sub>2</sub><sup>2</sup> + Θ<sub>13</sub><sup>2 </sup>a<sub>3</sub><sup>2</sup>)</li>
+        <li>
+          This is just logistic regression
+          <ul>
+            <li>The only difference is, instead of input a feature vector, the features are just values calculated by the hidden layer</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>The features a<sub>1</sub><sup>2</sup>, a<sub>2</sub><sup>2</sup>, and a<sub>3</sub><sup>2</sup> are calculated/learned - not original features</li>
+    <li>
+      So the mapping from layer 1 to layer 2 (i.e. the calculations which generate the a<sup>2</sup> features) is determined by another set of parameters - Θ<sup>1</sup>
+      <ul>
+        <li>So instead of being constrained by the original input features, a neural network can learn its own features to feed into logistic regression</li>
+        <li>
+          Depending on the Θ<sup>1</sup> parameters you can learn some interesting things
+          <ul>
+            <li>
+              Flexibility to learn whatever features it wants to feed into the final logistic regression calculation
+              <ul>
+                <li>So, if we compare this to previous logistic regression, you would have to calculate your own exciting features to define the best way to classify or describe something</li>
+                <li>Here, we're letting the hidden layers do that, so we feed the hidden layers our input values, and let them learn whatever gives the best final result to feed into the final output layer</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      As well as the networks already seen, other architectures (topology) are possible
+      <ul>
+        <li>More/less nodes per layer</li>
+        <li>More layers</li>
+        <li>Once again, layer 2 has three hidden units, layer 3 has 2 hidden units by the time you get to the output layer you get very interesting non-linear hypothesis</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [11].png"/></figure>
+  <ul>
+    <li>
+      Some of the intuitions here are complicated and hard to understand
+      <ul>
+        <li>In the following lectures we're going to go through a detailed example to understand how to do non-linear analysis</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="neural-network-example-computing-a-complex-nonlinear-function-of-the-input">
+  <h2>Neural network example - computing a complex, nonlinear function of the input</h2>
+  <ul>
+    <li>
+      Non-linear classification: XOR/XNOR
+      <ul>
+        <li>x<sub>1</sub>, x<sub>2</sub> are binary</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [12].png"/></figure>
+  <ul>
+    <li>Example on the right shows a simplified version of the more complex problem we're dealing with (on the left)</li>
+    <li>We want to learn a non-linear decision boundary to separate the positive and negative examples</li>
+  </ul>
+  <p>y = x<sub>1</sub> XOR x<sub>2</sub></p>
+  <p>x<sub>1</sub> XNOR x<sub>2</sub></p>
+  <p>Where XNOR = NOT (x<sub>1</sub> XOR x<sub>2</sub>)</p>
+  <ul>
+    <li>
+      Positive examples when both are true and both are false
+      <ul>
+        <li>Let's start with something a little more straight forward...</li>
+        <li>Don't worry about how we're determining the weights (Θ values) for now - just get a flavor of how NNs work</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Neural Network example 1: AND function</h3>
+  <ul>
+    <li>Simple first example</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [13].png"/></figure>
+  <ul>
+    <li>
+      Can we get a one-unit neural network to compute this logical AND function? (<em>probably...</em>)
+      <ul>
+        <li>Add a bias unit</li>
+        <li>
+          Add some weights for the networks
+          <ul>
+            <li>
+              What are weights?
+              <ul>
+                <li>Weights are the parameter values which multiply into the input nodes (i.e. Θ)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [14].png"/></figure>
+  <ul>
+    <li>
+      Sometimes it's convenient to add the weights into the diagram
+      <ul>
+        <li>
+          These values are in fact just the Θ parameters so
+          <ul>
+            <li>Θ<sub>10</sub><sup>1</sup> = -30</li>
+            <li>Θ<sub>11</sub><sup>1</sup> = 20</li>
+            <li>Θ<sub>12</sub><sup>1</sup> = 20</li>
+          </ul>
+        </li>
+        <li>To use our original notation</li>
+      </ul>
+    </li>
+    <li>Look at the four input values</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [15].png"/></figure>
+<table>
+  <caption>h<sub>&#x398;</sub>(x) = g(&#x2212;30 + 20x<sub>1</sub> + 20x<sub>2</sub>)</caption>
+  <tr><th scope="col">x<sub>1</sub></th><th scope="col">x<sub>2</sub></th>
+      <th scope="col">h<sub>&#x398;</sub>(x)</th></tr>
+  <tr><td>0</td><td>0</td><td>g(&#x2212;30) &#x2248; 0</td></tr>
+  <tr><td>0</td><td>1</td><td>g(&#x2212;10) &#x2248; 0</td></tr>
+  <tr><td>1</td><td>0</td><td>g(&#x2212;10) &#x2248; 0</td></tr>
+  <tr><td>1</td><td>1</td><td>g(10) &#x2248; 1</td></tr>
+</table>
+<p class="eqn-note">Only (1,1) gives a positive output &mdash; so h<sub>&#x398;</sub>(x) &#x2248; x<sub>1</sub> AND x<sub>2</sub>.</p>
+<div class="code-eg">
+<pre>import numpy as np
+
+def g(z):   <span class="comment"># the sigmoid, as everywhere else</span>
+    return 1 / (1 + np.exp(-z))
+
+Theta = np.array([-30, 20, 20])   <span class="comment"># the weights drawn on the network above</span>
+
+for x1, x2 in [(0, 0), (0, 1), (1, 0), (1, 1)]:
+    h = g(Theta @ np.array([1, x1, x2]))
+    <span class="comment"># h -> 0.000, 0.000, 0.000, 1.000 : only (1,1) fires</span></pre>
+<p class="eqn-note">The AND table above, computed. The weights push the sigmoid deep into saturation, so the outputs are 0 and 1 to three decimal places.</p>
+</div>
+  <ul>
+    <li>So, as we can see, when we evaluate each of the four possible input, only (1,1) gives a positive output</li>
+  </ul>
+  <h3>Neural Network example 2: NOT function</h3>
+  <ul>
+    <li>How about negation?</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [16].png"/></figure>
+  <ul>
+    <li>Negation is achieved by putting a large negative weight in front of the variable you want to negate</li>
+  </ul>
+  <h3>Neural Network example 3: XNOR function</h3>
+  <ul>
+    <li>
+      So how do we make the XNOR function work?
+      <ul>
+        <li>
+          XNOR is short for NOT XOR
+          <ul>
+            <li>i.e. NOT an exclusive or, so either go big (1,1) or go home (0,0)</li>
+          </ul>
+        </li>
+        <li>
+          So we want to structure this so the inputs which produce a positive output are
+          <ul>
+            <li>AND (i.e. both true)<br/><strong>OR</strong></li>
+            <li>Neither (which we can shortcut by saying not only one being true)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>So we combine these into a neural network as shown below;</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [17].png"/></figure>
+<table>
+  <caption>Combining the three gates: a<sub>1</sub><sup>(2)</sup> = x<sub>1</sub> AND x<sub>2</sub>,
+  a<sub>2</sub><sup>(2)</sup> = (NOT x<sub>1</sub>) AND (NOT x<sub>2</sub>),
+  h<sub>&#x398;</sub>(x) = a<sub>1</sub><sup>(2)</sup> OR a<sub>2</sub><sup>(2)</sup></caption>
+  <tr><th scope="col">x<sub>1</sub></th><th scope="col">x<sub>2</sub></th>
+      <th scope="col">a<sub>1</sub><sup>(2)</sup></th><th scope="col">a<sub>2</sub><sup>(2)</sup></th>
+      <th scope="col">h<sub>&#x398;</sub>(x)</th></tr>
+  <tr><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+  <tr><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+  <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+  <tr><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+</table>
+<p class="eqn-note">The output is 1 exactly when the inputs agree &mdash; XNOR &mdash; which a single
+logistic unit cannot express. Gate weights: AND (&#x2212;30, 20, 20), NOR (10, &#x2212;20, &#x2212;20),
+OR (&#x2212;10, 20, 20).</p>
+<div class="code-eg">
+<pre>Theta1 = np.array([[-30,  20,  20],   <span class="comment"># row 1: AND</span>
+                   [ 10, -20, -20]])  <span class="comment"># row 2: (NOT x1) AND (NOT x2)</span>
+Theta2 = np.array([-10, 20, 20])      <span class="comment"># output layer: OR</span>
+
+def forward(x1, x2):
+    a1 = np.array([1, x1, x2])              <span class="comment"># input plus bias</span>
+    a2 = g(Theta1 @ a1)                     <span class="comment"># both gates at once</span>
+    return g(Theta2 @ np.concatenate(([1], a2)))
+
+[round(forward(x1, x2)) for x1, x2 in [(0, 0), (0, 1), (1, 0), (1, 1)]]
+<span class="comment"># [1, 0, 0, 1]  - XNOR, from two layers of logistic units</span></pre>
+<p class="eqn-note">The whole XNOR network, forward-propagated. Layer 1 computes the two gates, layer 2 ORs them together &mdash; a non-linear function no single logistic unit can express.</p>
+</div>
+  <ul>
+    <li>Simplez!</li>
+  </ul>
+  <h3>Neural network intuition - handwritten digit classification</h3>
+  <ul>
+    <li>Yann LeCun = machine learning pioneer</li>
+    <li>
+      Early machine learning system was postcode reading
+      <ul>
+        <li>Hilarious music, impressive demonstration!</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="multiclass-classification">
+  <h2>Multiclass classification</h2>
+  <ul>
+    <li>Multiclass classification is, unsurprisingly, when you distinguish between more than two categories (i.e. more than 1 or 0)</li>
+    <li>
+      With handwritten digit recognition problem - 10 possible categories (0-9)
+      <ul>
+        <li>How do you do that?</li>
+        <li>Done using an extension of one vs. all classification</li>
+      </ul>
+    </li>
+    <li>
+      Recognizing pedestrian, car, motorbike or truck
+      <ul>
+        <li>Build a neural network with four output units</li>
+        <li>
+          Output a vector of four numbers
+          <ul>
+            <li>1 is 0/1 pedestrian</li>
+            <li>2 is 0/1 car</li>
+            <li>3 is 0/1 motorcycle</li>
+            <li>4 is 0/1 truck</li>
+          </ul>
+        </li>
+        <li>When image is a pedestrian get [1,0,0,0] and so on</li>
+      </ul>
+    </li>
+    <li>
+      Just like one vs. all described earlier
+      <ul>
+        <li>Here we have four logistic regression classifiers</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="08_Neural_Networks_Representation_files/Image [18].png"/></figure>
+  <ul>
+    <li>
+      Training set here is images of our four classifications
+      <ul>
+        <li>While previously we'd written y as an integer {1,2,3,4}</li>
+        <li>Now represent y as</li>
+      </ul>
+    </li>
+    <li>
+      <div class="eqn">
+<math display="block"><mrow><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mspace width="0.4em"/><mtext>is one of</mtext><mspace width="0.6em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width="0.8em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width="0.8em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width="0.8em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">One column per class, rather than an integer in {1, 2, 3, 4}.</span>
+</div>
+    </li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="07_Regularization.html" rel="prev">&larr; 07: Regularization</a>
+  <a href="index.html">Index</a>
+  <a href="09_Neural_Networks_Learning.html" rel="next">09: Neural networks II &rarr;</a>
+</nav>
+</main>
+</body>
+</html>
