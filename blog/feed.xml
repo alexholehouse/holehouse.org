@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>holehouse.org blog</title>
+  <link>https://holehouse.org/blog/</link>
+  <description>Occasional writing by Alex Holehouse.</description>
+  <item>
+    <title>Hello, world (2026 edition)</title>
+    <link>https://holehouse.org/blog/hello-world.html</link>
+    <guid isPermaLink="true">https://holehouse.org/blog/hello-world.html</guid>
+    <pubDate>Tue, 15 Sep 2026 00:00:00 +0000</pubDate>
+    <author>Alex Holehouse</author>
+    <description>Returning to the interblag</description>
+  </item>
+</channel>
+</rss>

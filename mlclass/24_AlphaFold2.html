@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -20,8 +21,7 @@
   <a href="index.html">Index</a>
   <a href="25_ESM2_and_ESM_C.html" rel="next">25: ESM2 and ESM-C &rarr;</a>
 </nav>
-
-<div class="toc">
+<nav class="toc" aria-label="On this page">
   <h2>On this page</h2>
   <ul>
     <li><a href="#a-note-on-this-chapter">A note on this chapter</a></li>
@@ -36,8 +36,7 @@
     <li><a href="#after-alphafold2">After AlphaFold2</a></li>
     <li><a href="#summary">Summary</a></li>
   </ul>
-</div>
-
+</nav>
 <section id="a-note-on-this-chapter">
   <h2>A note on this chapter</h2>
   <ul>
@@ -49,7 +48,6 @@
     <li>This is a description of how AlphaFold2 works, piece by piece - not of how to run it</li>
   </ul>
 </section>
-
 <section id="the-problem">
   <h2>The problem</h2>
   <ul>
@@ -74,7 +72,6 @@
     </li>
   </ul>
 </section>
-
 <section id="the-key-input-msas-and-coevolution">
   <h2>The key input: MSAs and coevolution</h2>
   <ul>
@@ -97,77 +94,75 @@
     </li>
   </ul>
 </section>
-
 <section id="the-architecture-at-a-glance">
   <h2>The architecture at a glance</h2>
   <ul>
     <li>Two internal representations, refined together, then turned into coordinates
       <ul>
-        <li><span class="term">MSA representation</span> - a [s &times; r] array: one row per aligned sequence, one column per residue</li>
-        <li><span class="term">Pair representation</span> - a [r &times; r] array: one cell per <em>pair</em> of residues, holding what the model currently believes about their relationship (distance, orientation)</li>
+        <li><span class="term">MSA representation</span> - a [s × r] array: one row per aligned sequence, one column per residue</li>
+        <li><span class="term">Pair representation</span> - a [r × r] array: one cell per <em>pair</em> of residues, holding what the model currently believes about their relationship (distance, orientation)</li>
       </ul>
     </li>
   </ul>
   <figure class="diagram">
     <svg viewBox="0 0 720 300" role="img" aria-label="AlphaFold2 architecture: sequence and MSA feed two representations, refined by the Evoformer, turned into coordinates by the structure module, with recycling">
-      <rect class="box" x="10" y="118" width="92" height="44" rx="4"/>
-      <text class="lbl" x="24" y="136">sequence</text>
-      <text class="lbl-sm" x="30" y="152">+ MSA</text>
-      <path class="arrow" d="M102 128 L138 92"/>
-      <polygon class="arrow-head" points="140,90 131,92 137,99"/>
-      <path class="arrow" d="M102 152 L138 188"/>
-      <polygon class="arrow-head" points="140,190 137,181 131,188"/>
-      <rect class="box" x="144" y="58" width="128" height="46" rx="4"/>
-      <text class="lbl" x="160" y="78">MSA rep.</text>
-      <text class="lbl-sm" x="160" y="94">[s &#215; r]</text>
-      <rect class="box" x="144" y="176" width="128" height="46" rx="4"/>
-      <text class="lbl" x="160" y="196">pair rep.</text>
-      <text class="lbl-sm" x="160" y="212">[r &#215; r]</text>
-      <rect class="box-accent" x="304" y="40" width="180" height="200" rx="6"/>
-      <text class="lbl-key" x="330" y="30">Evoformer &#215; 48</text>
-      <rect class="box" x="318" y="58" width="152" height="52" rx="4"/>
-      <text class="lbl-sm" x="330" y="80">row + column</text>
-      <text class="lbl-sm" x="330" y="96">attention on MSA</text>
-      <rect class="box" x="318" y="170" width="152" height="52" rx="4"/>
-      <text class="lbl-sm" x="330" y="192">triangle updates</text>
-      <text class="lbl-sm" x="330" y="208">on pairs</text>
-      <path class="arrow" d="M380 110 L380 166"/>
-      <polygon class="arrow-head" points="380,168 376,160 384,160"/>
-      <text class="lbl-sm" x="390" y="142">outer product</text>
-      <path class="arrow" d="M408 166 L408 114"/>
-      <polygon class="arrow-head" points="408,112 404,120 412,120"/>
-      <text class="lbl-sm" x="418" y="146">bias</text>
-      
-      <path class="arrow" d="M272 81 L314 81"/>
-      <polygon class="arrow-head" points="316,81 308,77 308,85"/>
-      <path class="arrow" d="M272 199 L314 199"/>
-      <polygon class="arrow-head" points="316,199 308,195 308,203"/>
-      <rect class="box" x="516" y="96" width="128" height="88" rx="4"/>
-      <text class="lbl" x="532" y="122">structure</text>
-      <text class="lbl" x="532" y="140">module &#215; 8</text>
-      <text class="lbl-sm" x="532" y="162">frames + IPA</text>
-      <path class="arrow" d="M484 140 L512 140"/>
-      <polygon class="arrow-head" points="514,140 506,136 506,144"/>
-      <path class="arrow" d="M644 140 L678 140"/>
-      <polygon class="arrow-head" points="680,140 672,136 672,144"/>
-      <text class="lbl" x="646" y="120">3D +</text>
-      <text class="lbl-sm" x="640" y="170">pLDDT</text>
-      <path class="arrow" d="M580 184 L580 268 L208 268 L208 226"/>
-      <polygon class="arrow-head" points="208,224 204,232 212,232"/>
-      <text class="lbl-sm" x="330" y="262">recycling &#215; 3 - feed the answer back in and refine</text>
+    <rect class="box" x="10" y="118" width="92" height="44" rx="4"/>
+    <text class="lbl" x="24" y="136">sequence</text>
+    <text class="lbl-sm" x="30" y="152">+ MSA</text>
+    <path class="arrow" d="M102 128 L138 92"/>
+    <polygon class="arrow-head" points="140,90 131,92 137,99"/>
+    <path class="arrow" d="M102 152 L138 188"/>
+    <polygon class="arrow-head" points="140,190 137,181 131,188"/>
+    <rect class="box" x="144" y="58" width="128" height="46" rx="4"/>
+    <text class="lbl" x="160" y="78">MSA rep.</text>
+    <text class="lbl-sm" x="160" y="94">[s &#215; r]</text>
+    <rect class="box" x="144" y="176" width="128" height="46" rx="4"/>
+    <text class="lbl" x="160" y="196">pair rep.</text>
+    <text class="lbl-sm" x="160" y="212">[r &#215; r]</text>
+    <rect class="box-accent" x="304" y="40" width="180" height="200" rx="6"/>
+    <text class="lbl-key" x="330" y="30">Evoformer &#215; 48</text>
+    <rect class="box" x="318" y="58" width="152" height="52" rx="4"/>
+    <text class="lbl-sm" x="330" y="80">row + column</text>
+    <text class="lbl-sm" x="330" y="96">attention on MSA</text>
+    <rect class="box" x="318" y="170" width="152" height="52" rx="4"/>
+    <text class="lbl-sm" x="330" y="192">triangle updates</text>
+    <text class="lbl-sm" x="330" y="208">on pairs</text>
+    <path class="arrow" d="M380 110 L380 166"/>
+    <polygon class="arrow-head" points="380,168 376,160 384,160"/>
+    <text class="lbl-sm" x="390" y="142">outer product</text>
+    <path class="arrow" d="M408 166 L408 114"/>
+    <polygon class="arrow-head" points="408,112 404,120 412,120"/>
+    <text class="lbl-sm" x="418" y="146">bias</text>
+
+    <path class="arrow" d="M272 81 L314 81"/>
+    <polygon class="arrow-head" points="316,81 308,77 308,85"/>
+    <path class="arrow" d="M272 199 L314 199"/>
+    <polygon class="arrow-head" points="316,199 308,195 308,203"/>
+    <rect class="box" x="516" y="96" width="128" height="88" rx="4"/>
+    <text class="lbl" x="532" y="122">structure</text>
+    <text class="lbl" x="532" y="140">module &#215; 8</text>
+    <text class="lbl-sm" x="532" y="162">frames + IPA</text>
+    <path class="arrow" d="M484 140 L512 140"/>
+    <polygon class="arrow-head" points="514,140 506,136 506,144"/>
+    <path class="arrow" d="M644 140 L678 140"/>
+    <polygon class="arrow-head" points="680,140 672,136 672,144"/>
+    <text class="lbl" x="646" y="120">3D +</text>
+    <text class="lbl-sm" x="640" y="170">pLDDT</text>
+    <path class="arrow" d="M580 184 L580 268 L208 268 L208 226"/>
+    <polygon class="arrow-head" points="208,224 204,232 212,232"/>
+    <text class="lbl-sm" x="330" y="262">recycling &#215; 3 - feed the answer back in and refine</text>
     </svg>
     <figcaption>The three stages: build two representations, refine them together through 48 Evoformer blocks, then let the structure module turn the result into coordinates &mdash; and recycle the whole thing a few times.</figcaption>
   </figure>
   <ul>
     <li>The design principle
       <ul>
-        <li>Keep a "what does each sequence say about each position" view and a "what is the relationship between every pair of positions" view, and let them inform each other repeatedly</li>
+        <li>Keep a &quot;what does each sequence say about each position&quot; view and a &quot;what is the relationship between every pair of positions&quot; view, and let them inform each other repeatedly</li>
         <li>Structure lives in the pair view; evidence lives in the MSA view</li>
       </ul>
     </li>
   </ul>
 </section>
-
 <section id="the-evoformer">
   <h2>The Evoformer</h2>
   <ul>
@@ -180,19 +175,19 @@
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mtext>softmax</mtext><mo form="prefix">(</mo><mfrac><mrow><msub><mi>q</mi><mi>i</mi></msub><mo>&#x22C5;</mo><msub><mi>k</mi><mi>j</mi></msub></mrow><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mfrac><mo>+</mo><msub><mi>b</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo form="postfix">)</mo></mrow></math>
-<span class="eqn-note">Chapter 21's scaled dot-product score with one extra term: b<sub>ij</sub> comes from the pair representation's cell (i, j). If the model currently believes residues i and j are close, their attention is boosted &mdash; the pair view steers where the MSA view looks.</span>
+    <math display="block"><mrow><msub><mi>a</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mtext>softmax</mtext><mo form="prefix">(</mo><mfrac><mrow><msub><mi>q</mi><mi>i</mi></msub><mo>&#x22C5;</mo><msub><mi>k</mi><mi>j</mi></msub></mrow><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mfrac><mo>+</mo><msub><mi>b</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo form="postfix">)</mo></mrow></math>
+    <span class="eqn-note">Chapter 21's scaled dot-product score with one extra term: b<sub>ij</sub> comes from the pair representation's cell (i, j). If the model currently believes residues i and j are close, their attention is boosted &mdash; the pair view steers where the MSA view looks.</span>
   </div>
   <ul>
     <li>2) Column-wise attention on the MSA
       <ul>
         <li>Down a column - the same position across organisms - letting evidence flow between sequences</li>
-        <li>Rows and columns alternating is how information gets everywhere without attending over the full s &times; r array at once (chapter 21's O(n&sup2;) cost, managed)</li>
+        <li>Rows and columns alternating is how information gets everywhere without attending over the full s × r array at once (chapter 21's O(n²) cost, managed)</li>
       </ul>
     </li>
-    <li>3) Outer product mean: MSA &rarr; pair
+    <li>3) Outer product mean: MSA → pair
       <ul>
-        <li>For each pair of columns (i, j), take the outer product of their representations averaged over sequences - a learned generalisation of "measure the covariation between column i and column j"</li>
+        <li>For each pair of columns (i, j), take the outer product of their representations averaged over sequences - a learned generalisation of &quot;measure the covariation between column i and column j&quot;</li>
         <li>The coevolution statistic that older methods hand-crafted, rediscovered as a differentiable layer</li>
       </ul>
     </li>
@@ -206,7 +201,6 @@
     <li>Plus the transformer usuals from chapter 21 - residual connections, normalisation, and feed-forward transitions after each attention</li>
   </ul>
 </section>
-
 <section id="the-structure-module">
   <h2>The structure module</h2>
   <ul>
@@ -226,7 +220,6 @@
     <li>After the frames settle, predicted torsion angles place the side-chain atoms, giving all-atom coordinates</li>
   </ul>
 </section>
-
 <section id="training-losses-and-recycling">
   <h2>Training, losses and recycling</h2>
   <ul>
@@ -257,7 +250,6 @@
     </li>
   </ul>
 </section>
-
 <section id="confidence-plddt-and-pae">
   <h2>Confidence: pLDDT and PAE</h2>
   <ul>
@@ -274,7 +266,6 @@
     </li>
   </ul>
 </section>
-
 <section id="limits">
   <h2>Limits</h2>
   <ul>
@@ -288,7 +279,6 @@
     <li>Shallow MSAs hurt - the coevolution signal is the fuel, and orphan sequences don't carry it (which is where chapter 25's single-sequence models come in)</li>
   </ul>
 </section>
-
 <section id="after-alphafold2">
   <h2>After AlphaFold2</h2>
   <ul>
@@ -299,16 +289,15 @@
         <li>Coverage extends to nucleic acids, ligands and modifications; the price is sampling multiple draws and ranking by confidence</li>
       </ul>
     </li>
-    <li>That a diffusion head could replace the carefully hand-built structure module is the chapter 23 thesis in action: given good conditioning, "denoise your way to the answer" is a remarkably general decoder</li>
+    <li>That a diffusion head could replace the carefully hand-built structure module is the chapter 23 thesis in action: given good conditioning, &quot;denoise your way to the answer&quot; is a remarkably general decoder</li>
   </ul>
 </section>
-
 <section id="summary">
   <h2>Summary</h2>
   <ul>
     <li>The problem: sequence in, all-atom 3D structure out - supervised learning against the protein data bank, judged blind at CASP</li>
     <li>The decisive input is the MSA: contacting residues co-vary across evolution, so alignment statistics encode geometry</li>
-    <li>Two representations - MSA [s &times; r] and pair [r &times; r] - refined by 48 Evoformer blocks: row and column attention (pair-biased), outer-product mean, and triangle updates that make geometric consistency learnable</li>
+    <li>Two representations - MSA [s × r] and pair [r × r] - refined by 48 Evoformer blocks: row and column attention (pair-biased), outer-product mean, and triangle updates that make geometric consistency learnable</li>
     <li>The structure module poses each residue as a rigid frame and moves them with Invariant Point Attention - rotation/translation invariance by construction</li>
     <li>Trained with FAPE plus distogram, masked-MSA (chapter 22's objective) and confidence heads; recycled ~3 times; boosted by self-distillation</li>
     <li>pLDDT and PAE are calibrated self-error estimates - the feature that makes the predictions usable</li>

@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -20,8 +21,7 @@
   <a href="index.html">Index</a>
   <a href="24_AlphaFold2.html" rel="next">24: AlphaFold2 &rarr;</a>
 </nav>
-
-<div class="toc">
+<nav class="toc" aria-label="On this page">
   <h2>On this page</h2>
   <ul>
     <li><a href="#a-note-on-this-chapter">A note on this chapter</a></li>
@@ -33,8 +33,7 @@
     <li><a href="#what-they-are-used-for">What they're used for</a></li>
     <li><a href="#summary">Summary</a></li>
   </ul>
-</div>
-
+</nav>
 <section id="a-note-on-this-chapter">
   <h2>A note on this chapter</h2>
   <ul>
@@ -51,7 +50,6 @@
     </li>
   </ul>
 </section>
-
 <section id="the-idea">
   <h2>The idea</h2>
   <ul>
@@ -66,28 +64,28 @@
   </ul>
   <figure class="diagram">
     <svg viewBox="0 0 560 140" role="img" aria-label="The forward diffusion process adds noise to an image step by step; the learned reverse process removes it">
-      <rect class="box" x="14" y="46" width="60" height="46" rx="4"/>
-      <text class="lbl" x="30" y="74">image</text>
-      <rect class="box" x="140" y="46" width="60" height="46" rx="4"/>
-      <text class="lbl-sm" x="152" y="74">noisier</text>
-      <rect class="box" x="266" y="46" width="60" height="46" rx="4"/>
-      <text class="lbl-sm" x="278" y="74">noisier</text>
-      <rect class="box" x="392" y="46" width="60" height="46" rx="4"/>
-      <text class="lbl" x="404" y="74">noise</text>
-      <path class="arrow" d="M74 58 L136 58"/>
-      <polygon class="arrow-head" points="136,58 129,54 129,62"/>
-      <path class="arrow" d="M200 58 L262 58"/>
-      <polygon class="arrow-head" points="262,58 255,54 255,62"/>
-      <path class="arrow" d="M326 58 L388 58"/>
-      <polygon class="arrow-head" points="388,58 381,54 381,62"/>
-      <text class="lbl-sm" x="150" y="34">forward - add noise (fixed, not learned)</text>
-      <path class="arrow" d="M388 82 L330 82"/>
-      <polygon class="arrow-head" points="330,82 337,78 337,86"/>
-      <path class="arrow" d="M262 82 L204 82"/>
-      <polygon class="arrow-head" points="204,82 211,78 211,86"/>
-      <path class="arrow" d="M136 82 L78 82"/>
-      <polygon class="arrow-head" points="78,82 85,78 85,86"/>
-      <text class="lbl-key" x="150" y="118">reverse - learned denoiser, run to generate</text>
+    <rect class="box" x="14" y="46" width="60" height="46" rx="4"/>
+    <text class="lbl" x="30" y="74">image</text>
+    <rect class="box" x="140" y="46" width="60" height="46" rx="4"/>
+    <text class="lbl-sm" x="152" y="74">noisier</text>
+    <rect class="box" x="266" y="46" width="60" height="46" rx="4"/>
+    <text class="lbl-sm" x="278" y="74">noisier</text>
+    <rect class="box" x="392" y="46" width="60" height="46" rx="4"/>
+    <text class="lbl" x="404" y="74">noise</text>
+    <path class="arrow" d="M74 58 L136 58"/>
+    <polygon class="arrow-head" points="136,58 129,54 129,62"/>
+    <path class="arrow" d="M200 58 L262 58"/>
+    <polygon class="arrow-head" points="262,58 255,54 255,62"/>
+    <path class="arrow" d="M326 58 L388 58"/>
+    <polygon class="arrow-head" points="388,58 381,54 381,62"/>
+    <text class="lbl-sm" x="150" y="34">forward - add noise (fixed, not learned)</text>
+    <path class="arrow" d="M388 82 L330 82"/>
+    <polygon class="arrow-head" points="330,82 337,78 337,86"/>
+    <path class="arrow" d="M262 82 L204 82"/>
+    <polygon class="arrow-head" points="204,82 211,78 211,86"/>
+    <path class="arrow" d="M136 82 L78 82"/>
+    <polygon class="arrow-head" points="78,82 85,78 85,86"/>
+    <text class="lbl-key" x="150" y="118">reverse - learned denoiser, run to generate</text>
     </svg>
     <figcaption>Destroy structure in small fixed steps; learn to undo one of them; run it backwards to generate.</figcaption>
   </figure>
@@ -101,19 +99,18 @@
     </li>
   </ul>
 </section>
-
 <section id="the-forward-process">
   <h2>The forward process</h2>
   <ul>
-    <li>Fix a <span class="term">noise schedule</span> - a sequence of small variances β<sub>1</sub>, &hellip;, β<sub>T</sub>
+    <li>Fix a <span class="term">noise schedule</span> - a sequence of small variances β<sub>1</sub>, …, β<sub>T</sub>
       <ul>
         <li>Each step shrinks the signal slightly and adds a little Gaussian noise</li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>q</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>x</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mi>N</mi><mo form="prefix">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>;</mo><mspace width="0.2em"/><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mi>&#x3B2;</mi><mi>t</mi></msub></msqrt><mspace width="0.15em"/><msub><mi>x</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo>,</mo><mspace width="0.2em"/><msub><mi>&#x3B2;</mi><mi>t</mi></msub><mi>I</mi><mo form="postfix">)</mo></mrow></math>
-<span class="eqn-note">One forward step: a Gaussian (chapter 15) centred just below the current value, with variance &beta;<sub>t</sub>. Nothing is learned here &mdash; the destruction is by design.</span>
+    <math display="block"><mrow><mi>q</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>x</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mi>N</mi><mo form="prefix">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>;</mo><mspace width="0.2em"/><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mi>&#x3B2;</mi><mi>t</mi></msub></msqrt><mspace width="0.15em"/><msub><mi>x</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo>,</mo><mspace width="0.2em"/><msub><mi>&#x3B2;</mi><mi>t</mi></msub><mi>I</mi><mo form="postfix">)</mo></mrow></math>
+    <span class="eqn-note">One forward step: a Gaussian (chapter 15) centred just below the current value, with variance &beta;<sub>t</sub>. Nothing is learned here &mdash; the destruction is by design.</span>
   </div>
   <ul>
     <li>The property that makes training practical
@@ -123,53 +120,51 @@
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>x</mi><mi>t</mi></msub><mo>=</mo><msqrt><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub></msqrt><mspace width="0.15em"/><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub></msqrt><mspace width="0.15em"/><mi>&#x3B5;</mi><mo>,</mo><mspace width="1em"/><mi>&#x3B5;</mi><mo>&#x223C;</mo><mi>N</mi><mo stretchy="false">(</mo><mn>0</mn><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></math>
-<math display="block"><mrow><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub><mo>=</mo><munderover><mo>&#x220F;</mo><mrow><mi>s</mi><mo>=</mo><mn>1</mn></mrow><mi>t</mi></munderover><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>&#x3B2;</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></math>
-<span class="eqn-note">&alpha;&#x304;<sub>t</sub> is the surviving fraction of the original signal. It starts near 1 and decays towards 0, so x<sub>T</sub> is (nearly) pure standard Gaussian noise whatever x<sub>0</sub> was &mdash; every data point is destroyed to the same known distribution, which is exactly what lets generation start from that distribution.</span>
+    <math display="block"><mrow><msub><mi>x</mi><mi>t</mi></msub><mo>=</mo><msqrt><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub></msqrt><mspace width="0.15em"/><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub></msqrt><mspace width="0.15em"/><mi>&#x3B5;</mi><mo>,</mo><mspace width="1em"/><mi>&#x3B5;</mi><mo>&#x223C;</mo><mi>N</mi><mo stretchy="false">(</mo><mn>0</mn><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></math>
+    <math display="block"><mrow><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub><mo>=</mo><munderover><mo>&#x220F;</mo><mrow><mi>s</mi><mo>=</mo><mn>1</mn></mrow><mi>t</mi></munderover><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>&#x3B2;</mi><mi>s</mi></msub><mo stretchy="false">)</mo></mrow></math>
+    <span class="eqn-note">&alpha;&#x304;<sub>t</sub> is the surviving fraction of the original signal. It starts near 1 and decays towards 0, so x<sub>T</sub> is (nearly) pure standard Gaussian noise whatever x<sub>0</sub> was &mdash; every data point is destroyed to the same known distribution, which is exactly what lets generation start from that distribution.</span>
   </div>
 </section>
-
 <section id="learning-to-reverse-it">
   <h2>Learning to reverse it</h2>
   <ul>
     <li>The network's one job: look at a noisy example and the step number, and predict the noise that was mixed in
       <ul>
-        <li>Call it &epsilon;<sub>&theta;</sub>(x<sub>t</sub>, t)</li>
-        <li>Training data is free in unlimited quantities: take a real x<sub>0</sub>, pick a random t, draw &epsilon;, mix them with the closed form above - now you know the right answer exactly</li>
+        <li>Call it ε<sub>&theta;</sub>(x<sub>t</sub>, t)</li>
+        <li>Training data is free in unlimited quantities: take a real x<sub>0</sub>, pick a random t, draw ε, mix them with the closed form above - now you know the right answer exactly</li>
         <li>Self-supervision again (chapter 20): the label is manufactured from the data itself</li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo>=</mo><mi>E</mi><mo form="prefix">[</mo><msup><mrow><mo stretchy="false">&#x2016;</mo><mi>&#x3B5;</mi><mo>&#x2212;</mo><msub><mi>&#x3B5;</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>,</mo><mi>t</mi><mo stretchy="false">)</mo><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup><mo form="postfix">]</mo></mrow></math>
-<span class="eqn-note">The entire training objective is squared error &mdash; chapter 02's cost function, with the "right answer" being the noise we ourselves added. No adversary, no likelihood gymnastics; this simplicity is a large part of why diffusion took over.</span>
+    <math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo>=</mo><mi>E</mi><mo form="prefix">[</mo><msup><mrow><mo stretchy="false">&#x2016;</mo><mi>&#x3B5;</mi><mo>&#x2212;</mo><msub><mi>&#x3B5;</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>,</mo><mi>t</mi><mo stretchy="false">)</mo><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup><mo form="postfix">]</mo></mrow></math>
+    <span class="eqn-note">The entire training objective is squared error &mdash; chapter 02's cost function, with the "right answer" being the noise we ourselves added. No adversary, no likelihood gymnastics; this simplicity is a large part of why diffusion took over.</span>
   </div>
   <ul>
     <li>Generation runs the chain backwards
       <ul>
-        <li>Start from x<sub>T</sub> &sim; N(0, I), and at each step subtract out (a correctly-scaled portion of) the predicted noise, then add back a little fresh noise</li>
+        <li>Start from x<sub>T</sub> ∼ N(0, I), and at each step subtract out (a correctly-scaled portion of) the predicted noise, then add back a little fresh noise</li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>x</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo>=</mo><mfrac><mn>1</mn><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mi>&#x3B2;</mi><mi>t</mi></msub></msqrt></mfrac><mo form="prefix">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>&#x2212;</mo><mfrac><msub><mi>&#x3B2;</mi><mi>t</mi></msub><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub></msqrt></mfrac><mspace width="0.15em"/><msub><mi>&#x3B5;</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>,</mo><mi>t</mi><mo stretchy="false">)</mo><mo form="postfix">)</mo><mo>+</mo><msqrt><msub><mi>&#x3B2;</mi><mi>t</mi></msub></msqrt><mspace width="0.15em"/><mi>z</mi><mo>,</mo><mspace width="1em"/><mi>z</mi><mo>&#x223C;</mo><mi>N</mi><mo stretchy="false">(</mo><mn>0</mn><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></math>
-<span class="eqn-note">One reverse step. The fresh noise z looks paradoxical &mdash; we are trying to remove noise &mdash; but it is what makes the reverse process a distribution rather than a single trajectory: run it twice and you get two different samples. At the final step (t = 1) no z is added.</span>
+    <math display="block"><mrow><msub><mi>x</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo>=</mo><mfrac><mn>1</mn><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mi>&#x3B2;</mi><mi>t</mi></msub></msqrt></mfrac><mo form="prefix">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>&#x2212;</mo><mfrac><msub><mi>&#x3B2;</mi><mi>t</mi></msub><msqrt><mn>1</mn><mo>&#x2212;</mo><msub><mover><mi>&#x3B1;</mi><mo>&#x00AF;</mo></mover><mi>t</mi></msub></msqrt></mfrac><mspace width="0.15em"/><msub><mi>&#x3B5;</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>,</mo><mi>t</mi><mo stretchy="false">)</mo><mo form="postfix">)</mo><mo>+</mo><msqrt><msub><mi>&#x3B2;</mi><mi>t</mi></msub></msqrt><mspace width="0.15em"/><mi>z</mi><mo>,</mo><mspace width="1em"/><mi>z</mi><mo>&#x223C;</mo><mi>N</mi><mo stretchy="false">(</mo><mn>0</mn><mo>,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow></math>
+    <span class="eqn-note">One reverse step. The fresh noise z looks paradoxical &mdash; we are trying to remove noise &mdash; but it is what makes the reverse process a distribution rather than a single trajectory: run it twice and you get two different samples. At the final step (t = 1) no z is added.</span>
   </div>
 </section>
-
 <section id="a-complete-diffusion-model-in-numpy">
   <h2>A complete diffusion model in NumPy</h2>
   <ul>
     <li>The pieces above, assembled and run
       <ul>
-        <li>Data: one-dimensional, a mixture of two Gaussians - half the points near &minus;2, half near +2</li>
+        <li>Data: one-dimensional, a mixture of two Gaussians - half the points near −2, half near +2</li>
         <li>Deliberately chosen so success is checkable: samples from a trained model must come out bimodal, and nothing simpler than a real generative model produces that from pure noise</li>
       </ul>
     </li>
     <li>First, the data and the forward process</li>
   </ul>
   <div class="code-eg">
-<pre>import numpy as np
+    <pre>import numpy as np
 
 rng = np.random.default_rng(0)
 
@@ -187,7 +182,7 @@ eps = rng.standard_normal(10000)
 xT  = np.sqrt(alpha_bar[-1]) * x0 + np.sqrt(1 - alpha_bar[-1]) * eps
 xT.mean(), xT.std()                <span class="comment"># (0.001, 1.0) - the data is gone;</span>
                                    <span class="comment"># every x0 ends as standard normal noise</span></pre>
-<p class="eqn-note">The closed-form jump verified: after 50 steps the bimodal data is indistinguishable from N(0, 1), which is exactly what the &alpha;&#x304;<sub>t</sub> equation promised.</p>
+    <p class="eqn-note">The closed-form jump verified: after 50 steps the bimodal data is indistinguishable from N(0, 1), which is exactly what the &alpha;&#x304;<sub>t</sub> equation promised.</p>
   </div>
   <ul>
     <li>The noise predictor - chapter 08's network, in miniature
@@ -197,7 +192,7 @@ xT.mean(), xT.std()                <span class="comment"># (0.001, 1.0) - the da
     </li>
   </ul>
   <div class="code-eg">
-<pre>H = 64
+    <pre>H = 64
 W1 = rng.standard_normal((H, 2)) * 0.5   <span class="comment"># chapter 09: random init, small values</span>
 b1 = np.zeros(H)
 W2 = rng.standard_normal(H) * 0.5
@@ -206,7 +201,7 @@ b2 = 0.0
 def predict(x, t_frac):
     a1 = np.tanh(W1 @ np.vstack([x, t_frac]) + b1[:, None])   <span class="comment"># hidden layer</span>
     return W2 @ a1 + b2, a1</pre>
-<p class="eqn-note">&epsilon;<sub>&theta;</sub>(x<sub>t</sub>, t) as sixty-four hidden units. Feeding t in as an input is what lets one network learn to denoise at every noise level at once.</p>
+    <p class="eqn-note">&epsilon;<sub>&theta;</sub>(x<sub>t</sub>, t) as sixty-four hidden units. Feeding t in as an input is what lets one network learn to denoise at every noise level at once.</p>
   </div>
   <ul>
     <li>Training - manufacture (noisy input, true noise) pairs and do mini-batch gradient descent on the squared error
@@ -216,7 +211,7 @@ def predict(x, t_frac):
     </li>
   </ul>
   <div class="code-eg">
-<pre>lr = 1e-2
+    <pre>lr = 1e-2
 for step in range(4000):                      <span class="comment"># mini-batch descent, chapter 17</span>
     x0  = sample_data(256)
     t   = rng.integers(0, T, size=256)        <span class="comment"># a random step per example</span>
@@ -235,13 +230,13 @@ for step in range(4000):                      <span class="comment"># mini-batch
     W1 -= lr * gW1; b1 -= lr * gb1            <span class="comment"># simultaneous update, chapter 02</span>
     W2 -= lr * gW2; b2 -= lr * gb2
 <span class="comment"># training loss falls from 4.1 to ~0.35 over the 4000 steps (under a second)</span></pre>
-<p class="eqn-note">The whole training loop. Note what it never does: it never sees a "generated sample is good/bad" signal. It only ever learns to predict added noise, and generation quality follows from that alone.</p>
+    <p class="eqn-note">The whole training loop. Note what it never does: it never sees a "generated sample is good/bad" signal. It only ever learns to predict added noise, and generation quality follows from that alone.</p>
   </div>
   <ul>
     <li>Generation - start from pure noise, run the reverse update 50 times</li>
   </ul>
   <div class="code-eg">
-<pre>n = 4000
+    <pre>n = 4000
 x = rng.standard_normal(n)                    <span class="comment"># x_T: pure noise, no data in sight</span>
 for t in range(T - 1, -1, -1):
     eps_hat, _ = predict(x, np.full(n, t / T))
@@ -253,7 +248,7 @@ for t in range(T - 1, -1, -1):
 x[x &lt; 0].mean(), x[x &gt;= 0].mean()  <span class="comment"># (-1.89, 1.87)  - mode centres (true: -2, +2)</span>
 x[x &lt; 0].std(),  x[x &gt;= 0].std()   <span class="comment"># (0.43, 0.47)   - mode widths  (true: 0.3)</span>
 (np.abs(x) &lt; 1).mean()             <span class="comment"># 0.054          - the gap is nearly empty</span></pre>
-<p class="eqn-note">Four thousand samples of standard normal noise, pushed backwards through the learned denoiser, come out <em>bimodal</em>: two clean modes at &plusmn;1.9 with an almost-empty gap between them. Slightly blurrier than the truth (widths 0.45 against 0.3) &mdash; about right for a sixty-four-unit network &mdash; but this is real generation: a distribution nothing in the sampling loop ever saw, reconstructed from noise.</p>
+    <p class="eqn-note">Four thousand samples of standard normal noise, pushed backwards through the learned denoiser, come out <em>bimodal</em>: two clean modes at &plusmn;1.9 with an almost-empty gap between them. Slightly blurrier than the truth (widths 0.45 against 0.3) &mdash; about right for a sixty-four-unit network &mdash; but this is real generation: a distribution nothing in the sampling loop ever saw, reconstructed from noise.</p>
   </div>
   <ul>
     <li>Scaling this up to images changes nothing conceptual
@@ -264,20 +259,18 @@ x[x &lt; 0].std(),  x[x &gt;= 0].std()   <span class="comment"># (0.43, 0.47)   
     </li>
   </ul>
 </section>
-
 <section id="conditioning-and-guidance">
   <h2>Conditioning and guidance</h2>
   <ul>
     <li>Everything so far generates unconditionally - real systems generate <em>from a prompt</em>
       <ul>
-        <li><span class="term">Conditioning</span> - feed a text prompt (encoded by a language model) into the denoiser as an extra input, so &epsilon;<sub>&theta;</sub>(x<sub>t</sub>, t, prompt) is steered towards matching images. The prompt attends into the denoiser via cross-attention - chapter 21</li>
+        <li><span class="term">Conditioning</span> - feed a text prompt (encoded by a language model) into the denoiser as an extra input, so ε<sub>&theta;</sub>(x<sub>t</sub>, t, prompt) is steered towards matching images. The prompt attends into the denoiser via cross-attention - chapter 21</li>
         <li><span class="term">Classifier-free guidance</span> - run the denoiser with and without the prompt and extrapolate away from the unconditioned prediction. Exaggerates prompt adherence, at some cost in diversity</li>
         <li><span class="term">Latent diffusion</span> - run the whole process in a learned compressed space rather than on pixels, which is what made it cheap enough to use widely. Chapter 14's dimensionality-reduction argument, doing real work: denoise where the data actually varies</li>
       </ul>
     </li>
   </ul>
 </section>
-
 <section id="what-they-are-used-for">
   <h2>What they're used for</h2>
   <ul>
@@ -294,7 +287,6 @@ x[x &lt; 0].std(),  x[x &gt;= 0].std()   <span class="comment"># (0.43, 0.47)   
     </li>
   </ul>
 </section>
-
 <section id="summary">
   <h2>Summary</h2>
   <ul>

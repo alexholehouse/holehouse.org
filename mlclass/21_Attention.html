@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -40,15 +41,13 @@
   <h2>A note on this chapter</h2>
   <ul>
     <li>Everything up to chapter 19 is my write-up of Professor Ng's 2011 course - this chapter is not</li>
-    <li>
-      Attention post-dates the course by some years
+    <li>Attention post-dates the course by some years
       <ul>
         <li>The mechanism in the form used here comes from <em>Neural Machine Translation by Jointly Learning to Align and Translate</em> (Bahdanau et al., 2014) and <em>Attention Is All You Need</em> (Vaswani et al., 2017)</li>
         <li>So there's no lecture behind this one, and the diagrams are my own</li>
       </ul>
     </li>
-    <li>
-      I've added it because attention is the piece that connects these notes to essentially everything that has happened since
+    <li>I've added it because attention is the piece that connects these notes to essentially everything that has happened since
       <ul>
         <li>It builds directly on things covered earlier - logistic units, softmax, vectorization, learned weight matrices</li>
         <li>If you've worked through chapters 08 and 09 you already have what you need</li>
@@ -59,42 +58,37 @@
 <section id="why-attention">
   <h2>Why attention?</h2>
   <ul>
-    <li>
-      Say we want to map one sequence to another
+    <li>Say we want to map one sequence to another
       <ul>
         <li>Translate a French sentence to English</li>
         <li>Summarize a paragraph</li>
         <li>Predict the next word</li>
       </ul>
     </li>
-    <li>
-      The obvious approach is an <strong><span class="term">encoder-decoder</span></strong>
+    <li>The obvious approach is an <strong><span class="term">encoder-decoder</span></strong>
       <ul>
         <li>Encoder reads the input sequence one step at a time, updating a hidden state</li>
-        <li>Final hidden state is a fixed-length vector - the "meaning" of the input</li>
+        <li>Final hidden state is a fixed-length vector - the &quot;meaning&quot; of the input</li>
         <li>Decoder generates the output sequence from that vector</li>
       </ul>
     </li>
   </ul>
   <h3>The problem with this</h3>
   <ul>
-    <li>
-      Everything has to squeeze through one fixed-length vector
+    <li>Everything has to squeeze through one fixed-length vector
       <ul>
         <li>This is the <strong><span class="hl-red">bottleneck</span></strong></li>
         <li>A 5 word sentence and a 50 word sentence get the same number of numbers to describe them</li>
         <li>Performance degrades badly as sentences get longer - which is exactly what you'd expect</li>
       </ul>
     </li>
-    <li>
-      Long-range dependencies get lost
+    <li>Long-range dependencies get lost
       <ul>
         <li>If word 40 depends on word 2, that information has to survive 38 update steps</li>
         <li>Signal decays, gradients vanish - the same problem we saw with deep networks in chapter 09, just stretched along time instead of depth</li>
       </ul>
     </li>
-    <li>
-      It's inherently sequential
+    <li>It's inherently sequential
       <ul>
         <li>Step t needs step t-1, so you can't parallelize over the sequence</li>
         <li>Given the whole point of vectorization (chapter 04) was to stop looping, this hurts</li>
@@ -103,65 +97,63 @@
   </ul>
   <figure class="diagram">
     <svg viewBox="0 0 620 186" role="img" aria-label="A fixed-length context vector bottleneck compared with attention, where the decoder reads every encoder state">
-      <text class="lbl-sm" x="10" y="16">Without attention - one fixed vector carries everything</text>
-      <rect class="box" x="14" y="28" width="52" height="30" rx="4"/>
-      <rect class="box" x="76" y="28" width="52" height="30" rx="4"/>
-      <rect class="box" x="138" y="28" width="52" height="30" rx="4"/>
-      <rect class="box" x="200" y="28" width="52" height="30" rx="4"/>
-      <text class="lbl" x="32" y="48">h1</text>
-      <text class="lbl" x="94" y="48">h2</text>
-      <text class="lbl" x="156" y="48">h3</text>
-      <text class="lbl" x="218" y="48">h4</text>
-      <path class="arrow" d="M252 43 L300 43"/>
-      <polygon class="arrow-head" points="300,43 293,39 293,47"/>
-      <rect class="box-accent" x="304" y="28" width="46" height="30" rx="4"/>
-      <text class="lbl-key" x="313" y="48">c</text>
-      <path class="arrow" d="M350 43 L398 43"/>
-      <polygon class="arrow-head" points="398,43 391,39 391,47"/>
-      <rect class="box" x="402" y="28" width="52" height="30" rx="4"/>
-      <text class="lbl" x="418" y="48">dec</text>
-      <text class="lbl-sm" x="462" y="47">everything</text>
-      <text class="lbl-sm" x="462" y="60">via one c</text>
+    <text class="lbl-sm" x="10" y="16">Without attention - one fixed vector carries everything</text>
+    <rect class="box" x="14" y="28" width="52" height="30" rx="4"/>
+    <rect class="box" x="76" y="28" width="52" height="30" rx="4"/>
+    <rect class="box" x="138" y="28" width="52" height="30" rx="4"/>
+    <rect class="box" x="200" y="28" width="52" height="30" rx="4"/>
+    <text class="lbl" x="32" y="48">h1</text>
+    <text class="lbl" x="94" y="48">h2</text>
+    <text class="lbl" x="156" y="48">h3</text>
+    <text class="lbl" x="218" y="48">h4</text>
+    <path class="arrow" d="M252 43 L300 43"/>
+    <polygon class="arrow-head" points="300,43 293,39 293,47"/>
+    <rect class="box-accent" x="304" y="28" width="46" height="30" rx="4"/>
+    <text class="lbl-key" x="313" y="48">c</text>
+    <path class="arrow" d="M350 43 L398 43"/>
+    <polygon class="arrow-head" points="398,43 391,39 391,47"/>
+    <rect class="box" x="402" y="28" width="52" height="30" rx="4"/>
+    <text class="lbl" x="418" y="48">dec</text>
+    <text class="lbl-sm" x="462" y="47">everything</text>
+    <text class="lbl-sm" x="462" y="60">via one c</text>
 
-      <text class="lbl-sm" x="10" y="100">With attention - the decoder looks back at every state</text>
-      <rect class="box" x="14" y="140" width="52" height="30" rx="4"/>
-      <rect class="box" x="76" y="140" width="52" height="30" rx="4"/>
-      <rect class="box" x="138" y="140" width="52" height="30" rx="4"/>
-      <rect class="box" x="200" y="140" width="52" height="30" rx="4"/>
-      <text class="lbl" x="32" y="160">h1</text>
-      <text class="lbl" x="94" y="160">h2</text>
-      <text class="lbl" x="156" y="160">h3</text>
-      <text class="lbl" x="218" y="160">h4</text>
-      <path class="arrow" d="M40 140 C 130 118, 350 118, 414 146"/>
-      <path class="arrow" d="M102 140 C 180 122, 356 122, 416 147"/>
-      <path class="arrow" d="M164 140 C 220 126, 362 126, 418 148"/>
-      <path class="arrow" d="M226 140 C 264 130, 368 130, 420 149"/>
-      <polygon class="arrow-head" points="422,149 413,145 414,154"/>
-      <rect class="box" x="402" y="140" width="52" height="30" rx="4"/>
-      <text class="lbl" x="418" y="160">dec</text>
-      <text class="lbl-sm" x="462" y="152">weights the</text>
-      <text class="lbl-sm" x="462" y="165">states it needs</text>
+    <text class="lbl-sm" x="10" y="100">With attention - the decoder looks back at every state</text>
+    <rect class="box" x="14" y="140" width="52" height="30" rx="4"/>
+    <rect class="box" x="76" y="140" width="52" height="30" rx="4"/>
+    <rect class="box" x="138" y="140" width="52" height="30" rx="4"/>
+    <rect class="box" x="200" y="140" width="52" height="30" rx="4"/>
+    <text class="lbl" x="32" y="160">h1</text>
+    <text class="lbl" x="94" y="160">h2</text>
+    <text class="lbl" x="156" y="160">h3</text>
+    <text class="lbl" x="218" y="160">h4</text>
+    <path class="arrow" d="M40 140 C 130 118, 350 118, 414 146"/>
+    <path class="arrow" d="M102 140 C 180 122, 356 122, 416 147"/>
+    <path class="arrow" d="M164 140 C 220 126, 362 126, 418 148"/>
+    <path class="arrow" d="M226 140 C 264 130, 368 130, 420 149"/>
+    <polygon class="arrow-head" points="422,149 413,145 414,154"/>
+    <rect class="box" x="402" y="140" width="52" height="30" rx="4"/>
+    <text class="lbl" x="418" y="160">dec</text>
+    <text class="lbl-sm" x="462" y="152">weights the</text>
+    <text class="lbl-sm" x="462" y="165">states it needs</text>
     </svg>
     <figcaption>The bottleneck, and what attention replaces it with.</figcaption>
   </figure>
   <ul>
-    <li>
-      The fix is almost embarrassingly simple
+    <li>The fix is almost embarrassingly simple
       <ul>
         <li>Don't force everything through one vector</li>
         <li>Keep <em>all</em> the encoder states around</li>
         <li>At each output step, let the decoder decide which of them to look at</li>
       </ul>
     </li>
-    <li>That "decide which to look at, and by how much" is <strong><span class="term">attention</span></strong></li>
+    <li>That &quot;decide which to look at, and by how much&quot; is <strong><span class="term">attention</span></strong></li>
   </ul>
 </section>
 <section id="attention-as-a-soft-lookup">
   <h2>Attention as a soft lookup</h2>
   <ul>
     <li>The cleanest way to think about attention is as a dictionary lookup that has been made differentiable</li>
-    <li>
-      An ordinary lookup
+    <li>An ordinary lookup
       <ul>
         <li>You have a set of <strong><span class="term">key</span></strong>-<strong><span class="term">value</span></strong> pairs</li>
         <li>You supply a <strong><span class="term">query</span></strong></li>
@@ -169,30 +161,26 @@
         <li>This is a <strong><span class="hl-red">hard</span></strong> lookup - one key wins, everything else returns nothing</li>
       </ul>
     </li>
-    <li>
-      The problem with a hard lookup is that it isn't differentiable
+    <li>The problem with a hard lookup is that it isn't differentiable
       <ul>
-        <li>"Which key matched" is a step function of the query</li>
+        <li>&quot;Which key matched&quot; is a step function of the query</li>
         <li>Derivative is zero everywhere and undefined at the jump - no gradient, nothing to learn from</li>
       </ul>
     </li>
-    <li>
-      So we soften it
+    <li>So we soften it
       <ul>
         <li>Score the query against <em>every</em> key - how well does each one match?</li>
         <li>Turn those scores into weights that are positive and sum to 1 (softmax, exactly as in chapter 09)</li>
         <li>Return the <strong><span class="term">weighted average</span></strong> of all the values</li>
       </ul>
     </li>
-    <li>
-      Now everything is smooth
+    <li>Now everything is smooth
       <ul>
         <li>Nudge the query slightly, the weights shift slightly, the output shifts slightly</li>
         <li>Which means we can backpropagate through it and learn what to attend to</li>
       </ul>
     </li>
-    <li>
-      If one score is much larger than the rest, softmax puts nearly all the weight there
+    <li>If one score is much larger than the rest, softmax puts nearly all the weight there
       <ul>
         <li>So a soft lookup can approximate a hard one when it wants to</li>
         <li>We get the behaviour of a lookup and the trainability of a smooth function</li>
@@ -201,47 +189,47 @@
   </ul>
   <figure class="diagram">
     <svg viewBox="0 0 560 200" role="img" aria-label="A query is scored against each key, the scores are softmaxed into weights, and the values are averaged using those weights">
-      <text class="lbl-key" x="14" y="100">query q</text>
-      <path class="arrow" d="M76 96 C 110 96, 110 40, 146 40"/>
-      <path class="arrow" d="M76 98 C 110 98, 110 76, 146 76"/>
-      <path class="arrow" d="M76 100 C 110 100, 110 112, 146 112"/>
-      <path class="arrow" d="M76 102 C 110 102, 110 148, 146 148"/>
-      <rect class="box" x="150" y="26" width="46" height="28" rx="4"/>
-      <rect class="box" x="150" y="62" width="46" height="28" rx="4"/>
-      <rect class="box" x="150" y="98" width="46" height="28" rx="4"/>
-      <rect class="box" x="150" y="134" width="46" height="28" rx="4"/>
-      <text class="lbl" x="166" y="45">k1</text>
-      <text class="lbl" x="166" y="81">k2</text>
-      <text class="lbl" x="166" y="117">k3</text>
-      <text class="lbl" x="166" y="153">k4</text>
-      <text class="lbl-sm" x="206" y="45">score</text>
-      <text class="lbl-sm" x="206" y="81">score</text>
-      <text class="lbl-sm" x="206" y="117">score</text>
-      <text class="lbl-sm" x="206" y="153">score</text>
-      <path class="arrow" d="M246 40 L286 40"/>
-      <path class="arrow" d="M246 76 L286 76"/>
-      <path class="arrow" d="M246 112 L286 112"/>
-      <path class="arrow" d="M246 148 L286 148"/>
-      <text class="lbl-key" x="252" y="16">softmax</text>
-      <text class="lbl-key" x="292" y="45">0.7</text>
-      <text class="lbl" x="292" y="81">0.2</text>
-      <text class="lbl" x="292" y="117">0.05</text>
-      <text class="lbl" x="292" y="153">0.05</text>
-      <text class="lbl-sm" x="286" y="178">sum to 1</text>
-      <rect class="box" x="344" y="26" width="46" height="28" rx="4"/>
-      <rect class="box" x="344" y="62" width="46" height="28" rx="4"/>
-      <rect class="box" x="344" y="98" width="46" height="28" rx="4"/>
-      <rect class="box" x="344" y="134" width="46" height="28" rx="4"/>
-      <text class="lbl" x="360" y="45">v1</text>
-      <text class="lbl" x="360" y="81">v2</text>
-      <text class="lbl" x="360" y="117">v3</text>
-      <text class="lbl" x="360" y="153">v4</text>
-      <path class="arrow" d="M390 40 C 430 40, 430 92, 464 96"/>
-      <path class="arrow" d="M390 76 C 430 76, 430 94, 464 98"/>
-      <path class="arrow" d="M390 112 C 430 112, 430 100, 464 100"/>
-      <path class="arrow" d="M390 148 C 430 148, 430 104, 464 102"/>
-      <polygon class="arrow-head" points="468,99 459,95 460,104"/>
-      <text class="lbl-key" x="474" y="103">output</text>
+    <text class="lbl-key" x="14" y="100">query q</text>
+    <path class="arrow" d="M76 96 C 110 96, 110 40, 146 40"/>
+    <path class="arrow" d="M76 98 C 110 98, 110 76, 146 76"/>
+    <path class="arrow" d="M76 100 C 110 100, 110 112, 146 112"/>
+    <path class="arrow" d="M76 102 C 110 102, 110 148, 146 148"/>
+    <rect class="box" x="150" y="26" width="46" height="28" rx="4"/>
+    <rect class="box" x="150" y="62" width="46" height="28" rx="4"/>
+    <rect class="box" x="150" y="98" width="46" height="28" rx="4"/>
+    <rect class="box" x="150" y="134" width="46" height="28" rx="4"/>
+    <text class="lbl" x="166" y="45">k1</text>
+    <text class="lbl" x="166" y="81">k2</text>
+    <text class="lbl" x="166" y="117">k3</text>
+    <text class="lbl" x="166" y="153">k4</text>
+    <text class="lbl-sm" x="206" y="45">score</text>
+    <text class="lbl-sm" x="206" y="81">score</text>
+    <text class="lbl-sm" x="206" y="117">score</text>
+    <text class="lbl-sm" x="206" y="153">score</text>
+    <path class="arrow" d="M246 40 L286 40"/>
+    <path class="arrow" d="M246 76 L286 76"/>
+    <path class="arrow" d="M246 112 L286 112"/>
+    <path class="arrow" d="M246 148 L286 148"/>
+    <text class="lbl-key" x="252" y="16">softmax</text>
+    <text class="lbl-key" x="292" y="45">0.7</text>
+    <text class="lbl" x="292" y="81">0.2</text>
+    <text class="lbl" x="292" y="117">0.05</text>
+    <text class="lbl" x="292" y="153">0.05</text>
+    <text class="lbl-sm" x="286" y="178">sum to 1</text>
+    <rect class="box" x="344" y="26" width="46" height="28" rx="4"/>
+    <rect class="box" x="344" y="62" width="46" height="28" rx="4"/>
+    <rect class="box" x="344" y="98" width="46" height="28" rx="4"/>
+    <rect class="box" x="344" y="134" width="46" height="28" rx="4"/>
+    <text class="lbl" x="360" y="45">v1</text>
+    <text class="lbl" x="360" y="81">v2</text>
+    <text class="lbl" x="360" y="117">v3</text>
+    <text class="lbl" x="360" y="153">v4</text>
+    <path class="arrow" d="M390 40 C 430 40, 430 92, 464 96"/>
+    <path class="arrow" d="M390 76 C 430 76, 430 94, 464 98"/>
+    <path class="arrow" d="M390 112 C 430 112, 430 100, 464 100"/>
+    <path class="arrow" d="M390 148 C 430 148, 430 104, 464 102"/>
+    <polygon class="arrow-head" points="468,99 459,95 460,104"/>
+    <text class="lbl-key" x="474" y="103">output</text>
     </svg>
     <figcaption>Score against every key, softmax the scores, average the values.</figcaption>
   </figure>
@@ -250,36 +238,32 @@
   <h2>Scaled dot-product attention</h2>
   <ul>
     <li>Now we need to pick an actual scoring function</li>
-    <li>
-      Simplest sensible choice - the dot product
+    <li>Simplest sensible choice - the dot product
       <ul>
-        <li>score(q, k<sub>i</sub>) = q &middot; k<sub>i</sub></li>
+        <li>score(q, k<sub>i</sub>) = q · k<sub>i</sub></li>
         <li>Large when the two vectors point the same way, near zero when orthogonal</li>
-        <li>Which is exactly the notion of "similarity" we want</li>
+        <li>Which is exactly the notion of &quot;similarity&quot; we want</li>
         <li>And it's a matrix multiply, so it's fast - no extra parameters at all</li>
       </ul>
     </li>
   </ul>
   <h3>Why divide by the square root of d<sub>k</sub>?</h3>
   <ul>
-    <li>
-      There's a problem with raw dot products as vectors get longer
+    <li>There's a problem with raw dot products as vectors get longer
       <ul>
         <li>Suppose the components of q and k are independent with mean 0 and variance 1</li>
         <li>Their dot product is a sum of d<sub>k</sub> such products</li>
-        <li>So it has mean 0 and variance d<sub>k</sub> - i.e. typical magnitude grows like &radic;d<sub>k</sub></li>
+        <li>So it has mean 0 and variance d<sub>k</sub> - i.e. typical magnitude grows like √d<sub>k</sub></li>
       </ul>
     </li>
-    <li>
-      With d<sub>k</sub> = 64 the scores are routinely in the tens
+    <li>With d<sub>k</sub> = 64 the scores are routinely in the tens
       <ul>
         <li>Feed those into softmax and it <strong><span class="hl-red">saturates</span></strong> - one weight goes to ~1, the rest to ~0</li>
         <li>In the flat region the gradient is vanishingly small</li>
         <li>Same problem as a saturated sigmoid back in chapter 06, for the same reason</li>
       </ul>
     </li>
-    <li>
-      So divide the scores by &radic;d<sub>k</sub>
+    <li>So divide the scores by √d<sub>k</sub>
       <ul>
         <li>Puts the variance back to about 1 regardless of dimension</li>
         <li>Keeps softmax in the part of its range where it has useful gradients</li>
@@ -289,8 +273,7 @@
   </ul>
   <h3>The whole thing in matrix form</h3>
   <ul>
-    <li>
-      Stack the queries, keys and values as rows of matrices - Q, K and V
+    <li>Stack the queries, keys and values as rows of matrices - Q, K and V
       <ul>
         <li>Q is [n x d<sub>k</sub>] for n queries</li>
         <li>K is [m x d<sub>k</sub>], V is [m x d<sub>v</sub>] for m key-value pairs</li>
@@ -300,17 +283,15 @@
   </ul>
   <pre>Attention(Q, K, V) = softmax( QK<sup>T</sup> / &radic;d<sub>k</sub> ) V</pre>
   <ul>
-    <li>
-      Worth walking through the shapes, since this is where it clicks
+    <li>Worth walking through the shapes, since this is where it clicks
       <ul>
         <li>QK<sup>T</sup> is [n x m] - every query scored against every key</li>
-        <li>Divide by &radic;d<sub>k</sub>, then softmax <em>along each row</em> - so each query's weights sum to 1</li>
+        <li>Divide by √d<sub>k</sub>, then softmax <em>along each row</em> - so each query's weights sum to 1</li>
         <li>Multiply by V, which is [m x d<sub>v</sub>] - gives [n x d<sub>v</sub>]</li>
         <li>One output vector per query, each a weighted average of the values</li>
       </ul>
     </li>
-    <li>
-      Note there are no learned parameters in this function
+    <li>Note there are no learned parameters in this function
       <ul>
         <li>It's two matrix multiplies and a softmax</li>
         <li>All the learning lives in how Q, K and V get produced - which is next</li>
@@ -319,33 +300,33 @@
   </ul>
   <figure class="diagram">
     <svg viewBox="0 0 600 120" role="img" aria-label="Data flow of scaled dot-product attention: Q and K are multiplied, scaled, masked, softmaxed, then multiplied by V">
-      <text class="lbl-key" x="14" y="64">Q, K</text>
-      <path class="arrow" d="M58 60 L92 60"/>
-      <polygon class="arrow-head" points="92,60 85,56 85,64"/>
-      <rect class="box" x="96" y="44" width="66" height="32" rx="4"/>
-      <text class="lbl" x="110" y="64">QK</text>
-      <text class="lbl-sm" x="136" y="59">T</text>
-      <path class="arrow" d="M162 60 L192 60"/>
-      <polygon class="arrow-head" points="192,60 185,56 185,64"/>
-      <rect class="box" x="196" y="44" width="60" height="32" rx="4"/>
-      <text class="lbl" x="206" y="64">&divide; &radic;d</text>
-      <text class="lbl-sm" x="240" y="68">k</text>
-      <path class="arrow" d="M256 60 L286 60"/>
-      <polygon class="arrow-head" points="286,60 279,56 279,64"/>
-      <rect class="box" x="290" y="44" width="56" height="32" rx="4"/>
-      <text class="lbl" x="300" y="64">mask</text>
-      <text class="lbl-sm" x="292" y="94">optional</text>
-      <path class="arrow" d="M346 60 L376 60"/>
-      <polygon class="arrow-head" points="376,60 369,56 369,64"/>
-      <rect class="box-accent" x="380" y="44" width="72" height="32" rx="4"/>
-      <text class="lbl-key" x="390" y="64">softmax</text>
-      <path class="arrow" d="M452 60 L482 60"/>
-      <polygon class="arrow-head" points="482,60 475,56 475,64"/>
-      <rect class="box" x="486" y="44" width="52" height="32" rx="4"/>
-      <text class="lbl" x="502" y="64">&times; V</text>
-      <path class="arrow" d="M538 60 L566 60"/>
-      <polygon class="arrow-head" points="566,60 559,56 559,64"/>
-      <text class="lbl-key" x="546" y="30">out</text>
+    <text class="lbl-key" x="14" y="64">Q, K</text>
+    <path class="arrow" d="M58 60 L92 60"/>
+    <polygon class="arrow-head" points="92,60 85,56 85,64"/>
+    <rect class="box" x="96" y="44" width="66" height="32" rx="4"/>
+    <text class="lbl" x="110" y="64">QK</text>
+    <text class="lbl-sm" x="136" y="59">T</text>
+    <path class="arrow" d="M162 60 L192 60"/>
+    <polygon class="arrow-head" points="192,60 185,56 185,64"/>
+    <rect class="box" x="196" y="44" width="60" height="32" rx="4"/>
+    <text class="lbl" x="206" y="64">&divide; &radic;d</text>
+    <text class="lbl-sm" x="240" y="68">k</text>
+    <path class="arrow" d="M256 60 L286 60"/>
+    <polygon class="arrow-head" points="286,60 279,56 279,64"/>
+    <rect class="box" x="290" y="44" width="56" height="32" rx="4"/>
+    <text class="lbl" x="300" y="64">mask</text>
+    <text class="lbl-sm" x="292" y="94">optional</text>
+    <path class="arrow" d="M346 60 L376 60"/>
+    <polygon class="arrow-head" points="376,60 369,56 369,64"/>
+    <rect class="box-accent" x="380" y="44" width="72" height="32" rx="4"/>
+    <text class="lbl-key" x="390" y="64">softmax</text>
+    <path class="arrow" d="M452 60 L482 60"/>
+    <polygon class="arrow-head" points="482,60 475,56 475,64"/>
+    <rect class="box" x="486" y="44" width="52" height="32" rx="4"/>
+    <text class="lbl" x="502" y="64">&times; V</text>
+    <path class="arrow" d="M538 60 L566 60"/>
+    <polygon class="arrow-head" points="566,60 559,56 559,64"/>
+    <text class="lbl-key" x="546" y="30">out</text>
     </svg>
     <figcaption>Scaled dot-product attention, end to end.</figcaption>
   </figure>
@@ -353,11 +334,8 @@
 <section id="self-attention">
   <h2>Self-attention</h2>
   <ul>
-    <li>
-      So far Q, K and V were handed to us - in <strong><span class="term">self-attention</span></strong> the sequence produces all three itself
-    </li>
-    <li>
-      Start with the sequence as a matrix X, one row per token
+    <li>So far Q, K and V were handed to us - in <strong><span class="term">self-attention</span></strong> the sequence produces all three itself</li>
+    <li>Start with the sequence as a matrix X, one row per token
       <ul>
         <li>Learn three weight matrices - W<sup>Q</sup>, W<sup>K</sup> and W<sup>V</sup></li>
         <li>Q = X W<sup>Q</sup></li>
@@ -365,31 +343,27 @@
         <li>V = X W<sup>V</sup></li>
       </ul>
     </li>
-    <li>
-      Each token therefore emits three different vectors, and it's worth being clear about what each is for
+    <li>Each token therefore emits three different vectors, and it's worth being clear about what each is for
       <ul>
         <li><strong><span class="term">Query</span></strong> - what this token is looking for</li>
         <li><strong><span class="term">Key</span></strong> - what this token offers to others looking for something</li>
         <li><strong><span class="term">Value</span></strong> - what this token actually contributes if attended to</li>
       </ul>
     </li>
-    <li>
-      Splitting key from value is the subtle part, and it's easy to skip past
+    <li>Splitting key from value is the subtle part, and it's easy to skip past
       <ul>
         <li>What makes a token <em>findable</em> need not be what makes it <em>useful</em></li>
         <li>A pronoun might match on grammatical role but contribute semantic content</li>
         <li>Keeping them separate lets the model learn the two independently</li>
       </ul>
     </li>
-    <li>
-      Then run scaled dot-product attention on those three
+    <li>Then run scaled dot-product attention on those three
       <ul>
         <li>Every token attends to every token, including itself</li>
         <li>Output is a new sequence, same length, where each position now mixes in information from wherever it found it useful</li>
       </ul>
     </li>
-    <li>
-      Note what we've bought
+    <li>Note what we've bought
       <ul>
         <li>Any position can reach any other in <strong><span class="hl-green">one step</span></strong> - no decay over 38 timesteps</li>
         <li>Every position is computed independently, so the whole sequence goes through at once - fully parallel</li>
@@ -399,8 +373,7 @@
   </ul>
   <h3>Cross-attention</h3>
   <ul>
-    <li>
-      Same machinery, different sources
+    <li>Same machinery, different sources
       <ul>
         <li>Q comes from one sequence, K and V from another</li>
         <li>This is the original translation use - decoder queries the encoder</li>
@@ -412,31 +385,27 @@
 <section id="positional-encoding">
   <h2>Positional encoding</h2>
   <ul>
-    <li>
-      There's a problem with what we just built, and it's a real one
+    <li>There's a problem with what we just built, and it's a real one
       <ul>
         <li>Attention is a weighted sum over the whole sequence</li>
         <li>Addition doesn't care about order</li>
         <li>So shuffle the input tokens and you get the same outputs, just shuffled to match</li>
       </ul>
     </li>
-    <li>
-      The mechanism is <strong><span class="hl-red">permutation equivariant</span></strong> - it has no idea what order anything came in
+    <li>The mechanism is <strong><span class="hl-red">permutation equivariant</span></strong> - it has no idea what order anything came in
       <ul>
-        <li>"the cat sat on the mat" and "the mat sat on the cat" are identical to it</li>
+        <li>&quot;the cat sat on the mat&quot; and &quot;the mat sat on the cat&quot; are identical to it</li>
         <li>Clearly not acceptable for language</li>
       </ul>
     </li>
-    <li>
-      Fix is to put the position into the input
+    <li>Fix is to put the position into the input
       <ul>
-        <li>Build a vector that encodes "this is position i"</li>
+        <li>Build a vector that encodes &quot;this is position i&quot;</li>
         <li>Add it to the token's embedding before any attention happens</li>
         <li>Now two identical words at different positions have different representations, and the dot products can pick up on it</li>
       </ul>
     </li>
-    <li>
-      Two broad approaches
+    <li>Two broad approaches
       <ul>
         <li><strong><span class="term">Learned</span></strong> - just an embedding table indexed by position, trained like any other parameter</li>
         <li><strong><span class="term">Fixed</span></strong> - sinusoids of different frequencies, which is what the original paper used</li>
@@ -450,25 +419,22 @@
   <h2>Masking</h2>
   <ul>
     <li>Sometimes a query must not be allowed to see certain positions</li>
-    <li>
-      <strong><span class="term">Causal masking</span></strong> - for generation
+    <li><strong><span class="term">Causal masking</span></strong> - for generation
       <ul>
         <li>When predicting token t we may only use tokens 1 to t</li>
         <li>Otherwise the model can read the answer off the input - it learns nothing and fails completely at generation time when the future isn't there</li>
         <li>This is the same trap as evaluating on your training set (chapter 10), just hidden inside the architecture</li>
       </ul>
     </li>
-    <li>
-      <strong><span class="term">Padding masking</span></strong> - for batching
+    <li><strong><span class="term">Padding masking</span></strong> - for batching
       <ul>
         <li>Sequences in a batch have different lengths, so short ones get padded</li>
         <li>Padding is meaningless and must not be attended to</li>
       </ul>
     </li>
-    <li>
-      Implementation is a neat trick
+    <li>Implementation is a neat trick
       <ul>
-        <li>Set the disallowed scores to -&infin; <em>before</em> the softmax</li>
+        <li>Set the disallowed scores to -∞ <em>before</em> the softmax</li>
         <li>e<sup>-&infin;</sup> = 0, so those positions get exactly zero weight</li>
         <li>And the remaining weights still sum to 1 automatically, because softmax normalizes over what's left</li>
         <li>No renormalization step needed - it falls out</li>
@@ -477,39 +443,39 @@
   </ul>
   <figure class="diagram">
     <svg viewBox="0 0 420 190" role="img" aria-label="A causal attention mask shown as a lower triangular grid, where each query may only attend to positions at or before itself">
-      <text class="lbl-sm" x="96" y="18">keys (what we attend to)</text>
-      <text class="lbl-sm" x="14" y="40">queries</text>
-      <rect class="cell-on" x="96" y="30" width="30" height="30"/>
-      <rect class="cell-off" x="128" y="30" width="30" height="30"/>
-      <rect class="cell-off" x="160" y="30" width="30" height="30"/>
-      <rect class="cell-off" x="192" y="30" width="30" height="30"/>
-      <rect class="cell-on" x="96" y="62" width="30" height="30"/>
-      <rect class="cell-on" x="128" y="62" width="30" height="30"/>
-      <rect class="cell-off" x="160" y="62" width="30" height="30"/>
-      <rect class="cell-off" x="192" y="62" width="30" height="30"/>
-      <rect class="cell-on" x="96" y="94" width="30" height="30"/>
-      <rect class="cell-on" x="128" y="94" width="30" height="30"/>
-      <rect class="cell-on" x="160" y="94" width="30" height="30"/>
-      <rect class="cell-off" x="192" y="94" width="30" height="30"/>
-      <rect class="cell-on" x="96" y="126" width="30" height="30"/>
-      <rect class="cell-on" x="128" y="126" width="30" height="30"/>
-      <rect class="cell-on" x="160" y="126" width="30" height="30"/>
-      <rect class="cell-on" x="192" y="126" width="30" height="30"/>
-      <text class="lbl-sm" x="78" y="50">1</text>
-      <text class="lbl-sm" x="78" y="82">2</text>
-      <text class="lbl-sm" x="78" y="114">3</text>
-      <text class="lbl-sm" x="78" y="146">4</text>
-      <text class="lbl-sm" x="106" y="174">1</text>
-      <text class="lbl-sm" x="138" y="174">2</text>
-      <text class="lbl-sm" x="170" y="174">3</text>
-      <text class="lbl-sm" x="202" y="174">4</text>
-      <rect class="cell-on" x="248" y="46" width="14" height="14"/>
-      <text class="lbl-sm" x="270" y="58">allowed</text>
-      <rect class="cell-off" x="248" y="76" width="14" height="14"/>
-      <text class="lbl-sm" x="270" y="88">masked to -inf</text>
-      <text class="lbl-sm" x="248" y="122">query 3 may use</text>
-      <text class="lbl-sm" x="248" y="136">keys 1, 2 and 3</text>
-      <text class="lbl-sm" x="248" y="150">but never 4</text>
+    <text class="lbl-sm" x="96" y="18">keys (what we attend to)</text>
+    <text class="lbl-sm" x="14" y="40">queries</text>
+    <rect class="cell-on" x="96" y="30" width="30" height="30"/>
+    <rect class="cell-off" x="128" y="30" width="30" height="30"/>
+    <rect class="cell-off" x="160" y="30" width="30" height="30"/>
+    <rect class="cell-off" x="192" y="30" width="30" height="30"/>
+    <rect class="cell-on" x="96" y="62" width="30" height="30"/>
+    <rect class="cell-on" x="128" y="62" width="30" height="30"/>
+    <rect class="cell-off" x="160" y="62" width="30" height="30"/>
+    <rect class="cell-off" x="192" y="62" width="30" height="30"/>
+    <rect class="cell-on" x="96" y="94" width="30" height="30"/>
+    <rect class="cell-on" x="128" y="94" width="30" height="30"/>
+    <rect class="cell-on" x="160" y="94" width="30" height="30"/>
+    <rect class="cell-off" x="192" y="94" width="30" height="30"/>
+    <rect class="cell-on" x="96" y="126" width="30" height="30"/>
+    <rect class="cell-on" x="128" y="126" width="30" height="30"/>
+    <rect class="cell-on" x="160" y="126" width="30" height="30"/>
+    <rect class="cell-on" x="192" y="126" width="30" height="30"/>
+    <text class="lbl-sm" x="78" y="50">1</text>
+    <text class="lbl-sm" x="78" y="82">2</text>
+    <text class="lbl-sm" x="78" y="114">3</text>
+    <text class="lbl-sm" x="78" y="146">4</text>
+    <text class="lbl-sm" x="106" y="174">1</text>
+    <text class="lbl-sm" x="138" y="174">2</text>
+    <text class="lbl-sm" x="170" y="174">3</text>
+    <text class="lbl-sm" x="202" y="174">4</text>
+    <rect class="cell-on" x="248" y="46" width="14" height="14"/>
+    <text class="lbl-sm" x="270" y="58">allowed</text>
+    <rect class="cell-off" x="248" y="76" width="14" height="14"/>
+    <text class="lbl-sm" x="270" y="88">masked to -inf</text>
+    <text class="lbl-sm" x="248" y="122">query 3 may use</text>
+    <text class="lbl-sm" x="248" y="136">keys 1, 2 and 3</text>
+    <text class="lbl-sm" x="248" y="150">but never 4</text>
     </svg>
     <figcaption>A causal mask - each query sees only itself and what came before.</figcaption>
   </figure>
@@ -517,8 +483,7 @@
 <section id="multi-head-attention">
   <h2>Multi-head attention</h2>
   <ul>
-    <li>
-      One attention operation has a limitation
+    <li>One attention operation has a limitation
       <ul>
         <li>It produces one set of weights per query</li>
         <li>So it can express one notion of relevance at a time</li>
@@ -526,16 +491,14 @@
         <li>Averaging those into a single weighting loses both</li>
       </ul>
     </li>
-    <li>
-      So run several attention operations in parallel - each is a <strong><span class="term">head</span></strong>
+    <li>So run several attention operations in parallel - each is a <strong><span class="term">head</span></strong>
       <ul>
         <li>Each head gets its own W<sup>Q</sup>, W<sup>K</sup>, W<sup>V</sup></li>
         <li>So each learns its own idea of what to look for</li>
         <li>Concatenate the outputs and pass through one more learned matrix W<sup>O</sup></li>
       </ul>
     </li>
-    <li>
-      The cost is not what you might expect
+    <li>The cost is not what you might expect
       <ul>
         <li>With h heads, each head works in dimension d<sub>model</sub> / h rather than d<sub>model</sub></li>
         <li>e.g. d<sub>model</sub> = 512 with 8 heads gives 64 dimensions per head</li>
@@ -543,8 +506,7 @@
         <li>So we get several independent views essentially for free</li>
       </ul>
     </li>
-    <li>
-      In a trained model heads do specialise, and visibly so
+    <li>In a trained model heads do specialise, and visibly so
       <ul>
         <li>Some track syntactic relations, some resolve pronouns, some just attend to the previous token</li>
         <li>Though it's easy to over-read this - plenty of heads do nothing interpretable at all, and many can be pruned with little loss</li>
@@ -553,39 +515,39 @@
   </ul>
   <figure class="diagram">
     <svg viewBox="0 0 560 170" role="img" aria-label="Multi-head attention splits the input into several heads, each running attention in a smaller dimension, then concatenates and projects the results">
-      <rect class="box" x="14" y="62" width="48" height="34" rx="4"/>
-      <text class="lbl" x="32" y="84">X</text>
-      <path class="arrow" d="M62 79 C 90 79, 90 28, 126 28"/>
-      <path class="arrow" d="M62 79 C 90 79, 90 62, 126 62"/>
-      <path class="arrow" d="M62 79 C 90 79, 90 96, 126 96"/>
-      <path class="arrow" d="M62 79 C 90 79, 90 132, 126 132"/>
-      <rect class="box-accent" x="130" y="14" width="104" height="28" rx="4"/>
-      <rect class="box-accent" x="130" y="48" width="104" height="28" rx="4"/>
-      <rect class="box-accent" x="130" y="82" width="104" height="28" rx="4"/>
-      <rect class="box-accent" x="130" y="118" width="104" height="28" rx="4"/>
-      <text class="lbl-key" x="140" y="33">head 1</text>
-      <text class="lbl-key" x="140" y="67">head 2</text>
-      <text class="lbl-key" x="140" y="101">head 3</text>
-      <text class="lbl-key" x="140" y="137">head h</text>
-      <text class="lbl-sm" x="192" y="33">d/h</text>
-      <text class="lbl-sm" x="192" y="67">d/h</text>
-      <text class="lbl-sm" x="192" y="101">d/h</text>
-      <text class="lbl-sm" x="192" y="137">d/h</text>
-      <path class="arrow" d="M234 28 C 270 28, 270 72, 300 76"/>
-      <path class="arrow" d="M234 62 C 270 62, 270 76, 300 78"/>
-      <path class="arrow" d="M234 96 C 270 96, 270 82, 300 80"/>
-      <path class="arrow" d="M234 132 C 270 132, 270 86, 300 82"/>
-      <polygon class="arrow-head" points="304,79 295,75 296,84"/>
-      <rect class="box" x="308" y="62" width="76" height="34" rx="4"/>
-      <text class="lbl" x="318" y="84">concat</text>
-      <path class="arrow" d="M384 79 L414 79"/>
-      <polygon class="arrow-head" points="414,79 407,75 407,83"/>
-      <rect class="box" x="418" y="62" width="60" height="34" rx="4"/>
-      <text class="lbl" x="436" y="84">W</text>
-      <text class="lbl-sm" x="452" y="78">O</text>
-      <path class="arrow" d="M478 79 L508 79"/>
-      <polygon class="arrow-head" points="508,79 501,75 501,83"/>
-      <text class="lbl-key" x="512" y="84">out</text>
+    <rect class="box" x="14" y="62" width="48" height="34" rx="4"/>
+    <text class="lbl" x="32" y="84">X</text>
+    <path class="arrow" d="M62 79 C 90 79, 90 28, 126 28"/>
+    <path class="arrow" d="M62 79 C 90 79, 90 62, 126 62"/>
+    <path class="arrow" d="M62 79 C 90 79, 90 96, 126 96"/>
+    <path class="arrow" d="M62 79 C 90 79, 90 132, 126 132"/>
+    <rect class="box-accent" x="130" y="14" width="104" height="28" rx="4"/>
+    <rect class="box-accent" x="130" y="48" width="104" height="28" rx="4"/>
+    <rect class="box-accent" x="130" y="82" width="104" height="28" rx="4"/>
+    <rect class="box-accent" x="130" y="118" width="104" height="28" rx="4"/>
+    <text class="lbl-key" x="140" y="33">head 1</text>
+    <text class="lbl-key" x="140" y="67">head 2</text>
+    <text class="lbl-key" x="140" y="101">head 3</text>
+    <text class="lbl-key" x="140" y="137">head h</text>
+    <text class="lbl-sm" x="192" y="33">d/h</text>
+    <text class="lbl-sm" x="192" y="67">d/h</text>
+    <text class="lbl-sm" x="192" y="101">d/h</text>
+    <text class="lbl-sm" x="192" y="137">d/h</text>
+    <path class="arrow" d="M234 28 C 270 28, 270 72, 300 76"/>
+    <path class="arrow" d="M234 62 C 270 62, 270 76, 300 78"/>
+    <path class="arrow" d="M234 96 C 270 96, 270 82, 300 80"/>
+    <path class="arrow" d="M234 132 C 270 132, 270 86, 300 82"/>
+    <polygon class="arrow-head" points="304,79 295,75 296,84"/>
+    <rect class="box" x="308" y="62" width="76" height="34" rx="4"/>
+    <text class="lbl" x="318" y="84">concat</text>
+    <path class="arrow" d="M384 79 L414 79"/>
+    <polygon class="arrow-head" points="414,79 407,75 407,83"/>
+    <rect class="box" x="418" y="62" width="60" height="34" rx="4"/>
+    <text class="lbl" x="436" y="84">W</text>
+    <text class="lbl-sm" x="452" y="78">O</text>
+    <path class="arrow" d="M478 79 L508 79"/>
+    <polygon class="arrow-head" points="508,79 501,75 501,83"/>
+    <text class="lbl-key" x="512" y="84">out</text>
     </svg>
     <figcaption>Several heads, each in a smaller dimension, concatenated and projected.</figcaption>
   </figure>
@@ -594,8 +556,7 @@
   <h2>Attention inside a transformer block</h2>
   <ul>
     <li>Attention on its own isn't a network - it's one layer in a repeating block</li>
-    <li>
-      A block is
+    <li>A block is
       <ul>
         <li>Multi-head self-attention</li>
         <li>A position-wise feed-forward network - an ordinary two-layer net applied to each position separately, with the same weights</li>
@@ -603,26 +564,22 @@
         <li>Layer normalization</li>
       </ul>
     </li>
-    <li>
-      Why each of the extra pieces is there
+    <li>Why each of the extra pieces is there
       <ul>
-        <li>
-          <strong><span class="term">Residual connections</span></strong> - output = x + f(x)
+        <li><strong><span class="term">Residual connections</span></strong> - output = x + f(x)
           <ul>
             <li>Gives gradients a direct path back through the whole stack</li>
             <li>Without them, deep stacks simply don't train - same story as chapter 09</li>
           </ul>
         </li>
-        <li>
-          <strong><span class="term">Layer normalization</span></strong>
+        <li><strong><span class="term">Layer normalization</span></strong>
           <ul>
             <li>Keeps activations at a sane scale across the layer</li>
             <li>Feature scaling from chapter 04, applied inside the network rather than to the inputs</li>
-        <li>The batch-wise sibling of this idea - batch normalization - is in chapter 20</li>
+            <li>The batch-wise sibling of this idea - batch normalization - is in chapter 20</li>
           </ul>
         </li>
-        <li>
-          <strong><span class="term">Feed-forward network</span></strong>
+        <li><strong><span class="term">Feed-forward network</span></strong>
           <ul>
             <li>Attention is a weighted <em>average</em> - it moves information around but is linear in V</li>
             <li>You need somewhere to actually transform it non-linearly, and this is that place</li>
@@ -631,8 +588,7 @@
         </li>
       </ul>
     </li>
-    <li>
-      Stack these blocks and you have a transformer
+    <li>Stack these blocks and you have a transformer
       <ul>
         <li>Attention mixes information between positions</li>
         <li>The feed-forward layer processes it at each position</li>
@@ -644,23 +600,20 @@
 <section id="the-cost-of-attention">
   <h2>The cost of attention</h2>
   <ul>
-    <li>
-      The catch is in the score matrix
+    <li>The catch is in the score matrix
       <ul>
         <li>QK<sup>T</sup> is [n x n] for a sequence of length n</li>
         <li>So compute and memory both scale as <strong><span class="hl-red">O(n<sup>2</sup>)</span></strong></li>
         <li>Double the sequence length, quadruple the cost</li>
       </ul>
     </li>
-    <li>
-      Which is fine at n = 512 and ruinous at n = 100,000
+    <li>Which is fine at n = 512 and ruinous at n = 100,000
       <ul>
         <li>This is the single biggest constraint on how much context a model can take</li>
         <li>It's the reason context length is a headline number people quote</li>
       </ul>
     </li>
-    <li>
-      Broad approaches to it
+    <li>Broad approaches to it
       <ul>
         <li><strong><span class="term">Sparse attention</span></strong> - don't attend to everything; use local windows, or a few global tokens</li>
         <li><strong><span class="term">Low-rank / kernel methods</span></strong> - approximate the softmax so you never form the n x n matrix</li>
@@ -673,26 +626,23 @@
 <section id="summary">
   <h2>Summary</h2>
   <ul>
-    <li>
-      Attention is a differentiable lookup
+    <li>Attention is a differentiable lookup
       <ul>
         <li>Score a query against every key, softmax to weights, average the values</li>
-        <li>Attention(Q, K, V) = softmax(QK<sup>T</sup> / &radic;d<sub>k</sub>) V</li>
+        <li>Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) V</li>
       </ul>
     </li>
-    <li>
-      Self-attention has the sequence generate its own Q, K and V through learned matrices
+    <li>Self-attention has the sequence generate its own Q, K and V through learned matrices
       <ul>
         <li>Any position reaches any other in one step</li>
         <li>The whole sequence computes in parallel</li>
       </ul>
     </li>
     <li>Because it's order-blind, position has to be added to the input explicitly</li>
-    <li>Masking with -&infin; before the softmax restricts what a query may see, and keeps the weights normalized for free</li>
+    <li>Masking with -∞ before the softmax restricts what a query may see, and keeps the weights normalized for free</li>
     <li>Multiple heads give several independent notions of relevance at roughly the cost of one</li>
     <li>The n<sup>2</sup> score matrix is the fundamental cost, and most of the engineering effort goes there</li>
-    <li>
-      The through-line from the rest of these notes
+    <li>The through-line from the rest of these notes
       <ul>
         <li>Softmax from chapter 09, feature scaling from chapter 04, vectorization from chapter 04, the vanishing gradient problem from chapter 09</li>
         <li>None of the ingredients are new - what's new is arranging them so the model decides for itself what to look at</li>

@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -20,8 +21,7 @@
   <a href="index.html">Index</a>
   <a href="23_Diffusion_Models.html" rel="next">23: Diffusion models &rarr;</a>
 </nav>
-
-<div class="toc">
+<nav class="toc" aria-label="On this page">
   <h2>On this page</h2>
   <ul>
     <li><a href="#a-note-on-this-chapter">A note on this chapter</a></li>
@@ -35,8 +35,7 @@
     <li><a href="#training-at-scale">Training at scale</a></li>
     <li><a href="#summary">Summary</a></li>
   </ul>
-</div>
-
+</nav>
 <section id="a-note-on-this-chapter">
   <h2>A note on this chapter</h2>
   <ul>
@@ -54,7 +53,6 @@
     </li>
   </ul>
 </section>
-
 <section id="the-language-modelling-problem">
   <h2>The language modelling problem</h2>
   <ul>
@@ -72,8 +70,8 @@
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><msub><mi>w</mi><mn>1</mn></msub><mo>,</mo><msub><mi>w</mi><mn>2</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>w</mi><mi>T</mi></msub><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>&#x220F;</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi>p</mi><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>w</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow></math>
-<span class="eqn-note">The chain rule: the probability of a sequence is the product of one next-token prediction per position. It turns "model language" into "predict the next token, repeatedly" &mdash; a supervised learning problem with the labels built in, which is the self-supervision idea from chapter 20.</span>
+    <math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><msub><mi>w</mi><mn>1</mn></msub><mo>,</mo><msub><mi>w</mi><mn>2</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>w</mi><mi>T</mi></msub><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>&#x220F;</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi>p</mi><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>w</mi><mrow><mi>t</mi><mo>&#x2212;</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow></math>
+    <span class="eqn-note">The chain rule: the probability of a sequence is the product of one next-token prediction per position. It turns "model language" into "predict the next token, repeatedly" &mdash; a supervised learning problem with the labels built in, which is the self-supervision idea from chapter 20.</span>
   </div>
   <ul>
     <li>Each factor is a classification problem
@@ -84,14 +82,13 @@
     </li>
   </ul>
 </section>
-
 <section id="tokens-and-embeddings">
   <h2>Tokens and embeddings</h2>
   <ul>
     <li>Tokens
       <ul>
         <li>Text is split into word-pieces from a fixed vocabulary V, typically 50,000-200,000 entries</li>
-        <li>Common words are one token; rare words split into several ("tokenization" &rarr; token + ization)</li>
+        <li>Common words are one token; rare words split into several (&quot;tokenization&quot; → token + ization)</li>
         <li>Fixes the output dimension, and nothing is ever out of vocabulary</li>
       </ul>
     </li>
@@ -103,15 +100,14 @@
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>=</mo><msup><mi>E</mi><mi>T</mi></msup><msub><mi>e</mi><mi>i</mi></msub></mrow></math>
-<span class="eqn-note">A one-hot vector times a matrix just selects row i of E &mdash; chapter 03's matrix-vector multiplication doing dictionary lookup. Each token gets a learned d-dimensional vector (d is typically 1,000-10,000), and tokens that behave similarly end up with similar vectors, because that is what reduces prediction error.</span>
+    <math display="block"><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>=</mo><msup><mi>E</mi><mi>T</mi></msup><msub><mi>e</mi><mi>i</mi></msub></mrow></math>
+    <span class="eqn-note">A one-hot vector times a matrix just selects row i of E &mdash; chapter 03's matrix-vector multiplication doing dictionary lookup. Each token gets a learned d-dimensional vector (d is typically 1,000-10,000), and tokens that behave similarly end up with similar vectors, because that is what reduces prediction error.</span>
   </div>
   <ul>
     <li>Position is added to each embedding before any attention happens - chapter 21's positional encoding, needed for exactly the reason given there</li>
     <li>The sequence of embedded, position-tagged vectors then runs through the stack of transformer blocks from chapter 21</li>
   </ul>
 </section>
-
 <section id="autoregressive-models">
   <h2>Autoregressive models</h2>
   <ul>
@@ -128,8 +124,8 @@
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>=</mo><mi>v</mi><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><msup><mi>e</mi><msub><mi>z</mi><mi>v</mi></msub></msup></mrow><mrow><munderover><mo>&#x2211;</mo><mrow><msup><mi>v</mi><mo>&#x2032;</mo></msup><mo>=</mo><mn>1</mn></mrow><mrow><mo stretchy="false">|</mo><mi>V</mi><mo stretchy="false">|</mo></mrow></munderover><msup><mi>e</mi><msub><mi>z</mi><msup><mi>v</mi><mo>&#x2032;</mo></msup></msub></msup></mrow></mfrac></mrow></math>
-<span class="eqn-note">Softmax: exponentiate every logit and normalize. Positive, sums to 1, and the biggest logit gets the biggest share &mdash; the same function that turned scores into weights inside attention (chapter 21).</span>
+    <math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>=</mo><mi>v</mi><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><msup><mi>e</mi><msub><mi>z</mi><mi>v</mi></msub></msup></mrow><mrow><munderover><mo>&#x2211;</mo><mrow><msup><mi>v</mi><mo>&#x2032;</mo></msup><mo>=</mo><mn>1</mn></mrow><mrow><mo stretchy="false">|</mo><mi>V</mi><mo stretchy="false">|</mo></mrow></munderover><msup><mi>e</mi><msub><mi>z</mi><msup><mi>v</mi><mo>&#x2032;</mo></msup></msub></msup></mrow></mfrac></mrow></math>
+    <span class="eqn-note">Softmax: exponentiate every logit and normalize. Positive, sums to 1, and the biggest logit gets the biggest share &mdash; the same function that turned scores into weights inside attention (chapter 21).</span>
   </div>
   <ul>
     <li>Softmax is the sigmoid, grown up
@@ -139,11 +135,11 @@
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mfrac><mrow><msup><mi>e</mi><mi>z</mi></msup></mrow><mrow><msup><mi>e</mi><mi>z</mi></msup><mo>+</mo><msup><mi>e</mi><mn>0</mn></msup></mrow></mfrac><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>&#x2212;</mo><mi>z</mi></mrow></msup></mrow></mfrac><mo>=</mo><mi>g</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo></mrow></math>
-<span class="eqn-note">Divide top and bottom by e<sup>z</sup> and chapter 06's hypothesis falls out. Binary classification was the |V| = 2 case all along.</span>
+    <math display="block"><mrow><mfrac><mrow><msup><mi>e</mi><mi>z</mi></msup></mrow><mrow><msup><mi>e</mi><mi>z</mi></msup><mo>+</mo><msup><mi>e</mi><mn>0</mn></msup></mrow></mfrac><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>&#x2212;</mo><mi>z</mi></mrow></msup></mrow></mfrac><mo>=</mo><mi>g</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo></mrow></math>
+    <span class="eqn-note">Divide top and bottom by e<sup>z</sup> and chapter 06's hypothesis falls out. Binary classification was the |V| = 2 case all along.</span>
   </div>
   <div class="code-eg">
-<pre>import numpy as np
+    <pre>import numpy as np
 
 def softmax(z):
     z = z - z.max()            <span class="comment"># subtract the max first - numerical safety,</span>
@@ -152,7 +148,7 @@ def softmax(z):
 
 softmax(np.array([1.3, 0.0]))[0]   <span class="comment"># 0.785835</span>
 1 / (1 + np.exp(-1.3))             <span class="comment"># 0.785835 - the sigmoid, identically</span></pre>
-<p class="eqn-note">The identity checked numerically: two-class softmax with the second logit at 0 <em>is</em> chapter 06's sigmoid.</p>
+    <p class="eqn-note">The identity checked numerically: two-class softmax with the second logit at 0 <em>is</em> chapter 06's sigmoid.</p>
   </div>
   <ul>
     <li>The training objective
@@ -162,18 +158,18 @@ softmax(np.array([1.3, 0.0]))[0]   <span class="comment"># 0.785835</span>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo>=</mo><mo>&#x2212;</mo><mfrac><mn>1</mn><mi>T</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi>log</mi><mspace width="0.15em"/><msub><mi>p</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo></mrow></math>
-<span class="eqn-note">Cross-entropy loss. For two classes this is literally chapter 06's cost function &mdash; y log h + (1 &minus; y) log(1 &minus; h) is the |V| = 2 case &mdash; and it is maximum likelihood for the same reason: there the labels were modelled as Bernoulli, here as categorical. One objective, from spam filters to chat assistants.</span>
+    <math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo>=</mo><mo>&#x2212;</mo><mfrac><mn>1</mn><mi>T</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi>log</mi><mspace width="0.15em"/><msub><mi>p</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo></mrow></math>
+    <span class="eqn-note">Cross-entropy loss. For two classes this is literally chapter 06's cost function &mdash; y log h + (1 &minus; y) log(1 &minus; h) is the |V| = 2 case &mdash; and it is maximum likelihood for the same reason: there the labels were modelled as Bernoulli, here as categorical. One objective, from spam filters to chat assistants.</span>
   </div>
   <div class="code-eg">
-<pre>vocab  = ["mat", "dog", "moon", "sofa", "banana"]
+    <pre>vocab  = ["mat", "dog", "moon", "sofa", "banana"]
 logits = np.array([3.2, 1.1, 0.4, 2.4, -1.0])   <span class="comment"># "the cat sat on the ___"</span>
 p = softmax(logits)
 <span class="comment"># mat 0.607, sofa 0.273, dog 0.074, moon 0.037, banana 0.009</span>
 
 -np.log(p[0])   <span class="comment"># 0.499 - the loss if the actual next word is "mat"</span>
 -np.log(p[4])   <span class="comment"># 4.699 - the loss if it is "banana": rare surprises cost a lot</span></pre>
-<p class="eqn-note">One next-token prediction, scored. The loss is small when the model put probability on what actually happened, and large when it was surprised &mdash; averaging this over trillions of tokens is the whole of pretraining.</p>
+    <p class="eqn-note">One next-token prediction, scored. The loss is small when the model put probability on what actually happened, and large when it was surprised &mdash; averaging this over trillions of tokens is the whole of pretraining.</p>
   </div>
   <ul>
     <li>Why one pass trains every position
@@ -185,7 +181,6 @@ p = softmax(logits)
     </li>
   </ul>
 </section>
-
 <section id="masked-language-models">
   <h2>Masked language models</h2>
   <ul>
@@ -196,14 +191,14 @@ p = softmax(logits)
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo>=</mo><mo>&#x2212;</mo><mfrac><mn>1</mn><mrow><mo stretchy="false">|</mo><mi>M</mi><mo stretchy="false">|</mo></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mi>t</mi><mo>&#x2208;</mo><mi>M</mi></mrow></munder><mi>log</mi><mspace width="0.15em"/><msub><mi>p</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&#x2216;</mo><mi>M</mi></mrow></msub><mo stretchy="false">)</mo></mrow></math>
-<span class="eqn-note">M is the set of masked positions. Same softmax, same cross-entropy &mdash; the only changes are which positions are scored and what the model is allowed to look at.</span>
+    <math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><mi>&#x3B8;</mi><mo stretchy="false">)</mo><mo>=</mo><mo>&#x2212;</mo><mfrac><mn>1</mn><mrow><mo stretchy="false">|</mo><mi>M</mi><mo stretchy="false">|</mo></mrow></mfrac><munder><mo>&#x2211;</mo><mrow><mi>t</mi><mo>&#x2208;</mo><mi>M</mi></mrow></munder><mi>log</mi><mspace width="0.15em"/><msub><mi>p</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&#x2216;</mo><mi>M</mi></mrow></msub><mo stretchy="false">)</mo></mrow></math>
+    <span class="eqn-note">M is the set of masked positions. Same softmax, same cross-entropy &mdash; the only changes are which positions are scored and what the model is allowed to look at.</span>
   </div>
   <ul>
     <li>The crucial architectural difference is the attention mask
       <ul>
         <li>No causal mask: every position attends to every position, in both directions</li>
-        <li>"The ___ sat on the mat" - the right context is often what settles the answer</li>
+        <li>&quot;The ___ sat on the mat&quot; - the right context is often what settles the answer</li>
       </ul>
     </li>
     <li>What you give up
@@ -221,20 +216,19 @@ p = softmax(logits)
     </li>
   </ul>
 </section>
-
 <section id="comparing-the-two-objectives">
   <h2>Comparing the two objectives</h2>
   <div class="table-wrap"><table>
-    <caption>The same architecture and the same cross-entropy loss &mdash; the objective and the mask are the entire difference.</caption>
-    <tr><th scope="col"></th><th scope="col">Autoregressive (GPT-style)</th><th scope="col">Masked (BERT-style)</th></tr>
-    <tr><th scope="row">Predicts</th><td>the next token, from the left context</td><td>masked tokens, from both sides</td></tr>
-    <tr><th scope="row">Attention mask</th><td>causal (chapter 21)</td><td>none - fully bidirectional</td></tr>
-    <tr><th scope="row">Models p(sequence)?</th><td>yes, exactly, via the chain rule</td><td>no - conditionals don't assemble into a joint</td></tr>
-    <tr><th scope="row">Training signal per pass</th><td>every position</td><td>the masked ~15%</td></tr>
-    <tr><th scope="row">Can generate?</th><td>natively, one token at a time</td><td>not directly</td></tr>
-    <tr><th scope="row">Strongest at</th><td>generation: writing, code, dialogue</td><td>representations: embeddings, classification, retrieval</td></tr>
-    <tr><th scope="row">Examples</th><td>GPT, Claude, Gemini, Llama</td><td>BERT, RoBERTa, ESM (chapter 25)</td></tr>
-  </table></div>
+      <caption>The same architecture and the same cross-entropy loss &mdash; the objective and the mask are the entire difference.</caption>
+      <tr><th scope="col"></th><th scope="col">Autoregressive (GPT-style)</th><th scope="col">Masked (BERT-style)</th></tr>
+      <tr><th scope="row">Predicts</th><td>the next token, from the left context</td><td>masked tokens, from both sides</td></tr>
+      <tr><th scope="row">Attention mask</th><td>causal (chapter 21)</td><td>none - fully bidirectional</td></tr>
+      <tr><th scope="row">Models p(sequence)?</th><td>yes, exactly, via the chain rule</td><td>no - conditionals don't assemble into a joint</td></tr>
+      <tr><th scope="row">Training signal per pass</th><td>every position</td><td>the masked ~15%</td></tr>
+      <tr><th scope="row">Can generate?</th><td>natively, one token at a time</td><td>not directly</td></tr>
+      <tr><th scope="row">Strongest at</th><td>generation: writing, code, dialogue</td><td>representations: embeddings, classification, retrieval</td></tr>
+      <tr><th scope="row">Examples</th><td>GPT, Claude, Gemini, Llama</td><td>BERT, RoBERTa, ESM (chapter 25)</td></tr>
+    </table></div>
   <ul>
     <li>Why the assistants are all autoregressive
       <ul>
@@ -250,7 +244,6 @@ p = softmax(logits)
     </li>
   </ul>
 </section>
-
 <section id="generation-temperature-and-sampling">
   <h2>Generation, temperature and sampling</h2>
   <ul>
@@ -269,27 +262,26 @@ p = softmax(logits)
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>p</mi><mi>v</mi></msub><mo>&#x221D;</mo><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>v</mi></msub><mo>/</mo><mi>&#x3C4;</mi></mrow></msup></mrow></math>
-<span class="eqn-note">Divide the logits by a temperature &tau; before the softmax. &tau; &rarr; 0 approaches greedy; &tau; = 1 is the model's own distribution; &tau; &gt; 1 flattens it towards uniform.</span>
+    <math display="block"><mrow><msub><mi>p</mi><mi>v</mi></msub><mo>&#x221D;</mo><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>v</mi></msub><mo>/</mo><mi>&#x3C4;</mi></mrow></msup></mrow></math>
+    <span class="eqn-note">Divide the logits by a temperature &tau; before the softmax. &tau; &rarr; 0 approaches greedy; &tau; = 1 is the model's own distribution; &tau; &gt; 1 flattens it towards uniform.</span>
   </div>
   <div class="code-eg">
-<pre>for tau in (0.5, 1.0, 2.0):
+    <pre>for tau in (0.5, 1.0, 2.0):
     pt = softmax(logits / tau)
     <span class="comment"># tau=0.5: top prob 0.819  - sharpened, nearly greedy</span>
     <span class="comment"># tau=1.0: top prob 0.607  - the model as trained</span>
     <span class="comment"># tau=2.0: top prob 0.419  - flattened, more adventurous</span></pre>
-<p class="eqn-note">The same five logits from above at three temperatures. One knob trades reliability against variety, with no retraining.</p>
+    <p class="eqn-note">The same five logits from above at three temperatures. One knob trades reliability against variety, with no retraining.</p>
   </div>
   <ul>
     <li>In practice the tail is also cut before sampling (top-k or top-p), which removes most of the nonsense at little cost</li>
   </ul>
 </section>
-
 <section id="measuring-a-language-model-perplexity">
   <h2>Measuring a language model: perplexity</h2>
   <div class="eqn">
-<math display="block"><mrow><mtext>PPL</mtext><mo>=</mo><mi>exp</mi><mo form="prefix">(</mo><mo>&#x2212;</mo><mfrac><mn>1</mn><mi>T</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi>log</mi><mspace width="0.15em"/><msub><mi>p</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo><mo form="postfix">)</mo></mrow></math>
-<span class="eqn-note">The exponential of the average loss. Interpretation: the model is, on average, as uncertain as if it were choosing uniformly between PPL tokens. A model that knows nothing about a 10-token vocabulary scores exactly 10; a good English model scores under 10 on a 100,000-token vocabulary.</span>
+    <math display="block"><mrow><mtext>PPL</mtext><mo>=</mo><mi>exp</mi><mo form="prefix">(</mo><mo>&#x2212;</mo><mfrac><mn>1</mn><mi>T</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>t</mi><mo>=</mo><mn>1</mn></mrow><mi>T</mi></munderover><mi>log</mi><mspace width="0.15em"/><msub><mi>p</mi><mi>&#x3B8;</mi></msub><mo stretchy="false">(</mo><msub><mi>w</mi><mi>t</mi></msub><mo>&#x2223;</mo><msub><mi>w</mi><mrow><mo>&lt;</mo><mi>t</mi></mrow></msub><mo stretchy="false">)</mo><mo form="postfix">)</mo></mrow></math>
+    <span class="eqn-note">The exponential of the average loss. Interpretation: the model is, on average, as uncertain as if it were choosing uniformly between PPL tokens. A model that knows nothing about a 10-token vocabulary scores exactly 10; a good English model scores under 10 on a 100,000-token vocabulary.</span>
   </div>
   <ul>
     <li>This is the single-real-number evaluation metric of chapter 11, for language models
@@ -305,7 +297,6 @@ p = softmax(logits)
     </li>
   </ul>
 </section>
-
 <section id="training-at-scale">
   <h2>Training at scale</h2>
   <ul>
@@ -323,8 +314,8 @@ p = softmax(logits)
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>L</mi><mo stretchy="false">(</mo><mi>N</mi><mo stretchy="false">)</mo><mo>&#x2248;</mo><msup><mrow><mo stretchy="false">(</mo><mfrac><msub><mi>N</mi><mi>c</mi></msub><mi>N</mi></mfrac><mo stretchy="false">)</mo></mrow><msub><mi>&#x3B1;</mi><mi>N</mi></msub></msup></mrow></math>
-<span class="eqn-note">An empirical regularity, not a theorem: straight lines on log-log plots over many orders of magnitude, with matching laws for data and compute. Predictable enough to budget a training run in advance &mdash; and the same fitting-a-curve-to-observations exercise as chapter 04's polynomial regression, applied to the models themselves.</span>
+    <math display="block"><mrow><mi>L</mi><mo stretchy="false">(</mo><mi>N</mi><mo stretchy="false">)</mo><mo>&#x2248;</mo><msup><mrow><mo stretchy="false">(</mo><mfrac><msub><mi>N</mi><mi>c</mi></msub><mi>N</mi></mfrac><mo stretchy="false">)</mo></mrow><msub><mi>&#x3B1;</mi><mi>N</mi></msub></msup></mrow></math>
+    <span class="eqn-note">An empirical regularity, not a theorem: straight lines on log-log plots over many orders of magnitude, with matching laws for data and compute. Predictable enough to budget a training run in advance &mdash; and the same fitting-a-curve-to-observations exercise as chapter 04's polynomial regression, applied to the models themselves.</span>
   </div>
   <ul>
     <li>The practical corollary
@@ -341,7 +332,6 @@ p = softmax(logits)
     </li>
   </ul>
 </section>
-
 <section id="summary">
   <h2>Summary</h2>
   <ul>

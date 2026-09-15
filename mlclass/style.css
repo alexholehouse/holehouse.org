@@ -95,6 +95,14 @@ section[id] { scroll-margin-top: calc(var(--topbar-h) + 0.75rem); }
 
 .topbar a:hover { text-decoration: underline; }
 
+/* The section you are in. */
+.topbar a.current {
+  color: #ffffff;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.4em;
+}
+
 /* --- headings ------------------------------------------------------------ */
 
 h1 {
@@ -512,4 +520,52 @@ th small {
   h2 { page-break-after: avoid; }
   figure, pre, li { page-break-inside: avoid; }
   a { color: #000; text-decoration: none; }
+}
+
+/* --- index page: chapter descriptions and origin tags --------------------- */
+
+/* Each entry carries a one-line description and a tag saying whether it is
+   part of the original 2011 course or was written for the 2026 edition. */
+
+.chapter-list a { padding: 0.7rem 0.2rem; }
+
+.ch-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.ch-tag {
+  display: inline-block;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  padding: 0 0.45rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  color: var(--text-soft);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.ch-tag-new {
+  border-color: var(--term);
+  color: var(--term);
+}
+
+.ch-desc {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.ch-legend {
+  font-size: 0.9rem;
+  color: var(--text-soft);
 }

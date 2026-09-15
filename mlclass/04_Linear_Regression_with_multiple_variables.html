@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -37,18 +38,15 @@
   <p><em>New version of linear regression with multiple features</em></p>
   <ul>
     <li>Multiple variables = multiple features</li>
-    <li>
-      In original version we had
+    <li>In original version we had
       <ul>
         <li>X = house size, use this to predict</li>
         <li>y = house price</li>
       </ul>
     </li>
-    <li>
-      If in a new scheme we have more variables (such as number of bedrooms, number floors, age of the home)
+    <li>If in a new scheme we have more variables (such as number of bedrooms, number floors, age of the home)
       <ul>
-        <li>
-          x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>,<sub> </sub>x<sub>4 </sub>are the four features
+        <li>x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>,<sub> </sub>x<sub>4 </sub>are the four features
           <ul>
             <li>x<sub>1</sub> - size (feet squared)</li>
             <li>x<sub>2</sub> - Number of bedrooms</li>
@@ -59,28 +57,23 @@
         <li>y is the output variable (price)</li>
       </ul>
     </li>
-    <li>
-      More notation
+    <li>More notation
       <ul>
-        <li>
-          <strong><span class="term">n </span></strong>
+        <li><strong><span class="term">n </span></strong>
           <ul>
             <li>number of features (n = 4)</li>
           </ul>
         </li>
-        <li>
-          <strong><span class="term">m</span> </strong>
+        <li><strong><span class="term">m</span> </strong>
           <ul>
             <li>number of examples (i.e. number of rows in a table)</li>
           </ul>
         </li>
-        <li>
-          <strong><span class="term">x<sup>i</sup> </span></strong>
+        <li><strong><span class="term">x<sup>i</sup> </span></strong>
           <ul>
             <li>vector of the input for an example (so a vector of the four parameters for the i<sup>th </sup>input example)</li>
             <li>i is an index into the training set</li>
-            <li>
-              So
+            <li>So
               <ul>
                 <li>x is an n-dimensional feature vector</li>
                 <li>x<sup>3</sup> is, for example, the 3rd house, and contains the four features associated with that house</li>
@@ -88,12 +81,10 @@
             </li>
           </ul>
         </li>
-        <li>
-          <strong><span class="term">x<sub>j</sub><sup>i </sup></span></strong>
+        <li><strong><span class="term">x<sub>j</sub><sup>i </sup></span></strong>
           <ul>
             <li>The value of feature j in the ith training example</li>
-            <li>
-              So
+            <li>So
               <ul>
                 <li>x<sub>2</sub><sup>3 </sup>is, for example, the number of bedrooms in the third house</li>
               </ul>
@@ -102,15 +93,12 @@
         </li>
       </ul>
     </li>
-    <li>
-      Now we have multiple features
+    <li>Now we have multiple features
       <ul>
         <li>What is the form of our hypothesis?</li>
-        <li>
-          Previously our hypothesis took the form;
+        <li>Previously our hypothesis took the form;
           <ul>
-            <li>
-              h<sub>θ</sub>(x) = θ<sub>0</sub> + θ<sub>1</sub>x
+            <li>h<sub>θ</sub>(x) = θ<sub>0</sub> + θ<sub>1</sub>x
               <ul>
                 <li>Here we have two parameters (theta 1 and theta 2) determined by our cost function</li>
                 <li>One variable x</li>
@@ -118,17 +106,14 @@
             </li>
           </ul>
         </li>
-        <li>
-          Now we have multiple features
+        <li>Now we have multiple features
           <ul>
             <li>h<sub>θ</sub>(x) = θ<sub>0</sub> + θ<sub>1</sub>x<sub>1</sub> + θ<sub>2</sub>x<sub>2</sub> + θ<sub>3</sub>x<sub>3</sub> + θ<sub>4</sub>x<sub>4</sub></li>
           </ul>
         </li>
-        <li>
-          For example
+        <li>For example
           <ul>
-            <li>
-              h<sub>θ</sub>(x) = 80 + 0.1x<sub>1</sub> + 0.01x<sub>2</sub> + 3x<sub>3</sub> - 2x<sub>4</sub>
+            <li>h<sub>θ</sub>(x) = 80 + 0.1x<sub>1</sub> + 0.01x<sub>2</sub> + 3x<sub>3</sub> - 2x<sub>4</sub>
               <ul>
                 <li>An example of a hypothesis which is trying to predict the price of a house</li>
                 <li>Parameters are still determined through a cost function</li>
@@ -136,20 +121,17 @@
             </li>
           </ul>
         </li>
-        <li>
-          For convenience of notation, x<sub>0</sub> = 1
+        <li>For convenience of notation, x<sub>0</sub> = 1
           <ul>
             <li>For every example i you have an additional 0th feature for each example</li>
-            <li>
-              So now your <strong><span class="term">feature vector</span></strong> is n + 1 dimensional feature vector indexed from 0
+            <li>So now your <strong><span class="term">feature vector</span></strong> is n + 1 dimensional feature vector indexed from 0
               <ul>
                 <li>This is a column vector called x</li>
                 <li>Each example has a column vector associated with it</li>
-                <li>So let's say we have a new example called "X"</li>
+                <li>So let's say we have a new example called &quot;X&quot;</li>
               </ul>
             </li>
-            <li>
-              <span class="term"><strong>Parameters</strong></span> are also in a 0 indexed n+1 dimensional vector
+            <li><span class="term"><strong>Parameters</strong></span> are also in a 0 indexed n+1 dimensional vector
               <ul>
                 <li>This is also a column vector called θ</li>
                 <li>This vector is the same for each example</li>
@@ -157,34 +139,28 @@
             </li>
           </ul>
         </li>
-        <li>
-          Considering this, hypothesis can be written
+        <li>Considering this, hypothesis can be written
           <ul>
             <li>h<sub>θ</sub>(x) = θ<sub>0</sub>x<sub>0</sub> + θ<sub>1</sub>x<sub>1</sub> + θ<sub>2</sub>x<sub>2</sub> + θ<sub>3</sub>x<sub>3</sub> + θ<sub>4</sub>x<sub>4</sub></li>
           </ul>
         </li>
-        <li>
-          If we do
+        <li>If we do
           <ul>
-            <li>
-              h<sub>θ</sub>(x) =θ<em><sup>T</sup></em> X
+            <li>h<sub>θ</sub>(x) =θ<em><sup>T</sup></em> X
               <ul>
                 <li>θ<em><sup>T </sup></em>is an [1 x n+1] matrix</li>
                 <li>In other words, because θ<em><sup> </sup></em>is a column vector, the transposition operation transforms it into a row vector</li>
-                <li>
-                  So before
+                <li>So before
                   <ul>
                     <li>θ<em><sup> </sup></em>was a matrix [n + 1 x 1]</li>
                   </ul>
                 </li>
-                <li>
-                  Now
+                <li>Now
                   <ul>
                     <li>θ<em><sup>T </sup></em>is a matrix [1 x n+1]</li>
                   </ul>
                 </li>
-                <li>
-                  Which means the inner dimensions of θ<em><sup>T</sup></em> and X match, so they can be multiplied together as
+                <li>Which means the inner dimensions of θ<em><sup>T</sup></em> and X match, so they can be multiplied together as
                   <ul>
                     <li>[1 x n+1] * [n+1 x 1]</li>
                     <li>= h<sub>θ</sub>(x)</li>
@@ -204,12 +180,10 @@
 <section id="gradient-descent-for-multiple-variables">
   <h2>Gradient descent for multiple variables</h2>
   <ul>
-    <li>
-      Fitting parameters for the hypothesis with gradient descent
+    <li>Fitting parameters for the hypothesis with gradient descent
       <ul>
         <li>Parameters are θ<sub>0</sub> to θ<sub>n</sub></li>
-        <li>
-          Instead of thinking about this as n separate values, think about the parameters as a single vector (θ)
+        <li>Instead of thinking about this as n separate values, think about the parameters as a single vector (θ)
           <ul>
             <li>Where θ is n+1 dimensional</li>
           </ul>
@@ -219,48 +193,42 @@
     <li>Our cost function is</li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
-</div>
+    <math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+  </div>
   <ul>
-    <li>
-      Similarly, instead of thinking of J as a function of the n+1 numbers, J() is just a function of the parameter vector
+    <li>Similarly, instead of thinking of J as a function of the n+1 numbers, J() is just a function of the parameter vector
       <ul>
         <li>J(θ)</li>
       </ul>
     </li>
-    <li>
-      <strong>Gradient descent</strong>
+    <li><strong>Gradient descent</strong>
       <div class="eqn">
-<math display="block"><mtext>Repeat {</mtext></math>
-<math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub><mo form="postfix">)</mo></mrow></math>
-<math display="block"><mtext>}</mtext></math>
-<span class="eqn-note">simultaneously update for every j = 0, &#x2026;, n</span>
-</div>
-    </li>
-    <li>
-      Once again, this is
+        <math display="block"><mtext>Repeat {</mtext></math>
+        <math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub><mo form="postfix">)</mo></mrow></math>
+        <math display="block"><mtext>}</mtext></math>
+        <span class="eqn-note">simultaneously update for every j = 0, &#x2026;, n</span>
+      </div></li>
+    <li>Once again, this is
       <ul>
         <li>θ<sub>j</sub> = θ<sub>j</sub> - learning rate (α) times the partial derivative of J(θ) with respect to θ<sub>J(...)</sub></li>
         <li>We do this through a <strong>simultaneous update</strong> of every θ<sub>j</sub> value</li>
       </ul>
     </li>
-    <li>
-      Implementing this algorithm
+    <li>Implementing this algorithm
       <ul>
         <li>When n = 1</li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mtext>Repeat {</mtext></math>
-<math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow></mrow></math>
-<math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup></mrow></math>
-<math display="block"><mtext>}</mtext></math>
-<span class="eqn-note">simultaneously update &#x3B8;<sub>0</sub> and &#x3B8;<sub>1</sub>. The first update's sum is &#x2202;/&#x2202;&#x3B8;<sub>0</sub> J(&#x3B8;).</span>
-</div>
+    <math display="block"><mtext>Repeat {</mtext></math>
+    <math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow></mrow></math>
+    <math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup></mrow></math>
+    <math display="block"><mtext>}</mtext></math>
+    <span class="eqn-note">simultaneously update &#x3B8;<sub>0</sub> and &#x3B8;<sub>1</sub>. The first update's sum is &#x2202;/&#x2202;&#x3B8;<sub>0</sub> J(&#x3B8;).</span>
+  </div>
   <ul>
-    <li>
-      Above, we have slightly different update rules for θ<sub>0</sub> and θ<sub>1</sub>
+    <li>Above, we have slightly different update rules for θ<sub>0</sub> and θ<sub>1</sub>
       <ul>
         <li>Actually they're the same, except the end has a previously undefined x<sub>0</sub><sup>(i)</sup> as 1, so wasn't shown</li>
       </ul>
@@ -268,34 +236,30 @@
     <li>We now have an almost identical rule for multivariate gradient descent</li>
   </ul>
   <div class="eqn">
-<math display="block"><mtext>New algorithm (n &#x2265; 1) &mdash; Repeat {</mtext></math>
-<math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
-<math display="block"><mtext>}</mtext></math>
-<span class="eqn-note">simultaneously update &#x3B8;<sub>j</sub> for j = 0, &#x2026;, n. The sum is &#x2202;/&#x2202;&#x3B8;<sub>j</sub> J(&#x3B8;).</span>
-</div>
-<div class="code-eg">
-<pre>import numpy as np
+    <math display="block"><mtext>New algorithm (n &#x2265; 1) &mdash; Repeat {</mtext></math>
+    <math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
+    <math display="block"><mtext>}</mtext></math>
+    <span class="eqn-note">simultaneously update &#x3B8;<sub>j</sub> for j = 0, &#x2026;, n. The sum is &#x2202;/&#x2202;&#x3B8;<sub>j</sub> J(&#x3B8;).</span>
+  </div>
+  <div class="code-eg">
+    <pre>import numpy as np
 
 grad = X.T @ (X @ theta - y) / m   <span class="comment"># every partial derivative at once</span>
 theta = theta - alpha * grad       <span class="comment"># every parameter updated at once</span></pre>
-<p class="eqn-note">The whole update rule in two lines: X.T @ (X @ theta &minus; y) computes the sum in the equation above for every j simultaneously.</p>
-</div>
+    <p class="eqn-note">The whole update rule in two lines: X.T @ (X @ theta &minus; y) computes the sum in the equation above for every j simultaneously.</p>
+  </div>
   <ul>
-    <li>
-      What's going on here?
+    <li>What's going on here?
       <ul>
         <li>We're doing this for each j (0 until n) as a simultaneous update (like when n = 1)</li>
-        <li>
-          So, we re-set θ<sub>j</sub> to
+        <li>So, we re-set θ<sub>j</sub> to
           <ul>
             <li>θ<sub>j</sub> minus the learning rate (α) times the partial derivative of the θ vector with respect to θ<sub>j</sub></li>
-            <li>
-              In non-calculus words, this means that we do
+            <li>In non-calculus words, this means that we do
               <ul>
                 <li>Learning rate</li>
                 <li>Times 1/m (makes the maths easier)</li>
-                <li>
-                  Times the sum of
+                <li>Times the sum of
                   <ul>
                     <li>The hypothesis taking in the variable vector, minus the actual value, times the j-th value in that variable vector for EACH example</li>
                   </ul>
@@ -304,12 +268,10 @@ theta = theta - alpha * grad       <span class="comment"># every parameter updat
             </li>
           </ul>
         </li>
-        <li>
-          It's important to remember that
+        <li>It's important to remember that
           <div class="eqn">
-<math display="block"><mrow><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>
-</div>
-        </li>
+            <math display="block"><mrow><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>
+          </div></li>
       </ul>
     </li>
     <li>These algorithm are highly similar</li>
@@ -319,18 +281,15 @@ theta = theta - alpha * grad       <span class="comment"># every parameter updat
   <h2>Gradient Descent in practice: 1 Feature Scaling</h2>
   <ul>
     <li>Having covered the theory, we now move on to learn about some of the practical tricks</li>
-    <li>
-      Feature scaling
+    <li>Feature scaling
       <ul>
         <li>If you have a problem with multiple features</li>
-        <li>
-          You should make sure those features have a similar scale
+        <li>You should make sure those features have a similar scale
           <ul>
             <li>Means gradient descent will converge more quickly</li>
           </ul>
         </li>
-        <li>
-          e.g.
+        <li>e.g.
           <ul>
             <li>x1 = size (0 - 2000 feet)</li>
             <li>x2 = number of bedrooms (1-5)</li>
@@ -343,20 +302,17 @@ theta = theta - alpha * grad       <span class="comment"># every parameter updat
   </ul>
   <figure><img alt="" loading="lazy" src="04_Linear_Regression_with_multiple_variables_files/Image [5].png"/></figure>
   <ul>
-    <li>
-      Pathological input to gradient descent
+    <li>Pathological input to gradient descent
       <ul>
         <li>So we need to rescale this input so it's more effective</li>
         <li>So, if you define each value from x1 and x2 by dividing by the max for each feature</li>
         <li>Contours become more like circles (as scaled between 0 and 1)</li>
       </ul>
     </li>
-    <li>
-      May want to get everything into -1 to +1 range (approximately)
+    <li>May want to get everything into -1 to +1 range (approximately)
       <ul>
         <li>Want to avoid large ranges, small ranges or very different ranges from one another</li>
-        <li>
-          Rule of thumb regarding acceptable ranges
+        <li>Rule of thumb regarding acceptable ranges
           <ul>
             <li>-3 to +3 is generally fine - any bigger bad</li>
             <li>-1/3 to +1/3 is ok - any smaller bad</li>
@@ -364,11 +320,9 @@ theta = theta - alpha * grad       <span class="comment"># every parameter updat
         </li>
       </ul>
     </li>
-    <li>
-      Can do <strong><span class="term">mean normalization</span></strong>
+    <li>Can do <strong><span class="term">mean normalization</span></strong>
       <ul>
-        <li>
-          Take a feature x<sub>i</sub>
+        <li>Take a feature x<sub>i</sub>
           <ul>
             <li>Replace it by (x<sub>i</sub> - mean)/max</li>
             <li>So your values all have an average of about 0</li>
@@ -378,15 +332,15 @@ theta = theta - alpha * grad       <span class="comment"># every parameter updat
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>&#x2190;</mo><mfrac><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>&#x2212;</mo><msub><mi>&#x3BC;</mi><mi>i</mi></msub></mrow><mrow><msub><mi>s</mi><mi>i</mi></msub></mrow></mfrac></mrow></math>
-<span class="eqn-note">&#x3BC;<sub>i</sub> is the average value of x<sub>i</sub> in the training set. s<sub>i</sub> is the range (max &#x2212; min), or the standard deviation.</span>
-</div>
-<div class="code-eg">
-<pre>mu = X[:, 1:].mean(axis=0)   <span class="comment"># per-feature mean (skip the x0 column of 1s)</span>
+    <math display="block"><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>&#x2190;</mo><mfrac><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>&#x2212;</mo><msub><mi>&#x3BC;</mi><mi>i</mi></msub></mrow><mrow><msub><mi>s</mi><mi>i</mi></msub></mrow></mfrac></mrow></math>
+    <span class="eqn-note">&#x3BC;<sub>i</sub> is the average value of x<sub>i</sub> in the training set. s<sub>i</sub> is the range (max &#x2212; min), or the standard deviation.</span>
+  </div>
+  <div class="code-eg">
+    <pre>mu = X[:, 1:].mean(axis=0)   <span class="comment"># per-feature mean (skip the x0 column of 1s)</span>
 s  = X[:, 1:].std(axis=0)    <span class="comment"># per-feature spread</span>
 X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centred, on a similar scale</span></pre>
-<p class="eqn-note">Mean normalization and feature scaling in one step &mdash; broadcasting applies the subtraction and division to every row at once.</p>
-</div>
+    <p class="eqn-note">Mean normalization and feature scaling in one step &mdash; broadcasting applies the subtraction and division to every row at once.</p>
+  </div>
   <ul>
     <li>Instead of max can also use standard deviation</li>
   </ul>
@@ -395,8 +349,7 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
   <h2>Learning Rate α</h2>
   <ul>
     <li>Focus on the learning rate (α)</li>
-    <li>
-      Topics
+    <li>Topics
       <ul>
         <li>Update rule</li>
         <li>Debugging</li>
@@ -503,14 +456,11 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
   <ul>
     <li>Choice of features and how you can get different learning algorithms by choosing appropriate features</li>
     <li>Polynomial regression for non-linear function</li>
-    <li>
-      Example
+    <li>Example
       <ul>
-        <li>
-          House price prediction
+        <li>House price prediction
           <ul>
-            <li>
-              Two features
+            <li>Two features
               <ul>
                 <li>Frontage - width of the plot of land along road (x<sub>1</sub>)</li>
                 <li>Depth - depth away from road (x<sub>2</sub>)</li>
@@ -518,18 +468,15 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
             </li>
           </ul>
         </li>
-        <li>
-          You don't have to use just two features
+        <li>You don't have to use just two features
           <ul>
             <li><strong><span class="hl-red">Can create new features</span></strong></li>
           </ul>
         </li>
-        <li>
-          Might decide that an important feature is the land area
+        <li>Might decide that an important feature is the land area
           <ul>
             <li>So, create a new feature = frontage * depth (x<sub>3</sub>)</li>
-            <li>
-              h(x) = θ<sub>0</sub> + θ<sub>1</sub>x<sub>3</sub>
+            <li>h(x) = θ<sub>0</sub> + θ<sub>1</sub>x<sub>3</sub>
               <ul>
                 <li>Area is a better indicator</li>
               </ul>
@@ -539,13 +486,11 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
         <li>Often, by defining new features you may get a better model</li>
       </ul>
     </li>
-    <li>
-      Polynomial regression
+    <li>Polynomial regression
       <ul>
         <li>May fit the data better</li>
         <li>θ<sub>0</sub> + θ<sub>1</sub>x + θ<sub>2</sub>x<sup>2</sup> e.g. here we have a quadratic function</li>
-        <li>
-          For housing data could use a quadratic function
+        <li>For housing data could use a quadratic function
           <ul>
             <li>But may not fit the data so well - inflection point means housing prices decrease when size gets really big</li>
             <li>So instead must use a cubic function</li>
@@ -556,11 +501,9 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
   </ul>
   <figure><img alt="" loading="lazy" src="04_Linear_Regression_with_multiple_variables_files/Image [10].png"/></figure>
   <ul>
-    <li>
-      How do we fit the model to this data
+    <li>How do we fit the model to this data
       <ul>
-        <li>
-          To map our old linear hypothesis and cost functions to these polynomial descriptions the easy thing to do is set
+        <li>To map our old linear hypothesis and cost functions to these polynomial descriptions the easy thing to do is set
           <ul>
             <li>x<sub>1</sub> = x</li>
             <li>x<sub>2</sub> = x<sup>2</sup></li>
@@ -579,14 +522,12 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
   <h2>Normal equation</h2>
   <ul>
     <li>For some linear regression problems the normal equation provides a better solution</li>
-    <li>
-      So far we've been using gradient descent
+    <li>So far we've been using gradient descent
       <ul>
         <li>Iterative algorithm which takes steps to converge</li>
       </ul>
     </li>
-    <li>
-      Normal equation solves θ analytically
+    <li>Normal equation solves θ analytically
       <ul>
         <li>Solve for the optimum value of theta</li>
       </ul>
@@ -595,26 +536,21 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
   </ul>
   <h3>How does it work?</h3>
   <ul>
-    <li>
-      Simplified cost function
+    <li>Simplified cost function
       <ul>
-        <li>
-          J(θ) = aθ<sup>2 </sup>+ bθ + c
+        <li>J(θ) = aθ<sup>2 </sup>+ bθ + c
           <ul>
             <li>θ is just a real number, not a vector</li>
           </ul>
         </li>
         <li>Cost function is a quadratic function</li>
-        <li>
-          How do you minimize this?
+        <li>How do you minimize this?
           <ul>
-            <li>
-              Do
+            <li>Do
               <ul>
-                <li>
-                  <div class="eqn">
-<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><mi>&#x3B8;</mi></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>
-</div>
+                <li><div class="eqn">
+                    <math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><mi>&#x3B8;</mi></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>
+                  </div>
                   <ul>
                     <li>Take derivative of J(θ) with respect to θ</li>
                     <li>Set that derivative equal to 0</li>
@@ -627,15 +563,12 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
         </li>
       </ul>
     </li>
-    <li>
-      In our more complex problems;
+    <li>In our more complex problems;
       <ul>
         <li>Here θ is an n+1 dimensional vector of real numbers</li>
-        <li>
-          Cost function is a function of the vector value
+        <li>Cost function is a function of the vector value
           <ul>
-            <li>
-              How do we minimize this function
+            <li>How do we minimize this function
               <ul>
                 <li>Take the partial derivative of J(θ) with respect to θ<sub>j </sub>and set to 0 for every j</li>
                 <li>Do that and solve for θ<sub>0</sub> to θ<sub>n</sub></li>
@@ -644,8 +577,7 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
             </li>
           </ul>
         </li>
-        <li>
-          If you work through the calculus and the solution, the derivation is pretty complex
+        <li>If you work through the calculus and the solution, the derivation is pretty complex
           <ul>
             <li>Not going to go through here</li>
             <li>Instead, what do you need to know to implement this process</li>
@@ -656,54 +588,49 @@ X[:, 1:] = (X[:, 1:] - mu) / s   <span class="comment"># every feature now centr
   </ul>
   <h3>Example of normal equation</h3>
   <table>
-  <caption>Training set &mdash; m = 4 examples, n = 4 features</caption>
-  <tr>
-    <th scope="col">Size in feet<sup>2</sup> (x<sub>1</sub>)</th>
-    <th scope="col">Number of bedrooms (x<sub>2</sub>)</th>
-    <th scope="col">Number of floors (x<sub>3</sub>)</th>
-    <th scope="col">Age of home in years (x<sub>4</sub>)</th>
-    <th scope="col">Price ($1000) (y)</th>
-  </tr>
-  <tr><td>2104</td><td>5</td><td>1</td><td>45</td><td>460</td></tr>
-  <tr><td>1416</td><td>3</td><td>2</td><td>40</td><td>232</td></tr>
-  <tr><td>1534</td><td>3</td><td>2</td><td>30</td><td>315</td></tr>
-  <tr><td>852</td><td>2</td><td>1</td><td>36</td><td>178</td></tr>
-</table>
+    <caption>Training set &mdash; m = 4 examples, n = 4 features</caption>
+    <tr>
+      <th scope="col">Size in feet<sup>2</sup> (x<sub>1</sub>)</th>
+      <th scope="col">Number of bedrooms (x<sub>2</sub>)</th>
+      <th scope="col">Number of floors (x<sub>3</sub>)</th>
+      <th scope="col">Age of home in years (x<sub>4</sub>)</th>
+      <th scope="col">Price ($1000) (y)</th>
+    </tr>
+    <tr><td>2104</td><td>5</td><td>1</td><td>45</td><td>460</td></tr>
+    <tr><td>1416</td><td>3</td><td>2</td><td>40</td><td>232</td></tr>
+    <tr><td>1534</td><td>3</td><td>2</td><td>30</td><td>315</td></tr>
+    <tr><td>852</td><td>2</td><td>1</td><td>36</td><td>178</td></tr>
+  </table>
   <ul>
-    <li>
-      Here
+    <li>Here
       <ul>
         <li>m = 4</li>
         <li>n = 4</li>
       </ul>
     </li>
-    <li>
-      To implement the normal equation
+    <li>To implement the normal equation
       <ul>
         <li>Take examples</li>
         <li>Add an extra column (x<sub>0</sub> feature)</li>
         <li>Construct a matrix (X - <strong><span class="term">the design matrix</span></strong>) which contains all the training data features in an [m x n+1] matrix</li>
-        <li>
-          Do something similar for y
+        <li>Do something similar for y
           <ul>
             <li>Construct a column vector y vector [m x 1] matrix</li>
           </ul>
         </li>
-        <li>
-          Using the following equation (X transpose * X) inverse times X transpose y<br/>
+        <li>Using the following equation (X transpose * X) inverse times X transpose y<br/>
           <div class="eqn">
-<math display="block"><mrow><mi>&#x3B8;</mi><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow></math>
-</div>
-        </li>
+            <math display="block"><mrow><mi>&#x3B8;</mi><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow></math>
+          </div></li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msup><mrow><mo>(</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>2104</mn></mtd><mtd><mn>1416</mn></mtd><mtd><mn>1534</mn></mtd><mtd><mn>852</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>45</mn></mtd><mtd><mn>40</mn></mtd><mtd><mn>30</mn></mtd><mtd><mn>36</mn></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>2104</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>45</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1416</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>40</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1534</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>30</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>852</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>36</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>2104</mn></mtd><mtd><mn>1416</mn></mtd><mtd><mn>1534</mn></mtd><mtd><mn>852</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>45</mn></mtd><mtd><mn>40</mn></mtd><mtd><mn>30</mn></mtd><mtd><mn>36</mn></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>460</mn></mtd></mtr><mtr><mtd><mn>232</mn></mtd></mtr><mtr><mtd><mn>315</mn></mtd></mtr><mtr><mtd><mn>178</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
-<span class="eqn-note">That is X<sup>T</sup>X inverted, times X<sup>T</sup>, times y &mdash; the normal equation with the table above substituted in.</span>
-</div>
-<div class="code-eg">
-<pre>X = np.array([[1, 2104, 5, 1, 45],
+    <math display="block"><mrow><msup><mrow><mo>(</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>2104</mn></mtd><mtd><mn>1416</mn></mtd><mtd><mn>1534</mn></mtd><mtd><mn>852</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>45</mn></mtd><mtd><mn>40</mn></mtd><mtd><mn>30</mn></mtd><mtd><mn>36</mn></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>2104</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>45</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1416</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>40</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1534</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>30</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>852</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>36</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>2104</mn></mtd><mtd><mn>1416</mn></mtd><mtd><mn>1534</mn></mtd><mtd><mn>852</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>45</mn></mtd><mtd><mn>40</mn></mtd><mtd><mn>30</mn></mtd><mtd><mn>36</mn></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>460</mn></mtd></mtr><mtr><mtd><mn>232</mn></mtd></mtr><mtr><mtd><mn>315</mn></mtd></mtr><mtr><mtd><mn>178</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+    <span class="eqn-note">That is X<sup>T</sup>X inverted, times X<sup>T</sup>, times y &mdash; the normal equation with the table above substituted in.</span>
+  </div>
+  <div class="code-eg">
+    <pre>X = np.array([[1, 2104, 5, 1, 45],
               [1, 1416, 3, 2, 40],
               [1, 1534, 3, 2, 30],
               [1,  852, 2, 1, 36]], dtype=float)
@@ -711,34 +638,29 @@ y = np.array([460, 232, 315, 178], dtype=float)
 
 theta = np.linalg.pinv(X.T @ X) @ X.T @ y
 
-X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces every price exactly</span></pre>
-<p class="eqn-note">The table above, solved in one line. With only four examples and five parameters the fit is exact &mdash; X @ theta returns the y column to machine precision.</p>
-</div>
+X @ theta   <span class="comment"># [460., 232., 315., 178.]  -&gt; reproduces every price exactly</span></pre>
+    <p class="eqn-note">The table above, solved in one line. With only four examples and five parameters the fit is exact &mdash; X @ theta returns the y column to machine precision.</p>
+  </div>
   <ul>
     <li>If you compute this, you get the value of theta which minimize the cost function</li>
   </ul>
   <h3>General case</h3>
   <ul>
-    <li>
-      Have m training examples and n features
+    <li>Have m training examples and n features
       <ul>
-        <li>
-          The <span class="term">design matrix</span> (X)
+        <li>The <span class="term">design matrix</span> (X)
           <ul>
             <li>Each training example is a n+1 dimensional feature column vector</li>
             <li>X is constructed by taking each training example, determining its transpose (i.e. column -&gt; row) and using it for a row in the design matrix</li>
-            <li>
-              This creates an [m x (n+1)] matrix
+            <li>This creates an [m x (n+1)] matrix
               <div class="eqn">
-<math display="block"><mrow><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msubsup><mi>x</mi><mn>0</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><msubsup><mi>x</mi><mn>1</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><msubsup><mi>x</mi><mn>2</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><mi>&#x22EE;</mi></mtd></mtr><mtr><mtd><msubsup><mi>x</mi><mi>n</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup></mrow></math>
-<math display="block"><mrow><mi>X</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msup><mrow><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>1</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup></mtd></mtr><mtr><mtd><msup><mrow><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>2</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup></mtd></mtr><mtr><mtd><mi>&#x22EE;</mi></mtd></mtr><mtr><mtd><msup><mrow><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>m</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
-<span class="eqn-note">Each training example is a column vector; its transpose becomes one row of the design matrix, giving an [m x (n+1)] matrix.</span>
-</div>
-            </li>
+                <math display="block"><mrow><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msubsup><mi>x</mi><mn>0</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><msubsup><mi>x</mi><mn>1</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><msubsup><mi>x</mi><mn>2</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr><mtr><mtd><mi>&#x22EE;</mi></mtd></mtr><mtr><mtd><msubsup><mi>x</mi><mi>n</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></msup></mrow></math>
+                <math display="block"><mrow><mi>X</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msup><mrow><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>1</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup></mtd></mtr><mtr><mtd><msup><mrow><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>2</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup></mtd></mtr><mtr><mtd><mi>&#x22EE;</mi></mtd></mtr><mtr><mtd><msup><mrow><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>m</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+                <span class="eqn-note">Each training example is a column vector; its transpose becomes one row of the design matrix, giving an [m x (n+1)] matrix.</span>
+              </div></li>
           </ul>
         </li>
-        <li>
-          <strong><span class="term">Vector y</span></strong>
+        <li><strong><span class="term">Vector y</span></strong>
           <ul>
             <li>Used by taking all the y values into a column vector</li>
           </ul>
@@ -747,17 +669,14 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>&#x3B8;</mi><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow></math>
-</div>
+    <math display="block"><mrow><mi>&#x3B8;</mi><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow></math>
+  </div>
   <ul>
-    <li>
-      What is this equation?!
+    <li>What is this equation?!
       <ul>
-        <li>
-          (X<sup><em>T</em></sup> * X)<sup>-1</sup>
+        <li>(X<sup><em>T</em></sup> * X)<sup>-1</sup>
           <ul>
-            <li>
-              What is this --&gt; the inverse of the matrix (X<sup><em>T</em> </sup>* X)
+            <li>What is this --&gt; the inverse of the matrix (X<sup><em>T</em> </sup>* X)
               <ul>
                 <li>i.e. A = X<sup><em>T</em> </sup>X</li>
                 <li>A<sup>-1 </sup>= (X<sup><em>T</em> </sup>X)<sup>-1</sup></li>
@@ -767,15 +686,13 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
         </li>
       </ul>
     </li>
-    <li>
-      In Python you could do;<br/><br/><code class="hl-green"><strong> theta = np.linalg.pinv(X.T @ X) @ X.T @ y</strong></code><br/>
+    <li>In Python you could do;<br/><br/><code class="hl-green"><strong> theta = np.linalg.pinv(X.T @ X) @ X.T @ y</strong></code><br/>
       <ul>
         <li>X.T is the notation for X transpose</li>
         <li>np.linalg.pinv is a function for the (pseudo) inverse of a matrix</li>
       </ul>
     </li>
-    <li>
-      In a previous lecture discussed feature scaling
+    <li>In a previous lecture discussed feature scaling
       <ul>
         <li>If you're using the normal equation then no need for feature scaling</li>
       </ul>
@@ -783,17 +700,14 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
   </ul>
   <h3>When should you use gradient descent and when should you use the normal equation?</h3>
   <ul>
-    <li>
-      <strong><em>Gradient descent</em></strong>
+    <li><strong><em>Gradient descent</em></strong>
       <ul>
         <li>Need to choose learning rate</li>
         <li>Needs many iterations - could make it slower</li>
-        <li>
-          Works well even when <em>n</em> is massive (millions)
+        <li>Works well even when <em>n</em> is massive (millions)
           <ul>
             <li>Better suited to big data</li>
-            <li>
-              What is a big <em>n</em> though
+            <li>What is a big <em>n</em> though
               <ul>
                 <li>100 or even a 1000 is still (relatively) small</li>
                 <li>If n is 10 000 then look at using gradient descent</li>
@@ -803,25 +717,21 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
         </li>
       </ul>
     </li>
-    <li>
-      <strong><em>Normal equation</em></strong>
+    <li><strong><em>Normal equation</em></strong>
       <ul>
         <li>No need to choose a learning rate</li>
         <li>No need to iterate, check for convergence etc.</li>
-        <li>
-          Normal equation needs to compute (X<sup><em>T</em> </sup>X)<sup>-1</sup>
+        <li>Normal equation needs to compute (X<sup><em>T</em> </sup>X)<sup>-1</sup>
           <ul>
             <li>This is the inverse of an n x n matrix</li>
-            <li>
-              With most implementations computing a matrix inverse grows by O(n<sup>3 </sup>)
+            <li>With most implementations computing a matrix inverse grows by O(n<sup>3 </sup>)
               <ul>
                 <li>So not great</li>
               </ul>
             </li>
           </ul>
         </li>
-        <li>
-          Slow if <em>n</em> is large
+        <li>Slow if <em>n</em> is large
           <ul>
             <li>Can be much slower</li>
           </ul>
@@ -833,28 +743,22 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
 <section id="normal-equation-and-non-invertibility">
   <h2>Normal equation and non-invertibility</h2>
   <ul>
-    <li>
-      Advanced concept
+    <li>Advanced concept
       <ul>
         <li>Often asked about, but quite advanced, perhaps optional material</li>
         <li>Phenomenon worth understanding, but not probably necessary</li>
       </ul>
     </li>
-    <li>
-      When computing (X<sup><em>T</em> </sup>X)<sup>-1</sup> * X<sup><em>T</em> </sup>* y)
+    <li>When computing (X<sup><em>T</em> </sup>X)<sup>-1</sup> * X<sup><em>T</em> </sup>* y)
       <ul>
-        <li>
-          What if (X<sup><em>T</em> </sup>X) is non-invertible (singular/degenerate)
+        <li>What if (X<sup><em>T</em> </sup>X) is non-invertible (singular/degenerate)
           <ul>
             <li>Only some matrices are invertible</li>
-            <li>
-              This should be quite a rare problem
+            <li>This should be quite a rare problem
               <ul>
-                <li>
-                  NumPy can invert matrices using
+                <li>NumPy can invert matrices using
                   <ul>
-                    <li>
-                      np.linalg.pinv (pseudo inverse)
+                    <li>np.linalg.pinv (pseudo inverse)
                       <ul>
                         <li>This gets the right value even if (X<sup><em>T</em> </sup>X) is non-invertible</li>
                       </ul>
@@ -866,17 +770,13 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
             </li>
           </ul>
         </li>
-        <li>
-          What does it mean for (X<sup><em>T</em> </sup>X) to be non-invertible
+        <li>What does it mean for (X<sup><em>T</em> </sup>X) to be non-invertible
           <ul>
-            <li>
-              Normally two common causes
+            <li>Normally two common causes
               <ul>
-                <li>
-                  <strong><span class="term">Redundant features</span></strong> in learning model
+                <li><strong><span class="term">Redundant features</span></strong> in learning model
                   <ul>
-                    <li>
-                      e.g.
+                    <li>e.g.
                       <ul>
                         <li>x<sub>1</sub> = size in feet</li>
                         <li>x<sub>2</sub> = size in meters squared</li>
@@ -884,11 +784,9 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
                     </li>
                   </ul>
                 </li>
-                <li>
-                  <strong><span class="term">Too many features</span></strong>
+                <li><strong><span class="term">Too many features</span></strong>
                   <ul>
-                    <li>
-                      e.g. m &lt;= n (n is much larger than m)
+                    <li>e.g. m &lt;= n (n is much larger than m)
                       <ul>
                         <li>m = 10</li>
                         <li>n = 100</li>
@@ -898,8 +796,7 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
                     <li>Sometimes work, but not always a good idea</li>
                     <li>Not enough data</li>
                     <li>Later look at <em>why</em> this may be too little data</li>
-                    <li>
-                      To solve this we
+                    <li>To solve this we
                       <ul>
                         <li>Delete features</li>
                         <li>Use <strong><span class="term">regularization</span></strong> (lets you use lots of features for a small training set)</li>
@@ -911,11 +808,9 @@ X @ theta   <span class="comment"># [460., 232., 315., 178.]  -> reproduces ever
             </li>
           </ul>
         </li>
-        <li>
-          If you find (X<sup><em>T</em> </sup>X) to be non-invertible
+        <li>If you find (X<sup><em>T</em> </sup>X) to be non-invertible
           <ul>
-            <li>
-              Look at features --&gt; are features linearly dependent?
+            <li>Look at features --&gt; are features linearly dependent?
               <ul>
                 <li>So just delete one, will solve problem</li>
               </ul>

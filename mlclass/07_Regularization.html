@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -39,32 +40,26 @@
   </ul>
   <h3>Overfitting with linear regression</h3>
   <ul>
-    <li>
-      Using our house pricing example again
+    <li>Using our house pricing example again
       <ul>
-        <li>
-          Fit a linear function to the data - not a great model
+        <li>Fit a linear function to the data - not a great model
           <ul>
             <li>This is <strong><span class="term">underfitting</span></strong> - also known as <span class="term"><strong>high bias</strong></span></li>
-            <li>
-              Bias is a historic/technical one - if we're fitting a straight line to the data we have a strong preconception that there should be a linear fit
+            <li>Bias is a historic/technical one - if we're fitting a straight line to the data we have a strong preconception that there should be a linear fit
               <ul>
                 <li>In this case, this is not correct, but a straight line can't help being straight!</li>
               </ul>
             </li>
           </ul>
         </li>
-        <li>
-          Fit a quadratic function
+        <li>Fit a quadratic function
           <ul>
             <li>Works well</li>
           </ul>
         </li>
-        <li>
-          Fit a 4th order polynomial
+        <li>Fit a 4th order polynomial
           <ul>
-            <li>
-              Now curve fits through all five examples
+            <li>Now curve fits through all five examples
               <ul>
                 <li>Seems to do a good job fitting the training set</li>
                 <li>But, despite fitting the data we've provided very well, this is actually not such a good model</li>
@@ -73,8 +68,7 @@
             <li>This is <strong><span class="term">overfitting</span></strong> - also known as <strong><span class="term">high variance</span></strong></li>
           </ul>
         </li>
-        <li>
-          Algorithm has high variance
+        <li>Algorithm has high variance
           <ul>
             <li>High variance - if fitting high order polynomial then the hypothesis can basically fit any data</li>
             <li>Space of hypothesis is too large</li>
@@ -85,8 +79,7 @@
   </ul>
   <figure><img alt="" loading="lazy" src="07_Regularization_files/Image.png"/></figure>
   <ul>
-    <li>
-      To recap, if we have too many features then the learned hypothesis may give a cost function of exactly zero
+    <li>To recap, if we have too many features then the learned hypothesis may give a cost function of exactly zero
       <ul>
         <li>But this tries too hard to fit the training set</li>
         <li>Fails to provide a <em>general</em> solution - <strong><span class="hl-red">unable to generalize</span></strong> (apply to new examples)</li>
@@ -95,8 +88,7 @@
   </ul>
   <h3>Overfitting with logistic regression</h3>
   <ul>
-    <li>
-      Same thing can happen to logistic regression
+    <li>Same thing can happen to logistic regression
       <ul>
         <li>Sigmoidal function is an underfit</li>
         <li>But a high order polynomial gives an overfitting (high variance hypothesis)</li>
@@ -107,32 +99,27 @@
   <h3>Addressing overfitting</h3>
   <ul>
     <li>Later we'll look at identifying when overfitting and underfitting is occurring</li>
-    <li>
-      Earlier we just plotted a higher order function - saw that it looks "too curvy"
+    <li>Earlier we just plotted a higher order function - saw that it looks &quot;too curvy&quot;
       <ul>
         <li>Plotting hypothesis is one way to decide, but doesn't always work</li>
         <li>Often have lots of features - here it's not just a case of selecting a degree polynomial, but also harder to plot the data and visualize to decide what features to keep and which to drop</li>
         <li>If you have lots of features and little data - overfitting can be a problem</li>
       </ul>
     </li>
-    <li>
-      How do we deal with this?
+    <li>How do we deal with this?
       <ul>
-        <li>
-          1) <strong>Reduce number of features</strong>
+        <li>1) <strong>Reduce number of features</strong>
           <ul>
             <li>Manually select which features to keep</li>
             <li>Model selection algorithms are discussed later (good for reducing number of features)</li>
-            <li>
-              But, in reducing the number of features we lose some information
+            <li>But, in reducing the number of features we lose some information
               <ul>
                 <li>Ideally select those features which minimize data loss, but even so, some info is lost</li>
               </ul>
             </li>
           </ul>
         </li>
-        <li>
-          2) <strong><span class="term">Regularization</span></strong>
+        <li>2) <strong><span class="term">Regularization</span></strong>
           <ul>
             <li>Keep all features, but reduce magnitude of parameters θ</li>
             <li>Works well when we have a lot of features, each of which contributes a bit to predicting y</li>
@@ -145,19 +132,17 @@
 <section id="cost-function-optimization-for-regularization">
   <h2>Cost function optimization for regularization</h2>
   <ul>
-    <li>
-      Penalize and make some of the θ parameters really small
+    <li>Penalize and make some of the θ parameters really small
       <ul>
         <li>e.g. here θ<sub>3</sub> and θ<sub>4</sub></li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><munder><mi>min</mi><mi>&#x3B8;</mi></munder><mspace width="0.35em"/><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mn>1000</mn><msubsup><mi>&#x3B8;</mi><mn>3</mn><mn>2</mn></msubsup><mo>+</mo><mn>1000</mn><msubsup><mi>&#x3B8;</mi><mn>4</mn><mn>2</mn></msubsup></mrow></math>
-</div>
+    <math display="block"><mrow><munder><mi>min</mi><mi>&#x3B8;</mi></munder><mspace width="0.35em"/><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mn>1000</mn><msubsup><mi>&#x3B8;</mi><mn>3</mn><mn>2</mn></msubsup><mo>+</mo><mn>1000</mn><msubsup><mi>&#x3B8;</mi><mn>4</mn><mn>2</mn></msubsup></mrow></math>
+  </div>
   <ul>
-    <li>
-      The addition in blue is a modification of our cost function to help penalize θ<sub>3</sub> and θ<sub>4</sub>
+    <li>The addition in blue is a modification of our cost function to help penalize θ<sub>3</sub> and θ<sub>4</sub>
       <ul>
         <li>So here we end up with θ<sub>3</sub> and θ<sub>4</sub> being close to zero (because the constants are massive)</li>
         <li>So we're basically left with a quadratic function</li>
@@ -166,34 +151,28 @@
   </ul>
   <figure><img alt="" loading="lazy" src="07_Regularization_files/Image [3].png"/></figure>
   <ul>
-    <li>
-      In this example, we penalized two of the parameter values
+    <li>In this example, we penalized two of the parameter values
       <ul>
         <li>More generally, regularization is as follows</li>
       </ul>
     </li>
-    <li>
-      Regularization
+    <li>Regularization
       <ul>
         <li>Small values for parameters corresponds to a simpler hypothesis (you effectively get rid of some of the terms)</li>
         <li>A simpler hypothesis is less prone to overfitting</li>
       </ul>
     </li>
-    <li>
-      Another example
+    <li>Another example
       <ul>
         <li>Have 100 features x<sub>1</sub>, x<sub>2</sub>, ..., x<sub>100</sub></li>
-        <li>
-          Unlike the polynomial example, we don't know what are the high order terms
+        <li>Unlike the polynomial example, we don't know what are the high order terms
           <ul>
             <li>How do we pick the ones to shrink?</li>
           </ul>
         </li>
-        <li>
-          With regularization, take cost function and modify it to shrink all the parameters
+        <li>With regularization, take cost function and modify it to shrink all the parameters
           <ul>
-            <li>
-              Add a term at the end
+            <li>Add a term at the end
               <ul>
                 <li>This regularization term shrinks every parameter</li>
                 <li>By convention you don't penalize θ<sub>0</sub> - minimization is from θ<sub>1</sub> onwards</li>
@@ -205,9 +184,9 @@
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>&#x3BB;</mi><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3B8;</mi><mi>j</mi><mn>2</mn></msubsup><mo>]</mo></mrow></math>
-<span class="eqn-note">The penalty runs over &#x3B8;<sub>1</sub>, &#x3B8;<sub>2</sub>, &#x2026;, &#x3B8;<sub>n</sub> &mdash; by convention &#x3B8;<sub>0</sub> is not penalised.</span>
-</div>
+    <math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>&#x3BB;</mi><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3B8;</mi><mi>j</mi><mn>2</mn></msubsup><mo>]</mo></mrow></math>
+    <span class="eqn-note">The penalty runs over &#x3B8;<sub>1</sub>, &#x3B8;<sub>2</sub>, &#x2026;, &#x3B8;<sub>n</sub> &mdash; by convention &#x3B8;<sub>0</sub> is not penalised.</span>
+  </div>
   <ul>
     <li>In practice, if you include θ<sub>0</sub> it has little impact</li>
     <li>
@@ -253,8 +232,7 @@
 <section id="regularized-linear-regression">
   <h2>Regularized linear regression</h2>
   <ul>
-    <li>
-      Previously, we looked at two algorithms for linear regression
+    <li>Previously, we looked at two algorithms for linear regression
       <ul>
         <li>Gradient descent</li>
         <li>Normal equation</li>
@@ -263,46 +241,42 @@
     <li>Our linear regression with regularization is shown below</li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>&#x3BB;</mi><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3B8;</mi><mi>j</mi><mn>2</mn></msubsup><mo>]</mo></mrow></math>
-<math display="block"><mrow><munder><mi>min</mi><mi>&#x3B8;</mi></munder><mspace width="0.35em"/><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>
-</div>
-<div class="code-eg">
-<pre>import numpy as np
+    <math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup><mo>+</mo><mi>&#x3BB;</mi><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3B8;</mi><mi>j</mi><mn>2</mn></msubsup><mo>]</mo></mrow></math>
+    <math display="block"><mrow><munder><mi>min</mi><mi>&#x3B8;</mi></munder><mspace width="0.35em"/><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>
+  </div>
+  <div class="code-eg">
+    <pre>import numpy as np
 
 def J(theta, X, y, lam):
     m = len(y)
     err = ((X @ theta - y) ** 2).sum()
     penalty = lam * (theta[1:] ** 2).sum()   <span class="comment"># theta[1:] - theta0 is not penalised</span>
     return (err + penalty) / (2 * m)</pre>
-<p class="eqn-note">The regularized cost. The penalty slices from theta[1:], leaving θ<sub>0</sub> out &mdash; matching the sum from j = 1.</p>
-</div>
+    <p class="eqn-note">The regularized cost. The penalty slices from theta[1:], leaving θ<sub>0</sub> out &mdash; matching the sum from j = 1.</p>
+  </div>
   <ul>
-    <li>
-      Previously, gradient descent would repeatedly update the parameters θ<sub>j</sub>, where j = 0,1,2...n simultaneously
+    <li>Previously, gradient descent would repeatedly update the parameters θ<sub>j</sub>, where j = 0,1,2...n simultaneously
       <ul>
         <li>Shown below</li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mtext>Repeat {</mtext></math>
-<math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mn>0</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
-<math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
-<math display="block"><mtext>}</mtext></math>
-<span class="eqn-note">j = 1, 2, 3, &#x2026;, n. &#x3B8;<sub>0</sub> has its own line above because it is never penalised &mdash; on the original slide the 0 is struck through in this index.</span>
-</div>
+    <math display="block"><mtext>Repeat {</mtext></math>
+    <math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mn>0</mn></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mn>0</mn><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
+    <math display="block"><mrow><mspace width="1.6em"/><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
+    <math display="block"><mtext>}</mtext></math>
+    <span class="eqn-note">j = 1, 2, 3, &#x2026;, n. &#x3B8;<sub>0</sub> has its own line above because it is never penalised &mdash; on the original slide the 0 is struck through in this index.</span>
+  </div>
   <ul>
-    <li>
-      We've got the θ<sub>0</sub> update here shown explicitly
+    <li>We've got the θ<sub>0</sub> update here shown explicitly
       <ul>
         <li>This is because for regularization we don't penalize θ<sub>0 </sub>so treat it slightly differently</li>
       </ul>
     </li>
-    <li>
-      How do we regularize these two rules?
+    <li>How do we regularize these two rules?
       <ul>
-        <li>
-          Take the term and add λ/m * θ<sub>j</sub>
+        <li>Take the term and add λ/m * θ<sub>j</sub>
           <ul>
             <li>Sum for every θ (i.e. j = 1 to n)</li>
           </ul>
@@ -313,15 +287,13 @@ def J(theta, X, y, lam):
     <li>We can show using calculus that the equation given below is the partial derivative of the regularized J(θ)</li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mo>[</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>+</mo><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>]</mo></mrow></math>
-<span class="eqn-note">j = 1, 2, 3, &#x2026;, n. The bracketed term is the partial derivative of the regularised J(&#x3B8;).</span>
-</div>
+    <math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mo>[</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>+</mo><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>]</mo></mrow></math>
+    <span class="eqn-note">j = 1, 2, 3, &#x2026;, n. The bracketed term is the partial derivative of the regularised J(&#x3B8;).</span>
+  </div>
   <ul>
-    <li>
-      The update for θ<sub>j </sub>
+    <li>The update for θ<sub>j </sub>
       <ul>
-        <li>
-          θ<sub>j</sub> gets updated to
+        <li>θ<sub>j</sub> gets updated to
           <ul>
             <li>θ<sub>j </sub>- α * [a big term which also depends on θ<sub>j</sub>]<sub> </sub></li>
           </ul>
@@ -331,27 +303,24 @@ def J(theta, X, y, lam):
     <li>So if you group the θ<sub>j </sub>terms together</li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><mo>)</mo><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
-</div>
+    <math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><mo>)</mo><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
+  </div>
   <ul>
-    <li>
-      The term
+    <li>The term
       <div class="eqn">
-<math display="block"><mrow><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><mo>)</mo></mrow></math>
-<span class="eqn-note">Slightly less than 1, so each update shrinks &#x3B8;<sub>j</sub> a little before the usual gradient step.</span>
-</div>
-<div class="code-eg">
-<pre>alpha, lam, m = 0.05, 10, 10
+        <math display="block"><mrow><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><mo>)</mo></mrow></math>
+        <span class="eqn-note">Slightly less than 1, so each update shrinks &#x3B8;<sub>j</sub> a little before the usual gradient step.</span>
+      </div><div class="code-eg">
+        <pre>alpha, lam, m = 0.05, 10, 10
 1 - alpha * lam / m   <span class="comment"># 0.95  : theta_j is multiplied by this every step</span>
 
 alpha, lam, m = 0.01, 1, 10
 1 - alpha * lam / m   <span class="comment"># 0.999 : closer to 1 for gentler regularization</span></pre>
-<p class="eqn-note">The shrink factor for two settings &mdash; every update scales θ<sub>j</sub> by a number just under 1 before the usual gradient step.</p>
-</div>
+        <p class="eqn-note">The shrink factor for two settings &mdash; every update scales θ<sub>j</sub> by a number just under 1 before the usual gradient step.</p>
+      </div>
       <ul>
         <li>Is going to be a number less than 1 usually</li>
-        <li>
-          Usually learning rate is small and m is large
+        <li>Usually learning rate is small and m is large
           <ul>
             <li>So this typically evaluates to (1 - a small number)</li>
             <li>So the term is often around 0.99 to 0.95</li>
@@ -359,8 +328,7 @@ alpha, lam, m = 0.01, 1, 10
         </li>
       </ul>
     </li>
-    <li>
-      This in effect means θ<sub>j </sub>gets multiplied by 0.99
+    <li>This in effect means θ<sub>j </sub>gets multiplied by 0.99
       <ul>
         <li>Means the squared norm of θ<sub>j </sub>gets a little smaller</li>
         <li>The second term is exactly the same as the original gradient descent</li>
@@ -371,26 +339,24 @@ alpha, lam, m = 0.01, 1, 10
 <section id="regularization-with-the-normal-equation">
   <h2>Regularization with the normal equation</h2>
   <ul>
-    <li>
-      Normal equation is the other linear regression model
+    <li>Normal equation is the other linear regression model
       <ul>
         <li>Minimize the J(θ) using the normal equation</li>
-        <li>
-          To use regularization we add a term (+ λ [n+1 x n+1]) to the equation
+        <li>To use regularization we add a term (+ λ [n+1 x n+1]) to the equation
           <ul>
-            <li>[n+1 x n+1] is the identity matrix with the top-left entry set to 0 &mdash; so &#x3B8;<sub>0</sub> escapes the penalty, as everywhere else in this chapter</li>
+            <li>[n+1 x n+1] is the identity matrix with the top-left entry set to 0 — so θ<sub>0</sub> escapes the penalty, as everywhere else in this chapter</li>
           </ul>
         </li>
       </ul>
     </li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>&#x3B8;</mi><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>+</mo><mi>&#x3BB;</mi><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mi>&#x2026;</mi></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mi>&#x2026;</mi></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mi>&#x2026;</mi></mtd></mtr><mtr><mtd><mi>&#x22EE;</mi></mtd><mtd><mi>&#x22EE;</mi></mtd><mtd><mi>&#x22EE;</mi></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow></math>
-<math display="block"><mrow><mtext>e.g. if n = 2:</mtext><mspace width="0.6em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
-<span class="eqn-note">An [n+1 x n+1] matrix &mdash; the identity with the top-left entry set to 0, so that &#x3B8;<sub>0</sub> escapes the penalty.</span>
-</div>
-<div class="code-eg">
-<pre>X = np.array([[1, 2, 2],   <span class="comment"># x2 is an exact copy of x1,</span>
+    <math display="block"><mrow><mi>&#x3B8;</mi><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><mo>+</mo><mi>&#x3BB;</mi><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mi>&#x2026;</mi></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mi>&#x2026;</mi></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mi>&#x2026;</mi></mtd></mtr><mtr><mtd><mi>&#x22EE;</mi></mtd><mtd><mi>&#x22EE;</mi></mtd><mtd><mi>&#x22EE;</mi></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>)</mo></mrow><mrow><mo>&#x2212;</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow></math>
+    <math display="block"><mrow><mtext>e.g. if n = 2:</mtext><mspace width="0.6em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+    <span class="eqn-note">An [n+1 x n+1] matrix &mdash; the identity with the top-left entry set to 0, so that &#x3B8;<sub>0</sub> escapes the penalty.</span>
+  </div>
+  <div class="code-eg">
+    <pre>X = np.array([[1, 2, 2],   <span class="comment"># x2 is an exact copy of x1,</span>
               [1, 3, 3],   <span class="comment"># so X.T @ X is singular</span>
               [1, 4, 4],
               [1, 5, 5]], dtype=float)
@@ -402,51 +368,42 @@ L = np.eye(3)
 L[0, 0] = 0              <span class="comment"># the modified identity from the equation above</span>
 theta = np.linalg.solve(X.T @ X + 1.0 * L, X.T @ y)
 X @ theta                <span class="comment"># [2.14, 3.05, 3.95, 4.86]  - a sensible fit anyway</span></pre>
-<p class="eqn-note">Redundant features make X<sup>T</sup>X singular &mdash; exactly the non-invertibility case from chapter 04. Adding λ times the modified identity makes the system solvable again.</p>
-</div>
+    <p class="eqn-note">Redundant features make X<sup>T</sup>X singular &mdash; exactly the non-invertibility case from chapter 04. Adding λ times the modified identity makes the system solvable again.</p>
+  </div>
   <h3>Regularization for logistic regression</h3>
   <ul>
     <li>We saw earlier that logistic regression can be prone to overfitting with lots of features</li>
     <li>Logistic regression cost function is as follows;</li>
   </ul>
   <div class="eqn">
-<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mspace width="0.15em"/><mi>log</mi><mspace width="0.15em"/><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mspace width="0.15em"/><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>)</mo><mo>]</mo></mrow></math>
-</div>
+    <math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mspace width="0.15em"/><mi>log</mi><mspace width="0.15em"/><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mspace width="0.15em"/><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>)</mo><mo>]</mo></mrow></math>
+  </div>
   <ul>
-    <li>
-      To modify it we have to add an extra term
+    <li>To modify it we have to add an extra term
       <div class="eqn">
-<math display="block"><mrow><mo>+</mo><mfrac><mi>&#x3BB;</mi><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3B8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
-</div>
-    </li>
-    <li>
-      This has the effect of penalizing the parameters θ<sub>1</sub>, θ<sub>2</sub> up to θ<sub>n </sub>
+        <math display="block"><mrow><mo>+</mo><mfrac><mi>&#x3BB;</mi><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3B8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+      </div></li>
+    <li>This has the effect of penalizing the parameters θ<sub>1</sub>, θ<sub>2</sub> up to θ<sub>n </sub>
       <ul>
         <li>Means, like with linear regression, we can get what appears to be a better fitting lower order hypothesis</li>
       </ul>
     </li>
-    <li>
-      How do we implement this?
+    <li>How do we implement this?
       <ul>
-        <li>
-          Original logistic regression with gradient descent function was as follows
+        <li>Original logistic regression with gradient descent function was as follows
           <div class="eqn">
-<math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
-<span class="eqn-note">j = 0, 1, 2, 3, &#x2026;, n</span>
-</div>
-        </li>
+            <math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
+            <span class="eqn-note">j = 0, 1, 2, 3, &#x2026;, n</span>
+          </div></li>
       </ul>
     </li>
-    <li>
-      Again, to modify the algorithm we simply need to modify the update rule for θ<sub>1</sub>, onwards
+    <li>Again, to modify the algorithm we simply need to modify the update rule for θ<sub>1</sub>, onwards
       <ul>
-        <li>
-          Looks cosmetically the same as linear regression, except obviously the hypothesis is very different
+        <li>Looks cosmetically the same as linear regression, except obviously the hypothesis is very different
           <div class="eqn">
-<math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><mo>)</mo><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
-<span class="eqn-note">Cosmetically the same as regularised linear regression &mdash; but h<sub>&#x3B8;</sub>(x) is the sigmoid here, so it is a different algorithm.</span>
-</div>
-        </li>
+            <math display="block"><mrow><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>&#x2254;</mo><msub><mi>&#x3B8;</mi><mi>j</mi></msub><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mi>&#x3BB;</mi><mi>m</mi></mfrac><mo>)</mo><mo>&#x2212;</mo><mi>&#x3B1;</mi><mfrac><mn>1</mn><mi>m</mi></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><msubsup><mi>x</mi><mi>j</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup></mrow></math>
+            <span class="eqn-note">Cosmetically the same as regularised linear regression &mdash; but h<sub>&#x3B8;</sub>(x) is the sigmoid here, so it is a different algorithm.</span>
+          </div></li>
       </ul>
     </li>
   </ul>
@@ -468,26 +425,22 @@ X @ theta                <span class="comment"># [2.14, 3.05, 3.95, 4.86]  - a s
     <math><mrow><mi>&#x22EE;</mi></mrow></math>
     gradient[n] = [code to compute <math><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>];</pre>
   <ul>
-    <li>
-      use <strong><code class="hl-green">scipy.optimize.minimize</code></strong>
+    <li>use <strong><code class="hl-green">scipy.optimize.minimize</code></strong>
       <ul>
         <li>Pass it the <strong><code class="hl-green">cost_function</code></strong> object</li>
         <li>Minimizes in an optimized manner using the cost function</li>
       </ul>
     </li>
-    <li>
-      <code class="hl-green"><strong>jVal</strong></code>
+    <li><code class="hl-green"><strong>jVal</strong></code>
       <ul>
-        <li>
-          Need code to compute J(θ)
+        <li>Need code to compute J(θ)
           <ul>
             <li>Need to include regularization term</li>
           </ul>
         </li>
       </ul>
     </li>
-    <li>
-      Gradient
+    <li>Gradient
       <ul>
         <li>Needs to be the partial derivative of J(θ) with respect to θ<sub>i</sub></li>
         <li>Adding the appropriate term here is also necessary</li>
@@ -510,8 +463,7 @@ X @ theta                <span class="comment"># [2.14, 3.05, 3.95, 4.86]  - a s
     <math><mrow><mi>&#x22EE;</mi></mrow></math>
     gradient[n] = [code to compute <math><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo></mrow></math>];</pre>
   <ul>
-    <li>
-      Ensure summation doesn't extend to the lambda term!
+    <li>Ensure summation doesn't extend to the lambda term!
       <ul>
         <li>It doesn't, but, you know, don't be daft!</li>
       </ul>

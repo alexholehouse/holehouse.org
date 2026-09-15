@@ -3,65 +3,138 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Stanford Machine Learning &mdash; complete course notes</title>
+<title>Stanford Machine Learning — complete course notes</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="topbar">
-  <a href="https://holehouse.org">holehouse.org</a>
-  <a href="changelog.html">Changelog</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
 <h1>Stanford Machine Learning</h1>
 
 <p>The following notes represent a complete, stand alone interpretation of Stanford's machine learning course presented by <a href="http://ai.stanford.edu/~ang/">Professor Andrew Ng</a> and originally posted on the ml-class.org website during the fall 2011 semester. The topics covered are shown below, although for a more detailed summary see lecture 19. The code examples throughout use Python with NumPy rather than the programming environment the original course taught.</p>
-
 <p>All diagrams are my own or are directly taken from the lectures, full credit to Professor Ng for a truly exceptional lecture course.</p>
-
 <h2>What are these notes?</h2>
-
 <p>Originally written as a way for me personally to help solidify and document the concepts, these notes have grown into a reasonably complete block of reference material spanning the course in its entirety in just over 40,000 words and a lot of diagrams! The target audience was originally me, but more broadly, can be someone familiar with programming although no assumption regarding statistics, calculus or linear algebra is made. We go from the very introduction of machine learning to neural networks, recommender systems and even pipeline design. The one thing I will say is that a lot of the later topics build on those of earlier sections, so it's generally advisable to work through in chronological order.</p>
-
 <p>The notes were written in Evernote and exported to HTML automatically, which left the original pages with a lot of markup that was never meant to be read. This version rewrites that markup by hand-built conversion: the words are unchanged, but the structure underneath them is now clean, semantic HTML.</p>
-
 <h2>How can you help!?</h2>
-
-<p>If you notice errors or typos, inconsistencies or things that are unclear please tell me and I'll update them. It would be hugely appreciated!<br>
-You can find me at <strong>alex[AT]holehouse[DOT]org</strong></p>
-
-<p><strong><a href="changelog.html">A changelog can be found here</a></strong> &mdash; it lists both the original corrections and everything that changed in this rewrite.</p>
-
+<p>If you notice errors or typos, inconsistencies or things that are unclear please tell me and I'll update them. It would be hugely appreciated!<br> You can find me at <strong>alex[AT]holehouse[DOT]org</strong></p>
+<p><strong><a href="changelog.html">A changelog can be found here</a></strong> — it lists both the original corrections and everything that changed in this rewrite.</p>
 <h2>Contents</h2>
-
+<p class="ch-legend">Each chapter is tagged with where it came from. <span class="ch-tag">2011 course</span> marks the original notes from the Stanford course: the text is unchanged apart from corrections, although the code examples were rewritten in Python and NumPy in 2026. <span class="ch-tag ch-tag-new">2026 addition</span> marks chapters written for this edition, covering material that did not exist or was not part of the course in 2011.</p>
 <ul class="chapter-list">
-  <li><a href="01_Introduction.html">01: Introduction</a></li>
-  <li><a href="02_Linear_Regression_with_One_Variable.html">02: Linear Regression with One Variable</a></li>
-  <li><a href="03_Linear_algebra_review.html">03: Linear Algebra &mdash; Review</a></li>
-  <li><a href="04_Linear_Regression_with_multiple_variables.html">04: Linear Regression with Multiple Variables</a></li>
-  <li><a href="05_Probability_and_Bayes_Rule.html">05: Probability and Bayes' Rule <span class="note">&mdash; added later, replacing the unwritten programming chapter</span></a></li>
-  <li><a href="06_Logistic_Regression.html">06: Logistic Regression</a></li>
-  <li><a href="07_Regularization.html">07: Regularization</a></li>
-  <li><a href="08_Neural_Networks_Representation.html">08: Neural Networks &mdash; Representation</a></li>
-  <li><a href="09_Neural_Networks_Learning.html">09: Neural Networks &mdash; Learning</a></li>
-  <li><a href="10_Advice_for_applying_machine_learning.html">10: Advice for applying machine learning techniques</a></li>
-  <li><a href="11_Machine_Learning_System_Design.html">11: Machine Learning System Design</a></li>
-  <li><a href="12_Support_Vector_Machines.html">12: Support Vector Machines</a></li>
-  <li><a href="13_Clustering.html">13: Clustering</a></li>
-  <li><a href="14_Dimensionality_Reduction.html">14: Dimensionality Reduction</a></li>
-  <li><a href="15_Anomaly_Detection.html">15: Anomaly Detection</a></li>
-  <li><a href="16_Recommender_Systems.html">16: Recommender Systems</a></li>
-  <li><a href="17_Large_Scale_Machine_Learning.html">17: Large Scale Machine Learning</a></li>
-  <li><a href="18_Application_Example_OCR.html">18: Application Example &mdash; Photo OCR</a></li>
-  <li><a href="19_Course_Summary.html">19: Course Summary</a></li>
-  <li><a href="20_Modern_Deep_Learning.html">20: Modern Deep Learning <span class="note">&mdash; added later, not part of the original course</span></a></li>
-  <li><a href="21_Attention.html">21: Attention <span class="note">&mdash; added later, not part of the original course</span></a></li>
-  <li><a href="22_Large_Language_Models.html">22: Large Language Models <span class="note">&mdash; added later, not part of the original course</span></a></li>
-  <li><a href="23_Diffusion_Models.html">23: Diffusion Models <span class="note">&mdash; added later, not part of the original course</span></a></li>
-  <li><a href="24_AlphaFold2.html">24: AlphaFold2 <span class="note">&mdash; added later, not part of the original course</span></a></li>
-  <li><a href="25_ESM2_and_ESM_C.html">25: ESM2 and ESM-C <span class="note">&mdash; added later, not part of the original course</span></a></li>
-  <li><a href="26_Convolutional_Neural_Networks.html">26: Convolutional Neural Networks <span class="note">&mdash; added later, not part of the original course</span></a></li>
-  <li><a href="A1_Python_and_NumPy.html">Appendix 1: Python and NumPy <span class="note">&mdash; the NumPy primer behind the code examples</span></a></li>
+  <li><a href="01_Introduction.html">
+    <span class="ch-head"><span class="ch-title">01: Introduction</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">What machine learning is, and the difference between supervised and unsupervised learning.</span>
+  </a></li>
+  <li><a href="02_Linear_Regression_with_One_Variable.html">
+    <span class="ch-head"><span class="ch-title">02: Linear Regression with One Variable</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Fitting a straight line: the hypothesis, the cost function, and gradient descent from first principles.</span>
+  </a></li>
+  <li><a href="03_Linear_algebra_review.html">
+    <span class="ch-head"><span class="ch-title">03: Linear Algebra — Review</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Matrices, vectors, multiplication, inverse and transpose: the notation the rest of the course leans on.</span>
+  </a></li>
+  <li><a href="04_Linear_Regression_with_multiple_variables.html">
+    <span class="ch-head"><span class="ch-title">04: Linear Regression with Multiple Variables</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Many features at once: vectorized gradient descent, feature scaling, learning rates, polynomial features and the normal equation.</span>
+  </a></li>
+  <li><a href="05_Probability_and_Bayes_Rule.html">
+    <span class="ch-head"><span class="ch-title">05: Probability and Bayes' Rule</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">The probability the course assumes but never teaches: Bayes' rule, maximum likelihood, and naive Bayes. Replaces the programming chapter that was never written.</span>
+  </a></li>
+  <li><a href="06_Logistic_Regression.html">
+    <span class="ch-head"><span class="ch-title">06: Logistic Regression</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Classification with the sigmoid: decision boundaries, the log-loss cost, and one-vs-all for more than two classes.</span>
+  </a></li>
+  <li><a href="07_Regularization.html">
+    <span class="ch-head"><span class="ch-title">07: Regularization</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Overfitting, and how a penalty on the parameters tames it in both linear and logistic regression.</span>
+  </a></li>
+  <li><a href="08_Neural_Networks_Representation.html">
+    <span class="ch-head"><span class="ch-title">08: Neural Networks — Representation</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">How a network is wired: layers, activations, forward propagation, and why it can compute non-linear functions.</span>
+  </a></li>
+  <li><a href="09_Neural_Networks_Learning.html">
+    <span class="ch-head"><span class="ch-title">09: Neural Networks — Learning</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Training a network: the cost function, backpropagation, gradient checking and random initialization.</span>
+  </a></li>
+  <li><a href="10_Advice_for_applying_machine_learning.html">
+    <span class="ch-head"><span class="ch-title">10: Advice for applying machine learning techniques</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Diagnosing what is wrong with a model: train, validation and test sets, bias versus variance, and learning curves.</span>
+  </a></li>
+  <li><a href="11_Machine_Learning_System_Design.html">
+    <span class="ch-head"><span class="ch-title">11: Machine Learning System Design</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Building a system end to end, using spam classification: what to prioritise, error metrics for skewed classes, and precision versus recall.</span>
+  </a></li>
+  <li><a href="12_Support_Vector_Machines.html">
+    <span class="ch-head"><span class="ch-title">12: Support Vector Machines</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Large-margin classification, the kernel trick for non-linear boundaries, and when to prefer an SVM over logistic regression.</span>
+  </a></li>
+  <li><a href="13_Clustering.html">
+    <span class="ch-head"><span class="ch-title">13: Clustering</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Unsupervised learning with K-means: the algorithm, its objective, and choosing the number of clusters.</span>
+  </a></li>
+  <li><a href="14_Dimensionality_Reduction.html">
+    <span class="ch-head"><span class="ch-title">14: Dimensionality Reduction</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Principal component analysis for compressing and visualising data, and how many components to keep.</span>
+  </a></li>
+  <li><a href="15_Anomaly_Detection.html">
+    <span class="ch-head"><span class="ch-title">15: Anomaly Detection</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Modelling normal data with a Gaussian and flagging what does not fit, including the multivariate case.</span>
+  </a></li>
+  <li><a href="16_Recommender_Systems.html">
+    <span class="ch-head"><span class="ch-title">16: Recommender Systems</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Content-based and collaborative filtering, and low-rank matrix factorization for predicting ratings.</span>
+  </a></li>
+  <li><a href="17_Large_Scale_Machine_Learning.html">
+    <span class="ch-head"><span class="ch-title">17: Large Scale Machine Learning</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">Learning from very large datasets: stochastic and mini-batch gradient descent, online learning, and map-reduce.</span>
+  </a></li>
+  <li><a href="18_Application_Example_OCR.html">
+    <span class="ch-head"><span class="ch-title">18: Application Example — Photo OCR</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">A complete pipeline: sliding windows, artificial data synthesis, and ceiling analysis to decide what to improve next.</span>
+  </a></li>
+  <li><a href="19_Course_Summary.html">
+    <span class="ch-head"><span class="ch-title">19: Course Summary</span> <span class="ch-tag">2011 course</span></span>
+    <span class="ch-desc">A short recap of everything the original course covered.</span>
+  </a></li>
+  <li><a href="20_Modern_Deep_Learning.html">
+    <span class="ch-head"><span class="ch-title">20: Modern Deep Learning</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">What changed after 2011: ReLU, initialization, Adam, dropout and batch normalization, and how today's assistants are trained.</span>
+  </a></li>
+  <li><a href="21_Attention.html">
+    <span class="ch-head"><span class="ch-title">21: Attention</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">Attention as a soft lookup, self-attention, positional encoding, multi-head attention, and the transformer block.</span>
+  </a></li>
+  <li><a href="22_Large_Language_Models.html">
+    <span class="ch-head"><span class="ch-title">22: Large Language Models</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">Tokens and embeddings, autoregressive and masked objectives, sampling, perplexity, and training at scale.</span>
+  </a></li>
+  <li><a href="23_Diffusion_Models.html">
+    <span class="ch-head"><span class="ch-title">23: Diffusion Models</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">Destroying data with noise and learning to reverse it, with a complete diffusion model in NumPy.</span>
+  </a></li>
+  <li><a href="24_AlphaFold2.html">
+    <span class="ch-head"><span class="ch-title">24: AlphaFold2</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">How protein structure prediction works: MSAs and coevolution, the Evoformer, the structure module, and confidence measures.</span>
+  </a></li>
+  <li><a href="25_ESM2_and_ESM_C.html">
+    <span class="ch-head"><span class="ch-title">25: ESM2 and ESM-C</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">Protein language models: masked residue prediction, what the embeddings capture, and how to use them in practice.</span>
+  </a></li>
+  <li><a href="26_Convolutional_Neural_Networks.html">
+    <span class="ch-head"><span class="ch-title">26: Convolutional Neural Networks</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">Convolution, pooling and weight sharing for image data, the ImageNet moment, and how convnets relate to transformers.</span>
+  </a></li>
+  <li><a href="A1_Python_and_NumPy.html">
+    <span class="ch-head"><span class="ch-title">Appendix 1: Python and NumPy</span> <span class="ch-tag ch-tag-new">2026 addition</span></span>
+    <span class="ch-desc">The NumPy primer behind the code examples: arrays, shapes, broadcasting and vectorization.</span>
+  </a></li>
 </ul>
 
 </main>

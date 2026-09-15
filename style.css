@@ -95,6 +95,14 @@ section[id] { scroll-margin-top: calc(var(--topbar-h) + 0.75rem); }
 
 .topbar a:hover { text-decoration: underline; }
 
+/* The section you are in. */
+.topbar a.current {
+  color: #ffffff;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.4em;
+}
+
 /* --- headings ------------------------------------------------------------ */
 
 h1 {
@@ -492,6 +500,72 @@ th small {
   color: var(--text-soft);
   font-size: 0.9rem;
 }
+
+/* --- blog ---------------------------------------------------------------- */
+
+.post-list { list-style: none; padding-left: 0; }
+
+.post-list li {
+  margin: 0;
+  padding: 0.75rem 0.2rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.post-list li:first-child { border-top: 1px solid var(--rule); }
+
+.post-list .post-title {
+  display: block;
+  font-size: 1.1rem;
+  text-decoration: none;
+}
+
+.post-list .post-title:hover { text-decoration: underline; }
+
+.post-meta {
+  display: block;
+  margin-top: 0.2rem;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.post-summary {
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+  color: var(--text-soft);
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0 0.45rem;
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  color: var(--text-soft);
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.tag:hover { border-color: var(--link); color: var(--link); }
+
+article.post > .post-meta { margin: -0.5rem 0 1.6rem; }
+
+.post-nav {
+  margin-top: 3rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--rule);
+  font-family: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.85rem;
+}
+
+.post-nav a { text-decoration: none; }
+.post-nav a:hover { text-decoration: underline; }
 
 /* --- small screens ------------------------------------------------------- */
 

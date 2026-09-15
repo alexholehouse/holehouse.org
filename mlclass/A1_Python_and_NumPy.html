@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -20,8 +21,7 @@
   <a href="index.html">Index</a>
   <span></span>
 </nav>
-
-<div class="toc">
+<nav class="toc" aria-label="On this page">
   <h2>On this page</h2>
   <ul>
     <li><a href="#a-note-on-this-chapter">A note on this chapter</a></li>
@@ -30,8 +30,7 @@
     <li><a href="#vectorization">Vectorization</a></li>
     <li><a href="#the-toolbox-used-in-later-chapters">The toolbox used in later chapters</a></li>
   </ul>
-</div>
-
+</nav>
 <section id="a-note-on-this-chapter">
   <h2>A note on this chapter</h2>
   <ul>
@@ -49,7 +48,6 @@
     <li>Python is very easy to pick up, and the <a href="https://numpy.org/doc/stable/user/absolute_beginners.html">official NumPy beginner's guide</a> is a good fuller tutorial</li>
   </ul>
 </section>
-
 <section id="arrays-and-shapes">
   <h2>Arrays and shapes</h2>
   <ul>
@@ -67,11 +65,11 @@ A = np.array([[1402,  191],
               [ 949, 1437],
               [ 147, 1448]])
 
-A.shape       <span class="comment"># (4, 2)  -> a [4 x 2] matrix</span>
+A.shape       <span class="comment"># (4, 2)  -&gt; a [4 x 2] matrix</span>
 
 v = np.array([460, 232, 315, 178])
-v.shape       <span class="comment"># (4,)    -> a 1-D array of 4 numbers</span>
-v.reshape(4, 1).shape  <span class="comment"># (4, 1)  -> an explicit column vector</span></pre>
+v.shape       <span class="comment"># (4,)    -&gt; a 1-D array of 4 numbers</span>
+v.reshape(4, 1).shape  <span class="comment"># (4, 1)  -&gt; an explicit column vector</span></pre>
   <p class="eqn-note">A 1-D array has no orientation &mdash; it is neither a row nor a column until you reshape it. For most of the code in these notes the 1-D form is fine.</p>
   <ul>
     <li>Indexing starts at 0, not 1
@@ -82,15 +80,14 @@ v.reshape(4, 1).shape  <span class="comment"># (4, 1)  -> an explicit column vec
     </li>
   </ul>
 </section>
-
 <section id="the-operations-the-notes-lean-on">
   <h2>The operations the notes lean on</h2>
   <ul>
     <li>Three symbols do nearly all the work
       <ul>
-        <li><code>@</code> &mdash; matrix multiplication (chapter 03's matrix-matrix and matrix-vector products)</li>
-        <li><code>.T</code> &mdash; transpose</li>
-        <li><code>*</code> &mdash; element-wise multiplication, which is <em>not</em> matrix multiplication</li>
+        <li><code>@</code> — matrix multiplication (chapter 03's matrix-matrix and matrix-vector products)</li>
+        <li><code>.T</code> — transpose</li>
+        <li><code>*</code> — element-wise multiplication, which is <em>not</em> matrix multiplication</li>
       </ul>
     </li>
   </ul>
@@ -100,20 +97,19 @@ v.reshape(4, 1).shape  <span class="comment"># (4, 1)  -> an explicit column vec
               [1,  852]])          <span class="comment"># data with a column of 1s, as in chapter 03</span>
 theta = np.array([-40, 0.25])
 
-X @ theta     <span class="comment"># [486., 314., 343.5, 173.]  -> one prediction per row</span>
-X.T.shape     <span class="comment"># (2, 4)   -> the transpose</span></pre>
+X @ theta     <span class="comment"># [486., 314., 343.5, 173.]  -&gt; one prediction per row</span>
+X.T.shape     <span class="comment"># (2, 4)   -&gt; the transpose</span></pre>
   <ul>
     <li>Broadcasting
       <ul>
         <li>Operations between an array and a scalar (or a smaller array) apply element-wise, stretching the smaller one to fit</li>
-        <li>This is how "subtract the mean from every example" is one line, with no loop</li>
+        <li>This is how &quot;subtract the mean from every example&quot; is one line, with no loop</li>
       </ul>
     </li>
   </ul>
   <pre>X[:, 1] - X[:, 1].mean()   <span class="comment"># mean normalization of a feature, in one line</span>
-(X[:, 1] &gt; 1500)            <span class="comment"># [ True, False,  True, False]  -> boolean mask</span></pre>
+(X[:, 1] &gt; 1500)            <span class="comment"># [ True, False,  True, False]  -&gt; boolean mask</span></pre>
 </section>
-
 <section id="vectorization">
   <h2>Vectorization</h2>
   <ul>
@@ -126,7 +122,6 @@ X.T.shape     <span class="comment"># (2, 4)   -> the transpose</span></pre>
     <li>Rule of thumb: if the maths is written as a sum over examples, the code is usually a matrix multiply</li>
   </ul>
 </section>
-
 <section id="the-toolbox-used-in-later-chapters">
   <h2>The toolbox used in later chapters</h2>
   <ul>
@@ -154,7 +149,7 @@ def cost_function(theta):        <span class="comment"># returns (cost, gradient
     return jval, gradient
 
 res = minimize(cost_function, np.zeros(2), jac=True)
-res.x         <span class="comment"># [5., 5.]  -> the minimum, found for us</span></pre>
+res.x         <span class="comment"># [5., 5.]  -&gt; the minimum, found for us</span></pre>
   <p class="eqn-note">The same worked example chapter 06 uses to introduce advanced optimization &mdash; J(θ) = (θ<sub>1</sub> &minus; 5)&sup2; + (θ<sub>2</sub> &minus; 5)&sup2;, minimised at (5, 5).</p>
 </section>
 

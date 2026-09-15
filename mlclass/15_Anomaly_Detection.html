@@ -8,8 +8,9 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html">Notes index</a>
-  <a href="https://holehouse.org">holehouse.org</a>
+  <a href="/">holehouse.org</a>
+  <a href="/blog/">Blog</a>
+  <a href="/mlclass/" class="current" aria-current="page">Machine learning notes</a>
 </header>
 
 <main>
@@ -36,50 +37,42 @@
 <section id="anomaly-detection-problem-motivation">
   <h2>Anomaly detection - problem motivation</h2>
   <ul>
-    <li>
-      Anomaly detection is a reasonably commonly used type of machine learning application
+    <li>Anomaly detection is a reasonably commonly used type of machine learning application
       <ul>
         <li>Can be thought of as a solution to an unsupervised learning problem</li>
         <li>But, has aspects of supervised learning</li>
       </ul>
     </li>
-    <li>
-      What is anomaly detection?
+    <li>What is anomaly detection?
       <ul>
         <li>Imagine you're an aircraft engine manufacturer</li>
-        <li>
-          As engines roll off your assembly line you're doing QA
+        <li>As engines roll off your assembly line you're doing QA
           <ul>
             <li>Measure some features from engines (e.g. heat generated and vibration)</li>
           </ul>
         </li>
         <li>You now have a dataset of <strong>x<sup>1</sup> to </strong><strong>x<sup>m</sup> (i.e. <em>m </em>engines were tested)</strong></li>
         <li><strong>Say we plot that dataset <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image.png"/></figure></strong></li>
-        <li>
-          <strong>Next day you have a new engine</strong>
+        <li><strong>Next day you have a new engine</strong>
           <ul>
             <li><strong>An anomaly detection method is used to see if the new engine is </strong>anomalous (when compared to the previous engines)</li>
           </ul>
         </li>
-        <li>
-          <strong>If the new engine looks like this;<figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [1].png"/></figure></strong>
+        <li><strong>If the new engine looks like this;<figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [1].png"/></figure></strong>
           <ul>
             <li><strong>Probably OK - looks like the ones we've seen before</strong></li>
           </ul>
         </li>
-        <li>
-          <strong>But if the engine looks like this<figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [2].png"/></figure></strong>
+        <li><strong>But if the engine looks like this<figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [2].png"/></figure></strong>
           <ul>
             <li>Uh oh! - this looks like an <strong><span class="hl-red">anomalous </span></strong><span class="hl-red"><strong>data-point</strong></span></li>
           </ul>
         </li>
       </ul>
     </li>
-    <li>
-      More formally
+    <li>More formally
       <ul>
-        <li>
-          We have a dataset which contains <span class="term"><strong>normal</strong> </span>(data)
+        <li>We have a dataset which contains <span class="term"><strong>normal</strong> </span>(data)
           <ul>
             <li>How we ensure they're normal is up to us</li>
             <li>In reality it's OK if there are a few which aren't actually normal</li>
@@ -88,30 +81,25 @@
         <li>Using that dataset as a reference point we can see if other examples are <strong><span class="term">anomalous</span></strong></li>
       </ul>
     </li>
-    <li>
-      How do we do this?
+    <li>How do we do this?
       <ul>
-        <li>
-          First, using our training dataset we build a model
+        <li>First, using our training dataset we build a model
           <ul>
-            <li>
-              We can access this model using <strong><span class="hl-red">p(x)</span></strong>
+            <li>We can access this model using <strong><span class="hl-red">p(x)</span></strong>
               <ul>
-                <li>This asks, "What is the probability that example x is normal"</li>
+                <li>This asks, &quot;What is the probability that example x is normal&quot;</li>
               </ul>
             </li>
           </ul>
         </li>
-        <li>
-          Having built a model
+        <li>Having built a model
           <ul>
             <li>if p(<strong>x<sub>test</sub></strong>) &lt; ε --&gt; flag this as an anomaly</li>
             <li>if p(<strong>x<sub>test</sub></strong>) &gt;= ε --&gt; this is OK</li>
             <li>ε is some threshold probability value which we define, depending on how sure we need/want to be</li>
           </ul>
         </li>
-        <li>
-          We expect our model to (graphically) look something like this;
+        <li>We expect our model to (graphically) look something like this;
           <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [3].png"/></figure>
           <ul>
             <li>i.e. this would be our model if we had 2D data</li>
@@ -122,11 +110,9 @@
   </ul>
   <h3>Applications</h3>
   <ul>
-    <li>
-      <u>Fraud detection</u>
+    <li><u>Fraud detection</u>
       <ul>
-        <li>
-          Users have activity associated with them, such as
+        <li>Users have activity associated with them, such as
           <ul>
             <li>Length of time on-line</li>
             <li>Location of login</li>
@@ -134,9 +120,8 @@
           </ul>
         </li>
         <li>Using this data we can build a model of what normal users' activity is like</li>
-        <li>What is the probability of "normal" behavior?</li>
-        <li>
-          Identify unusual users by sending their data through the model
+        <li>What is the probability of &quot;normal&quot; behavior?</li>
+        <li>Identify unusual users by sending their data through the model
           <ul>
             <li>Flag up anything that looks a bit weird</li>
             <li>Automatically block cards/transactions</li>
@@ -144,32 +129,27 @@
         </li>
       </ul>
     </li>
-    <li>
-      <u>Manufacturing</u>
+    <li><u>Manufacturing</u>
       <ul>
         <li>Already spoke about aircraft engine example</li>
       </ul>
     </li>
-    <li>
-      <u>Monitoring computers in data center</u>
+    <li><u>Monitoring computers in data center</u>
       <ul>
         <li>If you have many machines in a cluster</li>
-        <li>
-          Compute features of machine
+        <li>Compute features of machine
           <ul>
             <li><strong>x<sub>1</sub></strong> = memory use</li>
             <li><strong>x<sub>2</sub></strong> = number of disk accesses/sec</li>
             <li><strong>x<sub>3</sub></strong> = CPU load</li>
           </ul>
         </li>
-        <li>
-          In addition to the measurable features you can also define your own complex features
+        <li>In addition to the measurable features you can also define your own complex features
           <ul>
             <li><strong>x<sub>4</sub></strong> = CPU load/network traffic</li>
           </ul>
         </li>
-        <li>
-          If you see an anomalous machine
+        <li>If you see an anomalous machine
           <ul>
             <li>Maybe about to fail</li>
             <li>Look at replacing bits from it</li>
@@ -183,15 +163,12 @@
   <h2>The Gaussian distribution (optional)</h2>
   <ul>
     <li>Also called the <strong><span class="term">normal distribution</span></strong></li>
-    <li>
-      Example
+    <li>Example
       <ul>
-        <li>
-          Say x (data set) is made up of real numbers
+        <li>Say x (data set) is made up of real numbers
           <ul>
             <li>Mean is μ</li>
-            <li>
-              Variance is σ<sup>2</sup>
+            <li>Variance is σ<sup>2</sup>
               <ul>
                 <li>σ is also called the <strong><span class="term">standard </span></strong><strong><span class="term">deviation</span></strong> - specifies the width of the Gaussian probability</li>
               </ul>
@@ -199,44 +176,35 @@
             <li>The data has a Gaussian distribution</li>
           </ul>
         </li>
-        <li>
-          Then we can write this ~ <em>N(</em>μ,σ<sup>2</sup> )
+        <li>Then we can write this ~ <em>N(</em>μ,σ<sup>2</sup> )
           <ul>
-            <li>~ means "is distributed as"</li>
-            <li><em>N</em> (should really be "script" N (even curlier!) -&gt; means normal distribution</li>
-            <li>
-              <p>μ, σ<sup>2</sup> represent the mean and variance, respectively</p>
+            <li>~ means &quot;is distributed as&quot;</li>
+            <li><em>N</em> (should really be &quot;script&quot; N (even curlier!) -&gt; means normal distribution</li>
+            <li><p>μ, σ<sup>2</sup> represent the mean and variance, respectively</p>
               <ul>
                 <li>These are the two parameters a Gaussian needs</li>
               </ul>
             </li>
           </ul>
         </li>
-        <li>
-          Looks like this;
-          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [4].png"/></figure>
-        </li>
-        <li>
-          This specifies the probability of x taking a value
+        <li>Looks like this;
+          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [4].png"/></figure></li>
+        <li>This specifies the probability of x taking a value
           <ul>
             <li>As you move away from μ</li>
           </ul>
         </li>
       </ul>
     </li>
-    <li>
-      Gaussian equation is
+    <li>Gaussian equation is
       <ul>
-        <li>
-          P(x : μ , σ<sup>2</sup>) (probability of x, parameterized by the mean and variance)<br/>
+        <li>P(x : μ , σ<sup>2</sup>) (probability of x, parameterized by the mean and variance)<br/>
           <div class="eqn">
-<math display="block"><mrow><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mn>2</mn><mi>&#x3c0;</mi></msqrt><mi>&#x3c3;</mi></mrow></mfrac><mspace width="0.25em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>&#x3c3;</mi><mn>2</mn></msup></mrow></mfrac><mo form="postfix">)</mo></mrow></math>
-</div>
-        </li>
+            <math display="block"><mrow><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mn>2</mn><mi>&#x3c0;</mi></msqrt><mi>&#x3c3;</mi></mrow></mfrac><mspace width="0.25em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>&#x3c3;</mi><mn>2</mn></msup></mrow></mfrac><mo form="postfix">)</mo></mrow></math>
+          </div></li>
       </ul>
     </li>
-    <li>
-      Some examples of Gaussians below
+    <li>Some examples of Gaussians below
       <ul>
         <li>Area is always the same (must = 1)</li>
         <li>But width changes as standard deviation changes</li>
@@ -246,39 +214,30 @@
   <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [6].png"/></figure>
   <h3>Parameter estimation problem</h3>
   <ul>
-    <li>
-      What is it?
+    <li>What is it?
       <ul>
         <li>Say we have a data set of m examples</li>
-        <li>
-          Given each example is a real number - we can plot the data on the x axis as shown below
-          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [7].png"/></figure>
-        </li>
-        <li>
-          Problem is - say you suspect these examples come from a Gaussian
+        <li>Given each example is a real number - we can plot the data on the x axis as shown below
+          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [7].png"/></figure></li>
+        <li>Problem is - say you suspect these examples come from a Gaussian
           <ul>
             <li>Given the dataset can you estimate the distribution?</li>
           </ul>
         </li>
-        <li>
-          Could be something like this
-          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [8].png"/></figure>
-        </li>
+        <li>Could be something like this
+          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [8].png"/></figure></li>
         <li>Seems like a reasonable fit - data seems like a higher probability of being in the central region, lower probability of being further away</li>
       </ul>
     </li>
-    <li>
-      Estimating μ and σ<sup>2</sup>
+    <li>Estimating μ and σ<sup>2</sup>
       <ul>
         <li>μ = average of examples</li>
-        <li>
-          σ<sup>2</sup> = standard deviation squared <br/>
+        <li>σ<sup>2</sup> = standard deviation squared <br/>
           <div class="eqn">
-<math display="block"><mrow><msup><mi>&#x3c3;</mi><mn>2</mn></msup><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
-<span class="eqn-note">Dividing by m rather than m&#x2212;1. The chapter notes this is the maximum-likelihood estimate, and that with a reasonable number of examples the difference does not matter in practice.</span>
-</div>
-<div class="code-eg">
-<pre>import numpy as np
+            <math display="block"><mrow><msup><mi>&#x3c3;</mi><mn>2</mn></msup><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+            <span class="eqn-note">Dividing by m rather than m&#x2212;1. The chapter notes this is the maximum-likelihood estimate, and that with a reasonable number of examples the difference does not matter in practice.</span>
+          </div><div class="code-eg">
+            <pre>import numpy as np
 
 rng = np.random.default_rng(0)
 x = rng.normal(5, 2, 1000)        <span class="comment"># data with true mu = 5, sigma = 2</span>
@@ -291,15 +250,13 @@ def p(v, mu, sigma2):             <span class="comment"># the Gaussian density a
 
 p(mu, mu, sigma2)       <span class="comment"># 0.204  - highest exactly at the mean</span>
 p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearly nothing</span></pre>
-<p class="eqn-note">Parameter estimation and the density itself: fit &mu; and &sigma;&sup2; from a thousand samples, then read probabilities off the curve.</p>
-</div>
+            <p class="eqn-note">Parameter estimation and the density itself: fit &mu; and &sigma;&sup2; from a thousand samples, then read probabilities off the curve.</p>
+          </div>
         </li>
-        <li>
-          As a side comment
+        <li>As a side comment
           <ul>
             <li>These parameters are the maximum likelihood estimation values for μ and σ<sup>2</sup></li>
-            <li>
-              You can also do 1/(m) or 1/(m-1) doesn't make too much difference
+            <li>You can also do 1/(m) or 1/(m-1) doesn't make too much difference
               <ul>
                 <li>Slightly different mathematical problems, but in practice it makes little difference</li>
               </ul>
@@ -313,33 +270,27 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
 <section id="anomaly-detection-algorithm">
   <h2>Anomaly detection algorithm</h2>
   <ul>
-    <li>
-      Unlabeled training set of m examples
+    <li>Unlabeled training set of m examples
       <ul>
-        <li>
-          Data = {x<sup>1</sup>, x<sup>2</sup>, ..., x<sup>m </sup>}
+        <li>Data = {x<sup>1</sup>, x<sup>2</sup>, ..., x<sup>m </sup>}
           <ul>
             <li>Each example is an n-dimensional vector (i.e. a feature vector)</li>
             <li>We have n features!</li>
           </ul>
         </li>
-        <li>
-          Model P(x) from the data set
+        <li>Model P(x) from the data set
           <ul>
             <li>What are high probability features and low probability features</li>
             <li>x is a vector</li>
-            <li>
-              So model p(x) as
+            <li>So model p(x) as
               <ul>
                 <li>= p(x<strong><sub>1</sub></strong>; μ<strong><sub>1</sub></strong> , σ<strong><sub>1</sub></strong><sup>2</sup>) * p(x<strong><sub>2</sub></strong>; μ<strong><sub>2</sub></strong> , σ<strong><sub>2</sub></strong><sup>2</sup>) * ... p(x<strong><sub>n </sub></strong>; μ<strong><sub>n</sub></strong> , σ<strong><sub>n</sub></strong><sup>2</sup>)</li>
               </ul>
             </li>
-            <li>
-              Multiply the probabilities of each feature together
+            <li>Multiply the probabilities of each feature together
               <ul>
                 <li>We model each of the features by assuming each feature is distributed according to a Gaussian distribution</li>
-                <li>
-                  p(x<strong><sub>i</sub></strong>; μ<strong><sub>i</sub></strong> , σ<strong><sub>i</sub></strong><sup>2</sup>)
+                <li>p(x<strong><sub>i</sub></strong>; μ<strong><sub>i</sub></strong> , σ<strong><sub>i</sub></strong><sup>2</sup>)
                   <ul>
                     <li>The probability of feature x<strong><sub>i</sub></strong> given μ<strong><sub>i</sub></strong> and σ<strong><sub>i</sub></strong><sup>2</sup>, using a Gaussian distribution</li>
                   </ul>
@@ -348,23 +299,20 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
             </li>
           </ul>
         </li>
-        <li>
-          As a side comment
+        <li>As a side comment
           <ul>
-            <li>
-              Turns out this equation makes an <strong><span class="term">independence assumption</span></strong> for the features, although algorithm works if features are independent or not
+            <li>Turns out this equation makes an <strong><span class="term">independence assumption</span></strong> for the features, although algorithm works if features are independent or not
               <ul>
                 <li>Don't worry too much about this, although if your features are tightly linked you should be able to do some dimensionality reduction anyway!</li>
               </ul>
             </li>
           </ul>
         </li>
-        <li>
-          We can write this chain of multiplication more compactly as follows;
+        <li>We can write this chain of multiplication more compactly as follows;
           <div class="eqn">
-<math display="block"><mrow><mo>=</mo><munderover><mo>&#x220f;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>p</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo>,</mo><msubsup><mi>&#x3c3;</mi><mi>j</mi><mn>2</mn></msubsup><mo stretchy="false">)</mo></mrow></math>
-<span class="eqn-note">One Gaussian per feature, multiplied together &#x2014; which assumes the features are independent. This is the Naive Bayes assumption of chapter 05, used here without labels.</span>
-</div>
+            <math display="block"><mrow><mo>=</mo><munderover><mo>&#x220f;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>p</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo>,</mo><msubsup><mi>&#x3c3;</mi><mi>j</mi><mn>2</mn></msubsup><mo stretchy="false">)</mo></mrow></math>
+            <span class="eqn-note">One Gaussian per feature, multiplied together &#x2014; which assumes the features are independent. This is the Naive Bayes assumption of chapter 05, used here without labels.</span>
+          </div>
           <ul>
             <li>Capital PI (Π) is the product of a set of values</li>
           </ul>
@@ -375,98 +323,82 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
   </ul>
   <h3>Algorithm</h3>
   <div class="eqn pseudocode">
-<math display="block"><mrow><mn>1.</mn><mspace width="0.5em"/><mtext>Choose features</mtext><mspace width="0.35em"/><msub><mi>x</mi><mi>i</mi></msub><mspace width="0.35em"/><mtext>that might be indicative of anomalous examples.</mtext></mrow></math>
-<math display="block"><mrow><mn>2.</mn><mspace width="0.5em"/><mtext>Fit parameters</mtext><mspace width="0.4em"/><msub><mi>&#x3bc;</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>&#x3bc;</mi><mi>n</mi></msub><mo>,</mo><msubsup><mi>&#x3c3;</mi><mn>1</mn><mn>2</mn></msubsup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msubsup><mi>&#x3c3;</mi><mi>n</mi><mn>2</mn></msubsup></mrow></math>
-<math display="block"><mrow><mspace width="1.8em"/><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msubsup><mi>x</mi><mi>j</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow></math>
-<math display="block"><mrow><mspace width="1.8em"/><msubsup><mi>&#x3c3;</mi><mi>j</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>x</mi><mi>j</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>&#x2212;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
-<math display="block"><mrow><mn>3.</mn><mspace width="0.5em"/><mtext>Given a new example</mtext><mspace width="0.35em"/><mi>x</mi><mo>,</mo><mspace width="0.35em"/><mtext>compute</mtext><mspace width="0.35em"/><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>:</mo></mrow></math>
-<math display="block"><mrow><mspace width="1.8em"/><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>&#x220f;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>p</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo>,</mo><msubsup><mi>&#x3c3;</mi><mi>j</mi><mn>2</mn></msubsup><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>&#x220f;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mn>2</mn><mi>&#x3c0;</mi></msqrt><msub><mi>&#x3c3;</mi><mi>j</mi></msub></mrow></mfrac><mspace width="0.25em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><msup><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>&#x2212;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><msub><mi>&#x3c3;</mi><mi>j</mi></msub><mn>2</mn></msup></mrow></mfrac><mo form="postfix">)</mo></mrow></math>
-<math display="block"><mrow><mspace width="1.8em"/><mtext>Anomaly if</mtext><mspace width="0.4em"/><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>&#x3b5;</mi></mrow></math>
-</div>
+    <math display="block"><mrow><mn>1.</mn><mspace width="0.5em"/><mtext>Choose features</mtext><mspace width="0.35em"/><msub><mi>x</mi><mi>i</mi></msub><mspace width="0.35em"/><mtext>that might be indicative of anomalous examples.</mtext></mrow></math>
+    <math display="block"><mrow><mn>2.</mn><mspace width="0.5em"/><mtext>Fit parameters</mtext><mspace width="0.4em"/><msub><mi>&#x3bc;</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>&#x3bc;</mi><mi>n</mi></msub><mo>,</mo><msubsup><mi>&#x3c3;</mi><mn>1</mn><mn>2</mn></msubsup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msubsup><mi>&#x3c3;</mi><mi>n</mi><mn>2</mn></msubsup></mrow></math>
+    <math display="block"><mrow><mspace width="1.8em"/><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msubsup><mi>x</mi><mi>j</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup></mrow></math>
+    <math display="block"><mrow><mspace width="1.8em"/><msubsup><mi>&#x3c3;</mi><mi>j</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo stretchy="false">(</mo><msubsup><mi>x</mi><mi>j</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msubsup><mo>&#x2212;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow></math>
+    <math display="block"><mrow><mn>3.</mn><mspace width="0.5em"/><mtext>Given a new example</mtext><mspace width="0.35em"/><mi>x</mi><mo>,</mo><mspace width="0.35em"/><mtext>compute</mtext><mspace width="0.35em"/><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>:</mo></mrow></math>
+    <math display="block"><mrow><mspace width="1.8em"/><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>&#x220f;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>p</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo>,</mo><msubsup><mi>&#x3c3;</mi><mi>j</mi><mn>2</mn></msubsup><mo stretchy="false">)</mo><mo>=</mo><munderover><mo>&#x220f;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mn>2</mn><mi>&#x3c0;</mi></msqrt><msub><mi>&#x3c3;</mi><mi>j</mi></msub></mrow></mfrac><mspace width="0.25em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><msup><mrow><mo stretchy="false">(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>&#x2212;</mo><msub><mi>&#x3bc;</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><msub><mi>&#x3c3;</mi><mi>j</mi></msub><mn>2</mn></msup></mrow></mfrac><mo form="postfix">)</mo></mrow></math>
+    <math display="block"><mrow><mspace width="1.8em"/><mtext>Anomaly if</mtext><mspace width="0.4em"/><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>&lt;</mo><mi>&#x3b5;</mi></mrow></math>
+  </div>
   <ul>
-    <li>
-      <strong>1 - Choose features</strong>
+    <li><strong>1 - Choose features</strong>
       <ul>
         <li>Try to come up with features which might help identify something anomalous - may be unusually large or small values</li>
         <li>More generally, choose features which describe the general properties</li>
         <li>This is nothing unique to anomaly detection - it's just the idea of building a sensible feature vector</li>
       </ul>
     </li>
-    <li>
-      <strong>2 - Fit parameters</strong>
+    <li><strong>2 - Fit parameters</strong>
       <ul>
-        <li>
-          Determine parameters for each of your features μ<strong><sub>i</sub></strong> and σ<strong><sub>i</sub></strong><sup>2</sup>
+        <li>Determine parameters for each of your features μ<strong><sub>i</sub></strong> and σ<strong><sub>i</sub></strong><sup>2</sup>
           <ul>
-            <li>Fit is a bit misleading, really should just be "Calculate parameters for 1 to n"</li>
+            <li>Fit is a bit misleading, really should just be &quot;Calculate parameters for 1 to n&quot;</li>
           </ul>
         </li>
         <li>So you're calculating standard deviation and mean for each feature</li>
         <li>You should of course use some vectorized implementation rather than a loop probably</li>
       </ul>
     </li>
-    <li>
-      <strong>3 - compute p(x)</strong>
+    <li><strong>3 - compute p(x)</strong>
       <ul>
         <li>You compute the formula shown (i.e. the formula for the Gaussian probability)</li>
-        <li>If the number is very small, very low chance of it being "normal"</li>
+        <li>If the number is very small, very low chance of it being &quot;normal&quot;</li>
       </ul>
     </li>
   </ul>
   <h3>Anomaly detection example</h3>
   <ul>
-    <li>
-      <strong>x<sub>1</sub></strong>
+    <li><strong>x<sub>1</sub></strong>
       <ul>
         <li>Mean is about 5</li>
         <li>Standard deviation looks to be about 2</li>
       </ul>
     </li>
-    <li>
-      <strong>x<sub>2</sub></strong>
+    <li><strong>x<sub>2</sub></strong>
       <ul>
         <li>Mean is about 3</li>
         <li>Standard deviation about 1</li>
       </ul>
     </li>
-    <li>
-      So we have the following system
-      <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [12].png"/></figure>
-    </li>
-    <li>
-      If we plot the Gaussian for <strong>x<sub>1</sub></strong> and <strong>x<sub>2</sub></strong> we get something like this
-      <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [13].png"/></figure>
-    </li>
-    <li>
-      If you plot the product of these things you get a surface plot like this
+    <li>So we have the following system
+      <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [12].png"/></figure></li>
+    <li>If we plot the Gaussian for <strong>x<sub>1</sub></strong> and <strong>x<sub>2</sub></strong> we get something like this
+      <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [13].png"/></figure></li>
+    <li>If you plot the product of these things you get a surface plot like this
       <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [14].png"/></figure>
       <ul>
         <li>With this surface plot, the height of the surface is the probability - p(x)</li>
         <li>We can't always do surface plots, but for this example it's quite a nice way to show the probability of a 2D feature vector</li>
       </ul>
     </li>
-    <li>
-      Check if a value is anomalous
+    <li>Check if a value is anomalous
       <ul>
         <li>Set epsilon as some value</li>
-        <li>
-          Say we have two new data points with the values
+        <li>Say we have two new data points with the values
           <ul>
             <li>x<sup>1</sup><strong><sub>test</sub></strong></li>
             <li>x<sup>2</sup><strong><sub>test</sub></strong></li>
           </ul>
         </li>
-        <li>
-          We compute
+        <li>We compute
           <ul>
-            <li>
-              p(x<sup>1</sup><strong><sub>test</sub></strong>) = 0.436 &gt;= epsilon (~40% chance it's normal)
+            <li>p(x<sup>1</sup><strong><sub>test</sub></strong>) = 0.436 &gt;= epsilon (~40% chance it's normal)
               <ul>
                 <li>Normal</li>
               </ul>
             </li>
-            <li>
-              p(x<sup>2</sup><strong><sub>test</sub></strong>) = 0.0021 &lt; epsilon (~0.2% chance it's normal)
+            <li>p(x<sup>2</sup><strong><sub>test</sub></strong>) = 0.0021 &lt; epsilon (~0.2% chance it's normal)
               <ul>
                 <li>Anomalous</li>
               </ul>
@@ -481,17 +413,14 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
 <section id="developing-and-evaluating-an-anomaly-detection-system">
   <h2>Developing and evaluating an anomaly detection system</h2>
   <ul>
-    <li>
-      Here talk about developing a system for anomaly detection
+    <li>Here talk about developing a system for anomaly detection
       <ul>
         <li>How to evaluate an algorithm</li>
       </ul>
     </li>
-    <li>
-      Previously we spoke about the importance of real-number evaluation
+    <li>Previously we spoke about the importance of real-number evaluation
       <ul>
-        <li>
-          Often need to make a lot of choices (e.g. features to use)
+        <li>Often need to make a lot of choices (e.g. features to use)
           <ul>
             <li>Easier to evaluate your algorithm if it returns a <strong><span class="hl-red">single number</span></strong> to show if changes you made improved or worsened an algorithm's performance</li>
           </ul>
@@ -499,65 +428,54 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         <li>To develop an anomaly detection system quickly, would be helpful to have a way to evaluate your algorithm</li>
       </ul>
     </li>
-    <li>
-      Assume we have some labeled data
+    <li>Assume we have some labeled data
       <ul>
         <li>So far we've been treating anomalous detection with unlabeled data</li>
-        <li>
-          If you have labeled data allows evaluation
+        <li>If you have labeled data allows evaluation
           <ul>
             <li>i.e. if you think something is anomalous you can be sure if it is or not</li>
           </ul>
         </li>
       </ul>
     </li>
-    <li>
-      So, taking our engine example
+    <li>So, taking our engine example
       <ul>
-        <li>
-          You have some labeled data
+        <li>You have some labeled data
           <ul>
             <li>Data for engines which were non-anomalous -&gt; y = 0</li>
             <li>Data for engines which were anomalous -&gt; y = 1</li>
           </ul>
         </li>
-        <li>
-          Training set is the collection of normal examples
+        <li>Training set is the collection of normal examples
           <ul>
             <li>OK even if we have a few anomalous data examples</li>
           </ul>
         </li>
-        <li>
-          Next define
+        <li>Next define
           <ul>
             <li>Cross validation set</li>
             <li>Test set</li>
             <li>For both assume you can include a few examples which have anomalous examples</li>
           </ul>
         </li>
-        <li>
-          Specific example
+        <li>Specific example
           <ul>
-            <li>
-              Engines
+            <li>Engines
               <ul>
-                <li>
-                  Have 10 000 good engines
+                <li>Have 10 000 good engines
                   <ul>
                     <li>OK even if a few bad ones are here...</li>
                     <li>LOTS of y = 0</li>
                   </ul>
                 </li>
-                <li>
-                  20 flawed engines
+                <li>20 flawed engines
                   <ul>
                     <li>Typically when y = 1 have 2-50</li>
                   </ul>
                 </li>
               </ul>
             </li>
-            <li>
-              Split into
+            <li>Split into
               <ul>
                 <li>Training set: 6000 good engines (y = 0)</li>
                 <li>CV set: 2000 good engines, 10 anomalous</li>
@@ -565,8 +483,7 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
                 <li>Ratio is 3:1:1</li>
               </ul>
             </li>
-            <li>
-              Sometimes we see a different way of splitting
+            <li>Sometimes we see a different way of splitting
               <ul>
                 <li>Take 6000 good in training</li>
                 <li>Same CV and test set (4000 good in each) different 10 anomalous,</li>
@@ -576,24 +493,20 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
             </li>
           </ul>
         </li>
-        <li>
-          Algorithm evaluation
+        <li>Algorithm evaluation
           <ul>
-            <li>
-              Take training set { x<sup>1</sup>, x<sup>2</sup>, ..., x<sup>m </sup>}
+            <li>Take training set { x<sup>1</sup>, x<sup>2</sup>, ..., x<sup>m </sup>}
               <ul>
                 <li>Fit model p(x)</li>
               </ul>
             </li>
-            <li>
-              On cross validation and test set, test the example x
+            <li>On cross validation and test set, test the example x
               <ul>
                 <li>y = 1 if p(x) &lt; epsilon (anomalous)</li>
                 <li>y = 0 if p(x) &gt;= epsilon (normal)</li>
               </ul>
             </li>
-            <li>
-              Think of algorithm as trying to predict if something is anomalous
+            <li>Think of algorithm as trying to predict if something is anomalous
               <ul>
                 <li>But you have a label so can check!</li>
                 <li>Makes it look like a supervised learning algorithm</li>
@@ -603,11 +516,9 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         </li>
       </ul>
     </li>
-    <li>
-      What's a good metric to use for evaluation
+    <li>What's a good metric to use for evaluation
       <ul>
-        <li>
-          y = 0 is very common
+        <li>y = 0 is very common
           <ul>
             <li>So classification accuracy would be bad</li>
           </ul>
@@ -617,12 +528,10 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         <li>Compute F1-score</li>
       </ul>
     </li>
-    <li>
-      Earlier, also had <strong><span class="term">epsilon</span></strong> (the threshold value)
+    <li>Earlier, also had <strong><span class="term">epsilon</span></strong> (the threshold value)
       <ul>
         <li>Threshold to show when something is anomalous</li>
-        <li>
-          If you have CV set you can see how varying epsilon affects various evaluation metrics
+        <li>If you have CV set you can see how varying epsilon affects various evaluation metrics
           <ul>
             <li>Then pick the value of epsilon which maximizes the score on your CV set</li>
           </ul>
@@ -636,8 +545,7 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
 <section id="anomaly-detection-vs-supervised-learning">
   <h2>Anomaly detection vs. supervised learning</h2>
   <ul>
-    <li>
-      If we have labeled data, why not use a supervised learning algorithm?
+    <li>If we have labeled data, why not use a supervised learning algorithm?
       <ul>
         <li>Here we'll try and understand when you should use supervised learning and when anomaly detection would be better</li>
       </ul>
@@ -645,32 +553,27 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
   </ul>
   <h3>Anomaly detection</h3>
   <ul>
-    <li>
-      <strong><span class="hl-red">Very small number of positive </span></strong><strong><span class="hl-red">examples</span></strong>
+    <li><strong><span class="hl-red">Very small number of positive </span></strong><strong><span class="hl-red">examples</span></strong>
       <ul>
         <li>Save positive examples just for CV and test set</li>
         <li>Consider using an anomaly detection algorithm</li>
-        <li>Not enough data to "learn" positive examples</li>
+        <li>Not enough data to &quot;learn&quot; positive examples</li>
       </ul>
     </li>
-    <li>
-      <span class="hl-red"><strong>Have a very large number of negative examples</strong></span>
+    <li><span class="hl-red"><strong>Have a very large number of negative examples</strong></span>
       <ul>
         <li>Use these negative examples for p(x) fitting</li>
         <li>Only need negative examples for this</li>
       </ul>
     </li>
-    <li>
-      <strong><span class="hl-red">Many "types" of anomalies</span></strong>
+    <li><strong><span class="hl-red">Many "types" of anomalies</span></strong>
       <ul>
-        <li>
-          Hard for an algorithm to learn from positive examples when anomalies may look nothing like one another
+        <li>Hard for an algorithm to learn from positive examples when anomalies may look nothing like one another
           <ul>
             <li>So anomaly detection doesn't know what they look like, but knows what they <em>don't</em> look like</li>
           </ul>
         </li>
-        <li>
-          When we looked at SPAM email,
+        <li>When we looked at SPAM email,
           <ul>
             <li>Many types of SPAM</li>
             <li>For the spam problem, usually enough positive examples</li>
@@ -679,21 +582,17 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         </li>
       </ul>
     </li>
-    <li>
-      Application and why they're anomaly detection
+    <li>Application and why they're anomaly detection
       <ul>
-        <li>
-          <strong>Fraud detection</strong>
+        <li><strong>Fraud detection</strong>
           <ul>
             <li>Many ways you may do fraud</li>
             <li>If you're a major on line retailer/very subject to attacks, sometimes might shift to supervised learning</li>
           </ul>
         </li>
-        <li>
-          <strong>Manufacturing</strong>
+        <li><strong>Manufacturing</strong>
           <ul>
-            <li>
-              If you make HUGE volumes maybe have enough positive data -&gt; make supervised
+            <li>If you make HUGE volumes maybe have enough positive data -&gt; make supervised
               <ul>
                 <li>Means you make an assumption about the kinds of errors you're going to see</li>
                 <li>It's the unknown unknowns we don't like!</li>
@@ -708,14 +607,12 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
   <h3>Supervised learning</h3>
   <ul>
     <li><strong><span class="hl-red">Reasonably large number of positive and negative examples</span></strong></li>
-    <li>
-      Have enough positive examples to give your algorithm the opportunity to see what they look like
+    <li>Have enough positive examples to give your algorithm the opportunity to see what they look like
       <ul>
         <li>If you expect anomalies to look anomalous in the same way</li>
       </ul>
     </li>
-    <li>
-      Application
+    <li>Application
       <ul>
         <li>Email/SPAM classification</li>
         <li>Weather prediction</li>
@@ -728,33 +625,26 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
   <h2>Choosing features to use</h2>
   <ul>
     <li>One of the things which has a huge effect is which features are used</li>
-    <li>
-      <strong>Non-Gaussian features</strong>
+    <li><strong>Non-Gaussian features</strong>
       <ul>
-        <li>
-          Plot a histogram of data to check it has a Gaussian description - nice sanity check
+        <li>Plot a histogram of data to check it has a Gaussian description - nice sanity check
           <ul>
             <li>Often still works if data is non-Gaussian</li>
             <li>Use <span class="hl-green"><strong>plt.hist</strong></span> (matplotlib) to plot histogram</li>
           </ul>
         </li>
-        <li>
-          Non-Gaussian data might look like this
-          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [15].png"/></figure>
-        </li>
+        <li>Non-Gaussian data might look like this
+          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [15].png"/></figure></li>
         <li>Can play with different transformations of the data to make it look more Gaussian</li>
-        <li>
-          Might take a log transformation of the data
+        <li>Might take a log transformation of the data
           <ul>
-            <li>
-              i.e. if you have some feature <strong>x<sub>1</sub></strong>, replace it with log(<strong>x<sub>1</sub></strong>)
+            <li>i.e. if you have some feature <strong>x<sub>1</sub></strong>, replace it with log(<strong>x<sub>1</sub></strong>)
               <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [16].png"/></figure>
               <ul>
                 <li>This looks much more Gaussian</li>
               </ul>
             </li>
-            <li>
-              Or do log(<strong>x<sub>1</sub></strong>+c)
+            <li>Or do log(<strong>x<sub>1</sub></strong>+c)
               <ul>
                 <li>Play with c to make it look as Gaussian as possible</li>
               </ul>
@@ -769,24 +659,19 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
   <h3>Error analysis for anomaly detection</h3>
   <ul>
     <li>Good way of coming up with features</li>
-    <li>
-      Like supervised learning error analysis procedure
+    <li>Like supervised learning error analysis procedure
       <ul>
         <li>Run algorithm on CV set</li>
         <li>See which one it got wrong</li>
         <li>Develop new features based on trying to understand <em>why</em> the algorithm got those examples wrong</li>
       </ul>
     </li>
-    <li>
-      Example
+    <li>Example
       <ul>
         <li>p(x) large for normal, p(x) small for abnormal</li>
-        <li>
-          e.g.
-          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [17].png"/></figure>
-        </li>
-        <li>
-          Here we have one dimension, and our anomalous value is sort of buried in it (in green - Gaussian superimposed in blue)
+        <li>e.g.
+          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [17].png"/></figure></li>
+        <li>Here we have one dimension, and our anomalous value is sort of buried in it (in green - Gaussian superimposed in blue)
           <ul>
             <li>Look at data - see what went wrong</li>
             <li>Can looking at that example help develop a new feature (x2) which can help distinguish further anomalous examples</li>
@@ -794,11 +679,9 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         </li>
       </ul>
     </li>
-    <li>
-      Example - data center monitoring
+    <li>Example - data center monitoring
       <ul>
-        <li>
-          Features
+        <li>Features
           <ul>
             <li><strong>x<sub>1</sub></strong> = memory use</li>
             <li><strong>x<sub>2</sub></strong> = number of disk access/sec</li>
@@ -806,12 +689,10 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
             <li><strong>x<sub>4</sub></strong> = network traffic</li>
           </ul>
         </li>
-        <li>
-          We suspect CPU load and network traffic grow linearly with one another
+        <li>We suspect CPU load and network traffic grow linearly with one another
           <ul>
             <li>If server is serving many users, CPU is high and network is high</li>
-            <li>
-              Fail case is infinite loop, so CPU load grows but network traffic is low
+            <li>Fail case is infinite loop, so CPU load grows but network traffic is low
               <ul>
                 <li>New feature - CPU load/network traffic</li>
                 <li>May need to do feature scaling</li>
@@ -826,36 +707,27 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
 <section id="multivariate-gaussian-distribution">
   <h2>Multivariate Gaussian distribution</h2>
   <ul>
-    <li>
-      Is a slightly different technique which can sometimes catch some anomalies which non-multivariate Gaussian distribution anomaly detection fails to
+    <li>Is a slightly different technique which can sometimes catch some anomalies which non-multivariate Gaussian distribution anomaly detection fails to
       <ul>
-        <li>
-          Unlabeled data looks like this
-          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [18].png"/></figure>
-        </li>
+        <li>Unlabeled data looks like this
+          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [18].png"/></figure></li>
         <li>Say you can fit a Gaussian distribution to CPU load and memory use</li>
-        <li>
-          Lets say in the test set we have an example which looks like an anomaly (e.g. <strong>x<sub>1</sub></strong> = 0.4, <strong>x<sub>2</sub></strong> = 1.5)
+        <li>Lets say in the test set we have an example which looks like an anomaly (e.g. <strong>x<sub>1</sub></strong> = 0.4, <strong>x<sub>2</sub></strong> = 1.5)
           <ul>
-            <li>
-              Looks like most of data lies in a region far away from this example
+            <li>Looks like most of data lies in a region far away from this example
               <ul>
                 <li>Here memory use is high and CPU load is low (if we plot <strong>x<sub>1 </sub></strong>vs. <strong>x<sub>2</sub></strong> our green example looks miles away from the others)</li>
               </ul>
             </li>
           </ul>
         </li>
-        <li>
-          Problem is, if we look at each feature individually they may fall within acceptable limits - the issue is we know we shouldn't get those kinds of values <strong>together</strong>
+        <li>Problem is, if we look at each feature individually they may fall within acceptable limits - the issue is we know we shouldn't get those kinds of values <strong>together</strong>
           <ul>
-            <li>
-              But individually, they're both acceptable
-              <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [19].png"/></figure>
-            </li>
+            <li>But individually, they're both acceptable
+              <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [19].png"/></figure></li>
           </ul>
         </li>
-        <li>
-          This is because our function makes probability prediction in concentric circles around the means of both
+        <li>This is because our function makes probability prediction in concentric circles around the means of both
           <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [20].png"/></figure>
           <ul>
             <li>Probability of the two red circled examples is basically the same, even though we can clearly see the green one as an outlier</li>
@@ -867,14 +739,11 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
   </ul>
   <h3>Multivariate Gaussian distribution model</h3>
   <ul>
-    <li>
-      To get around this we develop the <strong><span class="term">multivariate Gaussian distribution</span></strong>
+    <li>To get around this we develop the <strong><span class="term">multivariate Gaussian distribution</span></strong>
       <ul>
-        <li>
-          Model p(x) all in one go, instead of each feature separately
+        <li>Model p(x) all in one go, instead of each feature separately
           <ul>
-            <li>
-              What are the parameters for this new model?
+            <li>What are the parameters for this new model?
               <ul>
                 <li>μ - which is an <em>n</em> dimensional vector (where n is number of features)</li>
                 <li>Σ - which is an [n x n] matrix - the <strong>covariance matrix</strong></li>
@@ -884,22 +753,19 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         </li>
       </ul>
     </li>
-    <li>
-      For the sake of completeness, the formula for the multivariate Gaussian distribution is as follows<br/>
+    <li>For the sake of completeness, the formula for the multivariate Gaussian distribution is as follows<br/>
       <div class="eqn">
-<math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo>;</mo><mi>&#x3bc;</mi><mo>,</mo><mi>&#x3a3;</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
-<span class="eqn-note">&#x3a3; is the covariance matrix, an [n&#x00d7;n] matrix, and &#x3bc; is an [n&#x00d7;1] vector. Unlike the product of independent Gaussians, this one can model features that vary together.</span>
-</div>
+        <math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo>;</mo><mi>&#x3bc;</mi><mo>,</mo><mi>&#x3a3;</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
+        <span class="eqn-note">&#x3a3; is the covariance matrix, an [n&#x00d7;n] matrix, and &#x3bc; is an [n&#x00d7;1] vector. Unlike the product of independent Gaussians, this one can model features that vary together.</span>
+      </div>
       <ul>
         <li>NB don't memorize this - you can always look it up</li>
-        <li>
-          What does this mean?
+        <li>What does this mean?
           <ul>
-            <li>
-              <div class="eqn">
-<math display="block"><mrow><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow></mrow></math>
-<span class="eqn-note">The determinant of the covariance matrix, not an absolute value. In NumPy it is <code>np.linalg.det(Sigma)</code>.</span>
-</div>
+            <li><div class="eqn">
+                <math display="block"><mrow><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow></mrow></math>
+                <span class="eqn-note">The determinant of the covariance matrix, not an absolute value. In NumPy it is <code>np.linalg.det(Sigma)</code>.</span>
+              </div>
               = absolute value of Σ (determinant of sigma)
               <ul>
                 <li>This is a mathematic function of a matrix</li>
@@ -910,22 +776,18 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         </li>
       </ul>
     </li>
-    <li>
-      More importantly, what does this p(x) look like?
+    <li>More importantly, what does this p(x) look like?
       <ul>
-        <li>
-          2D example
+        <li>2D example
           <div class="eqn">
-<math display="block"><mrow><mi>&#x3bc;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="1.4em"/><mi>&#x3a3;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
-<span class="eqn-note">With the identity as the covariance matrix the contours are circles, the same spread in both directions and no correlation between them.</span>
-</div>
+            <math display="block"><mrow><mi>&#x3bc;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="1.4em"/><mi>&#x3a3;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+            <span class="eqn-note">With the identity as the covariance matrix the contours are circles, the same spread in both directions and no correlation between them.</span>
+          </div>
           <ul>
-            <li>
-              Sigma here is the identity matrix
+            <li>Sigma here is the identity matrix
               <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [24].png"/></figure>
               <ul>
-                <li>
-                  p(x) looks like this
+                <li>p(x) looks like this
                   <ul>
                     <li>For inputs of <strong>x<sub>1</sub></strong> and <strong>x<sub>2</sub></strong> the height of the surface gives the value of p(x)</li>
                   </ul>
@@ -934,31 +796,24 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
             </li>
           </ul>
         </li>
-        <li>
-          What happens if we change Sigma?
+        <li>What happens if we change Sigma?
           <div class="eqn">
-<math display="block"><mrow><mi>&#x3bc;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="1.4em"/><mi>&#x3a3;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0.6</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0.6</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
-</div>
-        </li>
-        <li>
-          So now we change the plot to
+            <math display="block"><mrow><mi>&#x3bc;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="1.4em"/><mi>&#x3a3;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0.6</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0.6</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+          </div></li>
+        <li>So now we change the plot to
           <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [26].png"/></figure>
           <ul>
             <li>Now the width of the bump decreases and the height increases</li>
           </ul>
         </li>
-        <li>
-          If we set sigma to be different values we change the shape of our graph<br/>
-          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [27].png"/></figure>
-        </li>
+        <li>If we set sigma to be different values we change the shape of our graph<br/>
+          <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [27].png"/></figure></li>
         <li>Using these values we can, therefore, define the shape of this to better fit the data, rather than assuming symmetry in every dimension</li>
       </ul>
     </li>
-    <li>
-      One of the cool things is you can use it to model correlation between data
+    <li>One of the cool things is you can use it to model correlation between data
       <ul>
-        <li>
-          If you start to change the off-diagonal values in the covariance matrix you can control how well the various dimensions correlate<br/>
+        <li>If you start to change the off-diagonal values in the covariance matrix you can control how well the various dimensions correlate<br/>
           <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [28].png"/></figure>
           <ul>
             <li>So we see here the final example gives a very tall thin distribution, shows a strong positive correlation</li>
@@ -967,8 +822,7 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         </li>
       </ul>
     </li>
-    <li>
-      Hopefully this shows an example of the kinds of distribution you can get by varying sigma
+    <li>Hopefully this shows an example of the kinds of distribution you can get by varying sigma
       <ul>
         <li>We can, of course, also move the mean (μ) which varies the peak of the distribution</li>
       </ul>
@@ -978,23 +832,18 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
 <section id="applying-multivariate-gaussian-distribution-to-anomaly-detection">
   <h2>Applying multivariate Gaussian distribution to anomaly detection</h2>
   <ul>
-    <li>
-      Saw some examples of the kinds of distributions you can model
+    <li>Saw some examples of the kinds of distributions you can model
       <ul>
         <li>Now let's take those ideas and look at applying them to different anomaly detection algorithms</li>
       </ul>
     </li>
-    <li>
-      As mentioned, multivariate Gaussian modeling uses the following equation;
+    <li>As mentioned, multivariate Gaussian modeling uses the following equation;
       <div class="eqn">
-<math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo>;</mo><mi>&#x3bc;</mi><mo>,</mo><mi>&#x3a3;</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
-</div>
-    </li>
-    <li>
-      Which comes with the parameters μ and Σ
+        <math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo>;</mo><mi>&#x3bc;</mi><mo>,</mo><mi>&#x3a3;</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
+      </div></li>
+    <li>Which comes with the parameters μ and Σ
       <ul>
-        <li>
-          Where
+        <li>Where
           <ul>
             <li>μ - the mean (n-dimensional vector)</li>
             <li>Σ - covariance matrix ([nxn] matrix)</li>
@@ -1002,25 +851,21 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
         </li>
       </ul>
     </li>
-    <li>
-      Parameter fitting/estimation problem
+    <li>Parameter fitting/estimation problem
       <ul>
-        <li>
-          If you have a set of examples
+        <li>If you have a set of examples
           <ul>
             <li>{x<sup>1</sup>, x<sup>2</sup>, ..., x<sup>m </sup>}</li>
           </ul>
         </li>
-        <li>
-          The formula for estimating the parameters is
+        <li>The formula for estimating the parameters is
           <div class="eqn">
-<math display="block"><mrow><mi>&#x3bc;</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></mrow></math>
-</div>
+            <math display="block"><mrow><mi>&#x3bc;</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></mrow></math>
+          </div>
           <div class="eqn">
-<math display="block"><mrow><mi>&#x3a3;</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><msup><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mrow></math>
-<span class="eqn-note">The same covariance estimate as in the PCA chapter, but with the mean subtracted first rather than assumed to be zero.</span>
-</div>
-        </li>
+            <math display="block"><mrow><mi>&#x3a3;</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><msup><mrow><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup></mrow></math>
+            <span class="eqn-note">The same covariance estimate as in the PCA chapter, but with the mean subtracted first rather than assumed to be zero.</span>
+          </div></li>
         <li>Using these two formulas you get the parameters</li>
       </ul>
     </li>
@@ -1028,47 +873,37 @@ p(mu + 6, mu, sigma2)   <span class="comment"># 0.0018 - three sigmas out, nearl
   <h3>Anomaly detection algorithm with multivariate Gaussian distribution</h3>
   <ul>
     <li><strong>1)</strong> Fit model - take data set and calculate μ and Σ using the formula above</li>
-    <li>
-      <strong>2)</strong> We're next given a new example (<strong>x<sub>test</sub></strong>) - see below
+    <li><strong>2)</strong> We're next given a new example (<strong>x<sub>test</sub></strong>) - see below
       <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [32].png"/></figure>
       <ul>
-        <li>
-          For it compute p(x) using the following formula for multivariate distribution
+        <li>For it compute p(x) using the following formula for multivariate distribution
           <div class="eqn">
-<math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
-</div>
-        </li>
+            <math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
+          </div></li>
       </ul>
     </li>
-    <li>
-      <strong>3)</strong> Compare the value with ε (threshold probability value)
+    <li><strong>3)</strong> Compare the value with ε (threshold probability value)
       <ul>
         <li>if p(<strong>x<sub>test</sub></strong>) &lt; ε --&gt; flag this as an anomaly</li>
         <li>if p(<strong>x<sub>test</sub></strong>) &gt;= ε --&gt; this is OK</li>
       </ul>
     </li>
-    <li>
-      If you fit a multivariate Gaussian model to our data we build something like this
-      <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [34].png"/></figure>
-    </li>
+    <li>If you fit a multivariate Gaussian model to our data we build something like this
+      <figure><img alt="" loading="lazy" src="15_Anomaly_Detection_files/Image [34].png"/></figure></li>
     <li>Which means it's likely to identify the green value as anomalous</li>
-    <li>
-      Finally, we should mention how multivariate Gaussian relates to our original simple Gaussian model (where each feature is looked at individually)
+    <li>Finally, we should mention how multivariate Gaussian relates to our original simple Gaussian model (where each feature is looked at individually)
       <ul>
         <li>Original model corresponds to multivariate Gaussian where the Gaussians' contours are axis aligned</li>
-        <li>
-          i.e. the normal Gaussian model is a special case of multivariate Gaussian distribution
+        <li>i.e. the normal Gaussian model is a special case of multivariate Gaussian distribution
           <ul>
             <li>This can be shown mathematically</li>
-            <li>
-              Has this constraint that the covariance matrix sigma as ZEROs on the non-diagonal values
+            <li>Has this constraint that the covariance matrix sigma as ZEROs on the non-diagonal values
               <div class="eqn">
-<math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo>;</mo><mi>&#x3bc;</mi><mo>,</mo><mi>&#x3a3;</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
-<math display="block"><mrow><mtext>where</mtext><mspace width="0.6em"/><mi>&#x3a3;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msubsup><mi>&#x3c3;</mi><mn>1</mn><mn>2</mn></msubsup></mtd><mtd><mn>0</mn></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><msubsup><mi>&#x3c3;</mi><mn>2</mn><mn>2</mn></msubsup></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22f1;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><msubsup><mi>&#x3c3;</mi><mi>n</mi><mn>2</mn></msubsup></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
-<span class="eqn-note">The original model is the multivariate Gaussian with every off-diagonal entry forced to zero &#x2014; which is exactly the assumption that the features are independent. Put the per-feature variances on the diagonal and the two models are identical.</span>
-</div>
-<div class="code-eg">
-<pre>mu = np.array([2.0, 5.0])
+                <math display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo>;</mo><mi>&#x3bc;</mi><mo>,</mo><mi>&#x3a3;</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><msup><mrow><mo stretchy="false">(</mo><mn>2</mn><mi>&#x3c0;</mi><mo stretchy="false">)</mo></mrow><mrow><mfrac><mrow><mi>n</mi></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup><mspace width="0.2em"/><msup><mrow><mo stretchy="false">|</mo><mi>&#x3a3;</mi><mo stretchy="false">|</mo></mrow><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow></mfrac><mspace width="0.3em"/><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3a3;</mi><mrow><mo form="prefix">&#x2212;</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>&#x2212;</mo><mi>&#x3bc;</mi><mo stretchy="false">)</mo></mrow><mo form="postfix">)</mo></mrow></math>
+                <math display="block"><mrow><mtext>where</mtext><mspace width="0.6em"/><mi>&#x3a3;</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msubsup><mi>&#x3c3;</mi><mn>1</mn><mn>2</mn></msubsup></mtd><mtd><mn>0</mn></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><msubsup><mi>&#x3c3;</mi><mn>2</mn><mn>2</mn></msubsup></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd><mtd><mo>&#x22f1;</mo></mtd><mtd><mo>&#x22ee;</mo></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mo>&#x2026;</mo></mtd><mtd><msubsup><mi>&#x3c3;</mi><mi>n</mi><mn>2</mn></msubsup></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+                <span class="eqn-note">The original model is the multivariate Gaussian with every off-diagonal entry forced to zero &#x2014; which is exactly the assumption that the features are independent. Put the per-feature variances on the diagonal and the two models are identical.</span>
+              </div><div class="code-eg">
+                <pre>mu = np.array([2.0, 5.0])
 sigma2 = np.array([1.0, 3.0])     <span class="comment"># per-feature variances</span>
 x = np.array([1.5, 4.0])
 
@@ -1079,8 +914,8 @@ d = x - mu
 p_multi = np.exp(-d @ np.linalg.inv(Sigma) @ d / 2) \
           / ((2 * np.pi) ** (2 / 2) * np.sqrt(np.linalg.det(Sigma)))
 p_multi                                 <span class="comment"># 0.0686 - identical, to machine precision</span></pre>
-<p class="eqn-note">The equivalence above, checked numerically: with a diagonal &Sigma; the multivariate Gaussian and the product of per-feature Gaussians give the same number.</p>
-</div>
+                <p class="eqn-note">The equivalence above, checked numerically: with a diagonal &Sigma; the multivariate Gaussian and the product of per-feature Gaussians give the same number.</p>
+              </div>
             </li>
             <li>If you plug your variance values into the covariance matrix the models are actually identical</li>
           </ul>
@@ -1092,16 +927,13 @@ p_multi                                 <span class="comment"># 0.0686 - identic
   <h3>Original Gaussian model</h3>
   <ul>
     <li>Probably used more often</li>
-    <li>
-      There is a need to manually create features to capture anomalies where <strong>x<sub>1</sub></strong> and <strong>x<sub>2 </sub></strong>take unusual combinations of values
+    <li>There is a need to manually create features to capture anomalies where <strong>x<sub>1</sub></strong> and <strong>x<sub>2 </sub></strong>take unusual combinations of values
       <ul>
         <li>So <strong><span class="hl-red">need to make extra features</span></strong></li>
-        <li>
-          Might not be obvious what they should be
+        <li>Might not be obvious what they should be
           <ul>
-            <li>This is always a risk - where you're using your own expectation of a problem to "predict" future anomalies</li>
-            <li>
-              Typically, the things that catch you out aren't going to be the things you thought of
+            <li>This is always a risk - where you're using your own expectation of a problem to &quot;predict&quot; future anomalies</li>
+            <li>Typically, the things that catch you out aren't going to be the things you thought of
               <ul>
                 <li>If you thought of them they'd probably be avoided in the first place</li>
               </ul>
@@ -1112,14 +944,12 @@ p_multi                                 <span class="comment"># 0.0686 - identic
       </ul>
     </li>
     <li>Much <strong><span class="hl-red">cheaper computationally</span></strong></li>
-    <li>
-      <span class="hl-red"><strong>Scales much better</strong></span> to very large feature vectors
+    <li><span class="hl-red"><strong>Scales much better</strong></span> to very large feature vectors
       <ul>
         <li>Even if n = 100 000 the original model works fine</li>
       </ul>
     </li>
-    <li>
-      <strong><span class="hl-red">Works well even with a small training set</span></strong>
+    <li><strong><span class="hl-red">Works well even with a small training set</span></strong>
       <ul>
         <li>e.g. 50, 100</li>
       </ul>
@@ -1129,39 +959,33 @@ p_multi                                 <span class="comment"># 0.0686 - identic
   <h3>Multivariate Gaussian model</h3>
   <ul>
     <li>Used less frequently</li>
-    <li>
-      <strong><span class="hl-red">Can capture feature correlation</span></strong>
+    <li><strong><span class="hl-red">Can capture feature correlation</span></strong>
       <ul>
         <li>So no need to create extra values</li>
       </ul>
     </li>
-    <li>
-      <strong><span class="hl-red">Less computationally efficient</span></strong>
+    <li><strong><span class="hl-red">Less computationally efficient</span></strong>
       <ul>
         <li>Must compute inverse of matrix which is [n x n]</li>
         <li>So lots of features is bad - makes this calculation very expensive</li>
         <li>So if n = 100 000 not very good</li>
       </ul>
     </li>
-    <li>
-      <strong><span class="hl-red">Needs m &gt; n </span></strong>
+    <li><strong><span class="hl-red">Needs m &gt; n </span></strong>
       <ul>
         <li>i.e. number of examples must be greater than number of features</li>
         <li>If this is not true then we have a singular matrix (non-invertible)</li>
         <li>So should be used only if m &gt;&gt; n</li>
       </ul>
     </li>
-    <li>
-      If you find the matrix is non-invertible, could be for one of two main reasons
+    <li>If you find the matrix is non-invertible, could be for one of two main reasons
       <ul>
-        <li>
-          m &lt; n
+        <li>m &lt; n
           <ul>
             <li>So use original simple model</li>
           </ul>
         </li>
-        <li>
-          Redundant features (i.e. linearly dependent)
+        <li>Redundant features (i.e. linearly dependent)
           <ul>
             <li>i.e. two features that are the same</li>
             <li>If this is the case you could use PCA or sanity check your data</li>
