@@ -98,7 +98,7 @@ description: "What machine learning is, and the difference between supervised an
       - Work out which board positions were good and bad depending on wins/losses
 - Tom Mitchell (1998)
   - *<strong>Well posed learning problem:</strong> <span class="hl-green">"</span>*<strong><span class="hl-green">A computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E."</span></strong>
-    - The checkers example,
+    - The checkers example:
       - E = 10000s games
       - T is playing checkers
       - P if you win or not
@@ -107,8 +107,12 @@ description: "What machine learning is, and the difference between supervised an
     - Teach the computer how to do something, then let it use its new found knowledge to do it
   - **<span class="term">Unsupervised learning</span>**
     - Let the computer learn how to do something, and use this to determine structure and patterns in data
-  - Reinforcement learning
-  - Recommender systems
+  - **<span class="term">Semi-supervised learning</span>**
+    - Teach the computer with a few clear examples, then let it explore a mountain of unlabelled data to figure out the rest on its own
+  - **<span class="term">Reinforcement learning</span>**
+    - Let the computer learn by trial and error, using rewards and penalties to figure out the best actions to achieve a goal
+  - **<span class="term">Recommender systems</span>**
+    - Teach the computer what people like, then let it predict what a specific person will want next.
 - This course
   - Look at practical advice for applying learning algorithms
   - Learning a set of tools and **how** to apply them
