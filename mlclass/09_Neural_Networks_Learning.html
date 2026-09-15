@@ -2,11 +2,1100 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=../mlcourse/09_Neural_Networks_Learning.html">
-<link rel="canonical" href="../mlcourse/09_Neural_Networks_Learning.html">
-<title>Moved</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09: Neural Networks - Learning &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<p>These notes have moved. If you are not forwarded automatically, <a href="../mlcourse/09_Neural_Networks_Learning.html">follow this link</a>.</p>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>09: Neural Networks - Learning</h1>
+
+<nav class="chapter-nav">
+  <a href="08_Neural_Networks_Representation.html" rel="prev">&larr; 08: Neural networks I</a>
+  <a href="index.html">Index</a>
+  <a href="10_Advice_for_applying_machine_learning.html" rel="next">10: Applying ML &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#neural-network-cost-function">Neural network cost function</a></li>
+    <li><a href="#summary-of-whats-about-to-go-down">Summary of what&#x27;s about to go down</a></li>
+    <li><a href="#back-propagation-algorithm">Back propagation algorithm</a></li>
+    <li><a href="#back-propagation-intuition">Back propagation intuition</a></li>
+    <li><a href="#implementation-notes-unrolling-parameters-matrices">Implementation notes - unrolling parameters (matrices)</a></li>
+    <li><a href="#gradient-checking">Gradient checking</a></li>
+    <li><a href="#random-initialization">Random initialization</a></li>
+    <li><a href="#putting-it-all-together">Putting it all together</a></li>
+  </ul>
+</nav>
+<section id="neural-network-cost-function">
+  <h2>Neural network cost function</h2>
+  <ul>
+    <li>
+      NNs - one of the most powerful learning algorithms
+      <ul>
+        <li>Is a learning algorithm for fitting the derived parameters given a training set</li>
+        <li>Let's have a first look at a neural network cost function</li>
+      </ul>
+    </li>
+    <li>Focus on application of NNs for classification problems</li>
+    <li>
+      Here's the set up
+      <ul>
+        <li>Training set is {(x<sup>1</sup>, y<sup>1</sup>), (x<sup>2</sup>, y<sup>2</sup>), (x<sup>3</sup>, y<sup>3</sup>) ... (x<sup><em>m</em></sup>, y<sup><em>m</em></sup>)}</li>
+        <li>
+          <em>L</em> = number of layers in the network
+          <ul>
+            <li>In our example below L = 4</li>
+          </ul>
+        </li>
+        <li>s<sub>l</sub> = number of units (not counting bias unit) in layer l</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image.png"/></figure>
+  <ul>
+    <li>
+      So here
+      <ul>
+        <li>L = 4</li>
+        <li>s<sub>1</sub> = 3</li>
+        <li>s<sub>2</sub> = 5</li>
+        <li>s<sub>3</sub> = 5</li>
+        <li>s<sub>4</sub> = 4</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Types of classification problems with NNs</h3>
+  <ul>
+    <li>Two types of classification, as we've previously seen</li>
+    <li>
+      <strong><span class="term">Binary classification</span></strong>
+      <ul>
+        <li>1 output (0 or 1)</li>
+        <li>So single output node - value is going to be a real number</li>
+        <li>
+          k = 1
+          <ul>
+            <li>NB k is number of units in output layer</li>
+          </ul>
+        </li>
+        <li>s<sub><em>L</em></sub> = 1</li>
+      </ul>
+    </li>
+    <li>
+      <strong><span class="term">Multi-class classification</span></strong>
+      <ul>
+        <li>k distinct classifications</li>
+        <li>Typically k is greater than or equal to three</li>
+        <li>If only two just go for binary</li>
+        <li>s<sub><em>L</em></sub> = k</li>
+        <li>So y is a k-dimensional vector of real numbers</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>y</mi><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mi>K</mi></msup></mrow></math>
+<math display="block"><mrow><mtext>e.g.</mtext><mspace width="0.6em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width="0.9em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width="0.9em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>,</mo><mspace width="0.9em"/><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Left to right: pedestrian, car, motorcycle, truck.</span>
+</div>
+  <h3>Cost function for neural networks</h3>
+  <ul>
+    <li>The (regularized) logistic regression cost function is as follows;</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mspace width="0.15em"/><mi>log</mi><mspace width="0.15em"/><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>)</mo><mo>]</mo><mo>+</mo><mfrac><mi>&#x3BB;</mi><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3B8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+</div>
+  <ul>
+    <li>For neural networks our cost function is a generalization of this equation above, so instead of one output we generate <em>k</em> outputs</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mi>K</mi></msup><mspace width="1.6em"/><mrow><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>)</mo></mrow><msub><mo></mo><mi>i</mi></msub><mo>=</mo><msup><mi>i</mi><mtext>th</mtext></msup><mspace width="0.3em"/><mtext>output</mtext></mrow></math>
+<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x398;</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msubsup><mi>y</mi><mi>k</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mspace width="0.15em"/><mi>log</mi><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><msub><mo>)</mo><mi>k</mi></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msubsup><mi>y</mi><mi>k</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><msub><mo>)</mo><mi>k</mi></msub><mo>)</mo><mo>]</mo></mrow></math><math display="block"><mrow><mspace width="2.5em"/><mo>+</mo><mfrac><mi>&#x3BB;</mi><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>L</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mi>l</mi></msub></munderover><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mrow><mi>l</mi><mo>+</mo><mn>1</mn></mrow></msub></munderover><msup><mrow><mo>(</mo><msubsup><mi>&#x398;</mi><mrow><mi>j</mi><mi>i</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+  <ul>
+    <li>
+      Our cost function now outputs a <em>k</em> dimensional vector
+      <ul>
+        <li>h<sub>Θ</sub>(x) is a k dimensional vector, so h<sub>Θ</sub>(x)<sub><em>i</em></sub> refers to the ith value in that vector</li>
+      </ul>
+    </li>
+    <li>
+      Costfunction J(Θ) is
+      <ul>
+        <li>[-1/m] times a sum of a similar term to which we had for logistic regression</li>
+        <li>
+          But now this is also a sum from k = 1 through to K (K is number of output nodes)
+          <ul>
+            <li>Summation is a sum over the k output units - i.e. for each of the possible classes</li>
+            <li>So if we had 4 output units then the sum is k = 1 to 4 of the logistic regression over each of the four output units in turn</li>
+          </ul>
+        </li>
+        <li>
+          This looks really complicated, but it's not so difficult
+          <ul>
+            <li>
+              We don't sum over the bias terms (hence starting at 1 for the summation)
+              <ul>
+                <li>Even if you do and end up regularizing the bias term this is not a big problem</li>
+              </ul>
+            </li>
+            <li>Is just summation over the terms</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Woah there - lets take a second to try and understand this!</h3>
+  <ul>
+    <li>There are basically two halves to the neural network logistic regression cost function</li>
+  </ul>
+  <h3>First half</h3>
+  <div class="eqn">
+<math display="block"><mrow><mo form="prefix">&#x2212;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msubsup><mi>y</mi><mi>k</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mspace width="0.15em"/><mi>log</mi><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><msub><mo>)</mo><mi>k</mi></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msubsup><mi>y</mi><mi>k</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><msub><mo>)</mo><mi>k</mi></msub><mo>)</mo><mo>]</mo></mrow></math>
+</div>
+  <ul>
+    <li>
+      This is just saying
+      <ul>
+        <li>
+          For each training data example (i.e. 1 to m - the first summation)
+          <ul>
+            <li>Sum for each position in the output vector</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>This is an average sum of logistic regression</li>
+  </ul>
+  <h3>Second half</h3>
+  <div class="eqn">
+<math display="block"><mrow><mfrac><mi>&#x3BB;</mi><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>L</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mi>l</mi></msub></munderover><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mrow><mi>l</mi><mo>+</mo><mn>1</mn></mrow></msub></munderover><msup><mrow><mo>(</mo><msubsup><mi>&#x398;</mi><mrow><mi>j</mi><mi>i</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+  <ul>
+    <li>This is a massive regularization summation term, which I'm not going to walk through, but it's a fairly straightforward triple nested summation</li>
+    <li>This is also called a <span class="term"><strong>weight decay</strong></span> term</li>
+    <li>As before, the lambda value determines the importance of the two halves</li>
+    <li>The regularization term is similar to that in logistic regression</li>
+    <li>So, we have a cost function, but <em>how</em> do we minimize this bad boy?!</li>
+  </ul>
+</section>
+<section id="summary-of-whats-about-to-go-down">
+  <h2>Summary of what's about to go down</h2>
+  <p><em>The following section is, I think, the most complicated thing in the course, so I'm going to take a second to explain the general idea of what we're going to do;</em></p>
+  <ul>
+    <li>
+      We've already described <strong><span class="term">forward propagation</span></strong>
+      <ul>
+        <li>
+          This is the algorithm which takes your neural network and the initial input into that network and pushes the input through the network
+          <ul>
+            <li>It leads to the generation of an output hypothesis, which may be a single real number, but can also be a vector</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      We're now going to describe <strong><span class="term">back propagation</span></strong>
+      <ul>
+        <li>Back propagation basically takes the output you got from your network, compares it to the real value (y) and calculates how wrong the network was (i.e. how wrong the parameters were)</li>
+        <li>It then, using the error you've just calculated, back-calculates the error associated with each unit from the preceding layer (i.e. layer <em>L -</em> 1)</li>
+        <li>This goes on until you reach the input layer (where obviously there is no error, as the activation is the input)</li>
+        <li>
+          These "error" measurements for each unit can be used to calculate the <strong>partial derivatives</strong>
+          <ul>
+            <li>Partial derivatives are the bomb, because gradient descent needs them to minimize the cost function</li>
+          </ul>
+        </li>
+        <li>We use the partial derivatives with gradient descent to try minimize the cost function and update all the Θ values</li>
+        <li>This repeats until gradient descent reports convergence</li>
+      </ul>
+    </li>
+    <li>
+      A few things which are good to realize from the get go
+      <ul>
+        <li>
+          There is a Θ matrix for each layer in the network
+          <ul>
+            <li>This has each node in layer l as one dimension and each node in l+1 as the other dimension</li>
+          </ul>
+        </li>
+        <li>
+          Similarly, there is going to be a Δ matrix for each layer
+          <ul>
+            <li>This has each node as one dimension and each training data example as the other</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="back-propagation-algorithm">
+  <h2>Back propagation algorithm</h2>
+  <ul>
+    <li>We previously spoke about the neural network cost function</li>
+    <li>
+      Now we're going to deal with <strong><span class="term">back propagation</span></strong>
+      <ul>
+        <li>Algorithm used to minimize the cost function, as it <strong><span class="hl-red">allows us to calculate partial derivatives</span></strong>!</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x398;</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><munderover><mo>&#x2211;</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>K</mi></munderover><msubsup><mi>y</mi><mi>k</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mspace width="0.15em"/><mi>log</mi><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><msub><mo>)</mo><mi>k</mi></msub><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msubsup><mi>y</mi><mi>k</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msubsup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><msub><mo>)</mo><mi>k</mi></msub><mo>)</mo><mo>]</mo></mrow></math><math display="block"><mrow><mspace width="2.5em"/><mo>+</mo><mfrac><mi>&#x3BB;</mi><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>L</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mi>l</mi></msub></munderover><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mrow><mi>l</mi><mo>+</mo><mn>1</mn></mrow></msub></munderover><msup><mrow><mo>(</mo><msubsup><mi>&#x398;</mi><mrow><mi>j</mi><mi>i</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+  <ul>
+    <li>
+      The cost function used is shown above
+      <ul>
+        <li>We want to find parameters Θ which minimize J(Θ)</li>
+        <li>
+          To do so we can use one of the algorithms already described such as
+          <ul>
+            <li>Gradient descent</li>
+            <li>Advanced optimization algorithms</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      To minimize a cost function we just write code which computes the following
+      <ul>
+        <li>
+          <strong>J(Θ)</strong>
+          <ul>
+            <li>i.e. the cost function itself!</li>
+            <li>Use the formula above to calculate this value, so we've done that</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Partial derivative terms</strong>
+          <ul>
+            <li>
+              So now we need some way to do that
+              <ul>
+                <li>This is not trivial! Θ is indexed in three dimensions because we have separate parameter values for each node in each layer going to each node in the following layer</li>
+                <li>
+                  i.e. each layer has a Θ matrix associated with it!
+                  <ul>
+                    <li>
+                      We want to calculate the partial derivative of J(Θ) with respect to a single parameter
+                      <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msubsup><mi>&#x398;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x398;</mi><mo form="postfix">)</mo></mrow></math>
+</div>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              Remember that the partial derivative term we calculate above is a REAL number (not a vector or a matrix)
+              <ul>
+                <li>
+                  Θ is the input parameters
+                  <ul>
+                    <li>Θ<sup>1</sup> is the matrix of weights which define the function mapping from layer 1 to layer 2</li>
+                    <li>Θ<sub>10</sub><sup>1</sup> is the real number parameter which you multiply the bias unit (i.e. 1) with for the bias unit input into the first unit in the second layer</li>
+                    <li>Θ<sub>11</sub><sup>1</sup> is the real number parameter which you multiply the first (real) unit with for the first input into the first unit in the second layer</li>
+                    <li>Θ<sub>21</sub><sup>1</sup> is the real number parameter which you multiply the first (real) unit with for the first input into the second unit in the second layer</li>
+                    <li>
+                      As discussed, for Θ<sub>ij</sub><sup>l</sup>
+                      <ul>
+                        <li>i here represents the unit in layer l+1 you're mapping to (destination node)</li>
+                        <li>j is the unit in layer l you're mapping from (origin node)</li>
+                        <li>l is the layer your mapping from (to layer l+1) (origin layer)</li>
+                        <li>
+                          NB
+                          <ul>
+                            <li><em><span class="hl-red">The terms destination node, origin node and origin layer are terms I've made up!</span></em></li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              So - this partial derivative term is
+              <ul>
+                <li>The partial derivative of a 3-way indexed dataset with respect to a real number (which is one of the values in that dataset)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong>Gradient computation</strong>
+          <ul>
+            <li>One training example</li>
+            <li>Imagine we just have a single pair (x,y) - entire training set</li>
+            <li>How would we deal with this example?</li>
+            <li>
+              The forward propagation algorithm operates as follows
+              <ul>
+                <li>
+                  <strong>Layer 1</strong>
+                  <ul>
+                    <li>a<sup>1</sup> = x</li>
+                    <li>z<sup>2</sup> = Θ<sup>1</sup>a<sup>1</sup></li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Layer 2</strong>
+                  <ul>
+                    <li>a<sup>2</sup> = g(z<sup>2</sup>) (add a<sub>0</sub><sup>2</sup>)</li>
+                    <li>z<sup>3</sup> = Θ<sup>2</sup>a<sup>2</sup></li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Layer 3</strong>
+                  <ul>
+                    <li>a<sup>3</sup> = g(z<sup>3</sup>) (add a<sub>0</sub><sup>3</sup>)</li>
+                    <li>z<sup>4</sup> = Θ<sup>3</sup>a<sup>3</sup></li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Output</strong>
+                  <ul>
+                    <li>a<sup>4</sup> = h<sub>Θ</sub>(x) = g(z<sup>4</sup>)</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [8].png"/></figure>
+  <ul>
+    <li>
+      This is the vectorized implementation of forward propagation
+      <ul>
+        <li>Lets compute activation values sequentially (below just re-iterates what we had above!)</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><msup><mi>a</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><mo>=</mo><mi>x</mi></mrow></math>
+<math display="block"><mrow><msup><mi>z</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>=</mo><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><msup><mi>a</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup></mrow></math>
+<math display="block"><mrow><msup><mi>a</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>=</mo><mi>g</mi><mo>(</mo><msup><mi>z</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>)</mo></mrow></math>
+<math display="block"><mrow><msup><mi>z</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>=</mo><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><msup><mi>a</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup></mrow></math>
+<math display="block"><mrow><msup><mi>a</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>=</mo><mi>g</mi><mo>(</mo><msup><mi>z</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>)</mo></mrow></math>
+<math display="block"><mrow><msup><mi>z</mi><mrow><mo>(</mo><mn>4</mn><mo>)</mo></mrow></msup><mo>=</mo><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><msup><mi>a</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup></mrow></math>
+<math display="block"><mrow><msup><mi>a</mi><mrow><mo>(</mo><mn>4</mn><mo>)</mo></mrow></msup><mo>=</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><mi>g</mi><mo>(</mo><msup><mi>z</mi><mrow><mo>(</mo><mn>4</mn><mo>)</mo></mrow></msup><mo>)</mo></mrow></math>
+<span class="eqn-note">The bias unit a<sub>0</sub> is added to a<sup>(2)</sup> and a<sup>(3)</sup> after each activation.</span>
+</div>
+  <h3>What is back propagation?</h3>
+  <ul>
+    <li>Use it to compute the partial derivatives</li>
+    <li>
+      Before we dive into the mechanics, let's get an idea regarding the intuition of the algorithm
+      <ul>
+        <li>
+          For each node we can calculate (δ<sub>j</sub><sup>l</sup>) - this is <strong><span class="hl-red">the error of node j in layer l</span></strong>
+          <ul>
+            <li>If we remember, a<sub>j</sub><sup>l</sup> is the activation of node j in layer l</li>
+            <li>
+              Remember the activation is a totally calculated value, so we'd expect there to be some error compared to the "real" value
+              <ul>
+                <li>The delta term captures this error</li>
+                <li>
+                  But the problem here is, "what is this 'real' value, and how do we calculate it?!"
+                  <ul>
+                    <li>The NN is a totally artificial construct</li>
+                    <li>The only "real" value we have is our actual classification (our y value) - so that's where we start</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If we use our example and look at the fourth (output) layer, we can first calculate
+      <ul>
+        <li>
+          δ<sub>j</sub><sup>4 </sup>= a<sub>j</sub><sup>4 </sup>- y<sub>j</sub>
+          <ul>
+            <li>[Activation of the unit] - [the actual value observed in the training example]</li>
+            <li>
+              We could also write a<sub>j</sub><sup>4 </sup>as h<sub>Θ</sub>(x)<sub>j</sub>
+              <ul>
+                <li>Although I'm not sure why we would?</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>This is an individual example implementation</li>
+      </ul>
+    </li>
+    <li>
+      Instead of focussing on each node, let's think about this as a vectorized problem
+      <ul>
+        <li>
+          δ<sup>4 </sup>= a<sup>4 </sup>- y
+          <ul>
+            <li>So here δ<sup>4 </sup>is the vector of errors for the 4th layer</li>
+            <li>a<sup>4 </sup>is the vector of activation values for the 4th layer</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      With δ<sup>4 </sup>calculated, we can determine the error terms for the other layers as follows;
+      <div class="eqn">
+<math display="block"><mrow><msup><mi>&#x3B4;</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3B4;</mi><mrow><mo>(</mo><mn>4</mn><mo>)</mo></mrow></msup><mspace width="0.3em"/><mo>.</mo><mo>&#x2217;</mo><mspace width="0.15em"/><msup><mi>g</mi><mo>&#x2032;</mo></msup><mo>(</mo><msup><mi>z</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>)</mo></mrow></math>
+<math display="block"><mrow><msup><mi>&#x3B4;</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>=</mo><msup><mrow><mo>(</mo><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup><msup><mi>&#x3B4;</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mspace width="0.3em"/><mo>.</mo><mo>&#x2217;</mo><mspace width="0.15em"/><msup><mi>g</mi><mo>&#x2032;</mo></msup><mo>(</mo><msup><mi>z</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>)</mo></mrow></math>
+<span class="eqn-note"><code>.*</code> is element-wise multiplication. There is no &#x3B4;<sup>(1)</sup> &mdash; the input layer has no error.</span>
+</div>
+<div class="code-eg">
+<pre>def g(z):
+    return 1 / (1 + np.exp(-z))
+
+z = np.array([-2.0, 0.0, 3.0])
+a = g(z)
+
+h = 1e-6                                   <span class="comment"># check the identity numerically</span>
+numeric = (g(z + h) - g(z - h)) / (2 * h)
+a * (1 - a)   <span class="comment"># [0.105, 0.25, 0.0452] - matches `numeric` to ~1e-10</span></pre>
+<p class="eqn-note">The derivative identity the equations above rely on: g&prime;(z) is exactly a .* (1 &minus; a), checked against a numerical derivative.</p>
+</div>
+    </li>
+    <li>
+      Taking a second to break this down
+      <ul>
+        <li>Θ<sup>3 </sup>is the vector of parameters for the 3-&gt;4 layer mapping</li>
+        <li>δ<sup>4 </sup>is (as calculated) the error vector for the 4th layer</li>
+        <li>
+          g'(z<sup>3</sup>) is the first derivative of the activation function g evaluated by the input values given by z<sup>3 </sup>
+          <ul>
+            <li>You can do the calculus if you want (...), but when you calculate this derivative you get</li>
+            <li>g'(z<sup>3</sup>) = a<sup>3 </sup><span class="hl-red"><strong>. *</strong></span> (1 - a<sup>3</sup>)</li>
+          </ul>
+        </li>
+        <li>
+          So, more easily
+          <ul>
+            <li>δ<sup>3 </sup>= (Θ<sup>3</sup>)<sup>T </sup>δ<sup>4 </sup><span class="hl-red"><strong>. *</strong></span><strong>(a</strong><sup>3 </sup><span class="hl-red"><strong>. *</strong></span> <strong>(1 - </strong>a<sup>3</sup>))</li>
+          </ul>
+        </li>
+        <li>
+          <strong><span class="hl-red">. *</span></strong> is the element wise multiplication between the two vectors
+          <ul>
+            <li>Why element wise? Because this is essentially an extension of individual values in a vectorized implementation, so element wise multiplication gives that effect</li>
+            <li>We highlighted it just in case you think it's a typo!</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Analyzing the mathematics</h3>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [11].png"/></figure>
+  <ul>
+    <li>
+      And if we take a second to consider the vector dimensionality (with our example above [3-5-5-4])
+      <ul>
+        <li>
+          <span class="hl-purple">Θ<sup>3</sup></span><strong><span class="hl-purple"> </span>=</strong> is a matrix which is [4 X 5] (if we don't include the bias term, 4 X 6 if we do)
+          <ul>
+            <li><strong> </strong><span class="hl-purple">(Θ<sup>3</sup>)<sup><strong>T</strong></sup></span> = therefore, is a [5 X 4] matrix</li>
+          </ul>
+        </li>
+        <li><strong><sup> </sup><span class="hl-purple">δ<sup>4</sup></span></strong> = is a 4x1 vector</li>
+        <li>So when we multiply a [5 X 4] matrix with a [4 X 1] vector we get a [5 X 1] vector</li>
+        <li>Which, lo and behold, is the same dimensionality as the <strong><span class="hl-purple">a</span><sup><span class="hl-purple">3</span> </sup></strong>vector, meaning we can run our pairwise multiplication</li>
+      </ul>
+    </li>
+    <li>For δ<sup>3 </sup>when you calculate the derivative terms you get<br/>a<sup>3 </sup><span class="hl-red"><strong>. *</strong></span> (1 - a<sup>3</sup>)</li>
+    <li>
+      Similarly For δ<sup>2</sup> when you calculate the derivative terms you get<br/>a<sup>2 </sup><strong><span class="hl-red">. *</span></strong> (1 - a<sup>2</sup>)
+      <ul>
+        <li>So to calculate δ<sup>2</sup> we do<br/>δ<sup>2 </sup>= (Θ<sup>2</sup>)<sup>T </sup>δ<sup>3</sup><sup><span class="hl-red"> </span></sup><span class="hl-red"><strong>. *</strong></span><strong>(a</strong><sup>2 </sup><span class="hl-red"><strong>. *</strong></span><strong> (1 - </strong>a<sup>2</sup>))</li>
+      </ul>
+    </li>
+    <li>
+      There's no δ<sup>1</sup> term
+      <ul>
+        <li>Because that was the input!</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Why do we do this?</h3>
+  <ul>
+    <li>We do all this to get all the δ terms, and we want the δ terms because through a very complicated derivation you can use δ to get the partial derivative of J(Θ) with respect to individual parameters (if you ignore regularization, or regularization is 0, which we deal with later)</li>
+    <li>
+      <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msubsup><mi>&#x398;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x398;</mi><mo form="postfix">)</mo></mrow></math>
+</div>
+      = a<sub>j</sub><sup>l </sup>δ<sub>i</sub><sup>(l+1) </sup>
+    </li>
+    <li>
+      By doing back propagation and computing the delta terms you can then compute the <strong><span class="term">partial derivative terms</span></strong>
+      <ul>
+        <li>We need the partial derivatives to minimize the cost function!</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Putting it all together to get the partial derivatives!</h3>
+  <ul>
+    <li>What is really happening - lets look at a more complex example</li>
+    <li>
+      Training set of m examples
+      <div class="eqn">
+<math display="block"><mrow><mtext>Training set</mtext><mspace width="0.5em"/><mo>{</mo><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><mo>,</mo><msup><mi>y</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><mo>)</mo><mo>,</mo><mi>&#x2026;</mi><mo>,</mo><mo>(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>m</mi><mo>)</mo></mrow></msup><mo>,</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>m</mi><mo>)</mo></mrow></msup><mo>)</mo><mo>}</mo></mrow></math>
+</div>
+    </li>
+    <li>
+      <strong>First</strong>, set the delta values
+      <div class="eqn">
+<math display="block"><mrow><mtext>Set</mtext><mspace width="0.5em"/><msubsup><mi>&#x394;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mn>0</mn><mspace width="0.8em"/><mtext>(for all l, i, j)</mtext></mrow></math>
+</div>
+      <ul>
+        <li>Set equal to 0 for all values</li>
+        <li>
+          Eventually these Δ values will be used to compute the partial derivative
+          <ul>
+            <li>Will be used as accumulators for computing the partial derivatives</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <strong>Next</strong>, loop through the training set
+      <div class="eqn">
+<math display="block"><mrow><mtext>For</mtext><mspace width="0.5em"/><mi>i</mi><mo>=</mo><mn>1</mn><mspace width="0.4em"/><mtext>to</mtext><mspace width="0.4em"/><mi>m</mi></mrow></math>
+</div>
+      <ul>
+        <li>i.e. for each example in the training set (dealing with each example as (x,y)</li>
+        <li>Set a<sup>1 </sup>(activation of input layer) = x<sup>i</sup></li>
+        <li>
+          <strong>Perform</strong> <strong><span class="term">forward propagation</span></strong> to compute a<sup>l </sup>for each layer (l = 1,2, ... L)
+          <ul>
+            <li>i.e. run forward propagation</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Then</strong>, use the output label for the specific example we're looking at to calculate δ<sup>L</sup> where δ<sup>L </sup>= a<sup>L </sup>- y<sup>i</sup>
+          <ul>
+            <li>So we initially calculate the delta value for the output layer</li>
+            <li>Then, using <strong><span class="term">back propagation</span></strong> we move back through the network from layer L-1 down to layer 2</li>
+          </ul>
+        </li>
+        <li>
+          Finally, use Δ to accumulate the partial derivative terms
+          <div class="eqn">
+<math display="block"><mrow><msubsup><mi>&#x394;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>&#x2254;</mo><msubsup><mi>&#x394;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>+</mo><msubsup><mi>a</mi><mrow><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><msubsup><mi>&#x3B4;</mi><mrow><mi>i</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>+</mo><mn>1</mn><mo>)</mo></mrow></msubsup></mrow></math>
+</div>
+        </li>
+        <li>
+          Note here
+          <ul>
+            <li>l = layer</li>
+            <li>j = node in that layer</li>
+            <li>i = the error of the affected node in the target layer</li>
+          </ul>
+        </li>
+        <li>
+          You can vectorize the Δ expression too, as
+          <div class="eqn">
+<math display="block"><mrow><msup><mi>&#x394;</mi><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msup><mo>&#x2254;</mo><msup><mi>&#x394;</mi><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msup><mo>+</mo><msup><mi>&#x3B4;</mi><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msup><msup><mrow><mo>(</mo><msup><mi>a</mi><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msup><mo>)</mo></mrow><mi>T</mi></msup></mrow></math>
+</div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <strong>Finally</strong>
+      <ul>
+        <li>
+          After executing the body of the loop, exit the for loop and compute
+          <div class="eqn">
+<math display="block"><mrow><msubsup><mi>D</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>&#x2254;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><msubsup><mi>&#x394;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>+</mo><mi>&#x3BB;</mi><msubsup><mi>&#x398;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mspace width="1em"/><mtext>if j &#x2260; 0</mtext></mrow></math>
+<math display="block"><mrow><msubsup><mi>D</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>&#x2254;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><msubsup><mi>&#x394;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mspace width="1em"/><mtext>if j = 0</mtext></mrow></math>
+<span class="eqn-note">j = 0 is the bias term, which is not regularised.</span>
+</div>
+          <ul>
+            <li>When j = 0 we have no regularization term</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      At the end of ALL this
+      <ul>
+        <li>
+          You've calculated all the <em>D</em> terms above using Δ
+          <ul>
+            <li>NB - each D term above is a real number!</li>
+          </ul>
+        </li>
+        <li>
+          We can show that each D is equal to the following
+          <ul>
+            <li>
+              <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msubsup><mi>&#x398;</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x398;</mi><mo form="postfix">)</mo><mo>=</mo><msubsup><mi>D</mi><mrow><mi>i</mi><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup></mrow></math>
+</div>
+            </li>
+          </ul>
+        </li>
+        <li>
+          We have calculated the partial derivative for each parameter
+          <ul>
+            <li>We can then use these in gradient descent or one of the advanced optimization algorithms</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Phew!
+      <ul>
+        <li>What a load of hassle!</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="back-propagation-intuition">
+  <h2>Back propagation intuition</h2>
+  <ul>
+    <li>
+      Some additionally back propagation notes
+      <ul>
+        <li>In case you found the preceding unclear, which it shouldn't be as it's fairly heavily modified with my own explanatory notes</li>
+      </ul>
+    </li>
+    <li>
+      Back propagation is hard(ish...)
+      <ul>
+        <li>But don't let that discourage you</li>
+        <li>It's hard in as much as it's confusing - it's not difficult, just complex</li>
+      </ul>
+    </li>
+    <li>Looking at mechanical steps of back propagation</li>
+  </ul>
+  <h3>Forward propagation with pictures!</h3>
+  <strong><figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [20].png"/></figure></strong>
+  <ul>
+    <li>
+      Feeding input into the input layer (x<sup>i</sup>, y<sup>i</sup>)
+      <ul>
+        <li>
+          Note that x and y here are vectors from 1 to n where n is the number of features
+          <ul>
+            <li>So above, our data has two features (hence x<sub>1</sub> and x<sub>2</sub>)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>With our input data present we use <strong>forward propagation</strong></li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [21].png"/></figure>
+  <ul>
+    <li>
+      The sigmoid function applied to the z values gives the activation values
+      <ul>
+        <li>Below we show exactly how the z value is calculated for an example</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [22].png"/></figure>
+  <h3>Back propagation</h3>
+  <ul>
+    <li>With forwardprop done we move on to do back propagation</li>
+    <li>
+      Back propagation is doing something very similar to forward propagation, but backwards
+      <ul>
+        <li>Very similar though</li>
+      </ul>
+    </li>
+    <li>
+      Let's look at the cost function again...
+      <ul>
+        <li>Below we have the cost function if there is a single output (i.e. binary classification)</li>
+      </ul>
+    </li>
+  </ul>
+  <strong><div class="eqn">
+<math display="block"><mrow><mi>J</mi><mo form="prefix">(</mo><mi>&#x398;</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mfrac><mn>1</mn><mi>m</mi></mfrac><mo>[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mspace width="0.15em"/><mi>log</mi><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><mo>(</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>)</mo><mo>)</mo><mo>]</mo></mrow></math><math display="block"><mrow><mspace width="2.5em"/><mo>+</mo><mfrac><mi>&#x3BB;</mi><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>L</mi><mo>&#x2212;</mo><mn>1</mn></mrow></munderover><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mi>l</mi></msub></munderover><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>s</mi><mrow><mi>l</mi><mo>+</mo><mn>1</mn></mrow></msub></munderover><msup><mrow><mo>(</mo><msubsup><mi>&#x398;</mi><mrow><mi>j</mi><mi>i</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div></strong>
+  <ul>
+    <li>This function cycles over each example, so the cost for one example really boils down to this</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>cost</mi><mo>(</mo><mi>i</mi><mo>)</mo><mo>=</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mspace width="0.15em"/><mi>log</mi><mspace width="0.15em"/><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>+</mo><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo>)</mo><mspace width="0.15em"/><mi>log</mi><mo>(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>h</mi><mi>&#x398;</mi></msub><mo form="prefix">(</mo><msup><mi>x</mi><mrow><mo>(</mo><mi>i</mi><mo>)</mo></mrow></msup><mo form="postfix">)</mo><mo>)</mo></mrow></math>
+<span class="eqn-note">The original slide writes the second logarithm as log h(x<sup>(i)</sup>), dropping the 1 &#x2212; ; it is corrected here to match the same expression elsewhere in this chapter.</span>
+</div>
+  <ul>
+    <li>
+      Which, we can think of as a sigmoidal version of the squared difference (check out the derivation if you don't believe me)
+      <ul>
+        <li>So, basically saying, "how well is the network doing on example <em>i </em>"?</li>
+      </ul>
+    </li>
+    <li>
+      We can think about a δ term on a unit as the "error" of cost for the activation value associated with a unit
+      <ul>
+        <li>
+          More formally (<em>don't worry about this...</em>), δ is
+          <div class="eqn">
+<math display="block"><mrow><msubsup><mi>&#x3B4;</mi><mrow><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup><mo>=</mo><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msubsup><mi>z</mi><mrow><mi>j</mi></mrow><mrow><mo>(</mo><mi>l</mi><mo>)</mo></mrow></msubsup></mrow></mfrac><mspace width="0.2em"/><mi>cost</mi><mo>(</mo><mi>i</mi><mo>)</mo></mrow></math>
+</div>
+          <ul>
+            <li>Where cost is as defined above</li>
+            <li>Cost function is a function of y value and the hypothesis function</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So - for the output layer, back propagation sets the δ value as [a - y]
+      <ul>
+        <li>Difference between activation and actual value</li>
+      </ul>
+    </li>
+    <li>We then propagate these values backwards;</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [26].png"/></figure>
+  <ul>
+    <li>Looking at another example to see <em>how</em> we actually calculate the delta value;</li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [27].png"/></figure>
+  <ul>
+    <li>
+      So, in effect,
+      <ul>
+        <li>Back propagation calculates the δ, and those δ values are the weighted sum of the next layer's delta values, weighted by the parameter associated with the links</li>
+        <li>Forward propagation calculates the activation (a) values, which</li>
+      </ul>
+    </li>
+    <li>
+      Depending on how you implement you may compute the delta values of the bias values
+      <ul>
+        <li>However, these aren't actually used, so it's a bit inefficient, but not a lot more!</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="implementation-notes-unrolling-parameters-matrices">
+  <h2>Implementation notes - unrolling parameters (matrices)</h2>
+  <ul>
+    <li>Needed for using advanced optimization routines</li>
+  </ul>
+  <pre>def cost_function(theta):
+    ...
+    return jval, gradient
+
+res = minimize(cost_function, initial_theta, jac=True)
+opt_theta = res.x</pre>
+  <ul>
+    <li>
+      Is the Python code
+      <ul>
+        <li>But theta is going to be matrices</li>
+      </ul>
+    </li>
+    <li>
+      minimize takes the cost function and initial theta values
+      <ul>
+        <li>These routines assume theta is a parameter vector</li>
+        <li>Also assumes the gradient created by costFunction is a vector</li>
+      </ul>
+    </li>
+    <li>
+      For NNs, our parameters are matrices
+      <ul>
+        <li>e.g.</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mtext>Neural Network (L = 4):</mtext></mrow></math>
+<math display="block"><mrow><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><mo>,</mo><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>,</mo><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mspace width="0.5em"/><mtext>&#x2014; matrices</mtext></mrow></math>
+<math display="block"><mrow><msup><mi>D</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><mo>,</mo><msup><mi>D</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>,</mo><msup><mi>D</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mspace width="0.5em"/><mtext>&#x2014; matrices</mtext></mrow></math>
+<span class="eqn-note">In the code these are <code>Theta1, Theta2, Theta3</code> and <code>D1, D2, D3</code>.</span>
+</div>
+  <h3>Example</h3>
+  <strong><figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [30].png"/></figure>
+<div class="eqn">
+<math display="block"><mrow><msub><mi>s</mi><mn>1</mn></msub><mo>=</mo><mn>10</mn><mo>,</mo><mspace width="0.4em"/><msub><mi>s</mi><mn>2</mn></msub><mo>=</mo><mn>10</mn><mo>,</mo><mspace width="0.4em"/><msub><mi>s</mi><mn>3</mn></msub><mo>=</mo><mn>1</mn></mrow></math>
+<math display="block"><mrow><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mn>10</mn><mo>&#x00D7;</mo><mn>11</mn></mrow></msup><mo>,</mo><mspace width="0.5em"/><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mn>10</mn><mo>&#x00D7;</mo><mn>11</mn></mrow></msup><mo>,</mo><mspace width="0.5em"/><msup><mi>&#x398;</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mn>1</mn><mo>&#x00D7;</mo><mn>11</mn></mrow></msup></mrow></math>
+<math display="block"><mrow><msup><mi>D</mi><mrow><mo>(</mo><mn>1</mn><mo>)</mo></mrow></msup><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mn>10</mn><mo>&#x00D7;</mo><mn>11</mn></mrow></msup><mo>,</mo><mspace width="0.5em"/><msup><mi>D</mi><mrow><mo>(</mo><mn>2</mn><mo>)</mo></mrow></msup><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mn>10</mn><mo>&#x00D7;</mo><mn>11</mn></mrow></msup><mo>,</mo><mspace width="0.5em"/><msup><mi>D</mi><mrow><mo>(</mo><mn>3</mn><mo>)</mo></mrow></msup><mo>&#x2208;</mo><msup><mi>&#x211D;</mi><mrow><mn>1</mn><mo>&#x00D7;</mo><mn>11</mn></mrow></msup></mrow></math>
+</div>
+<div class="code-eg">
+<pre>Theta1 = np.ones((10, 11))
+Theta2 = np.ones((10, 11))
+Theta3 = np.ones((1, 11))
+
+theta_vec = np.concatenate([Theta1.ravel(), Theta2.ravel(), Theta3.ravel()])
+theta_vec.shape   <span class="comment"># (231,) = 110 + 110 + 11, one long vector</span>
+
+np.array_equal(theta_vec[0:110].reshape(10, 11), Theta1)   <span class="comment"># True - the round trip</span></pre>
+<p class="eqn-note">Unroll and reshape for the example network above: three matrices flatten into one 231-element vector and come back out unchanged.</p>
+</div></strong>
+  <ul>
+    <li>Use the <code class="hl-green"><strong>theta_vec = np.concatenate([Theta1.ravel(), Theta2.ravel(), Theta3.ravel()])</strong></code> to unroll the matrices into a long vector</li>
+    <li>
+      To go back you use
+      <ul>
+        <li><strong><code class="hl-green">Theta1 = theta_vec[0:110].reshape(10, 11)</code></strong></li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="gradient-checking">
+  <h2>Gradient checking</h2>
+  <ul>
+    <li>
+      Backpropagation has a lot of details, small bugs can be present and ruin it :-(
+      <ul>
+        <li>This may mean it looks like J(Θ) is decreasing, but in reality it may not be decreasing by as much as it should</li>
+      </ul>
+    </li>
+    <li>
+      So using a numeric method to check the gradient can help diagnose a bug
+      <ul>
+        <li>Gradient checking helps make sure an implementation is working correctly</li>
+      </ul>
+    </li>
+    <li>
+      <strong>Example</strong>
+      <ul>
+        <li>Have a function J(Θ)</li>
+        <li>Estimate derivative of function at point Θ (where Θ is a real number)</li>
+        <li>
+          How?
+          <ul>
+            <li>
+              Numerically
+              <ul>
+                <li>Compute Θ + ε</li>
+                <li>Compute Θ - ε</li>
+                <li>Join them by a straight line</li>
+                <li>Use the slope of that line as an approximation to the derivative</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [31].png"/></figure>
+  <ul>
+    <li>
+      Usually, epsilon is pretty small (0.0001)
+      <ul>
+        <li>If epsilon becomes REALLY small then the term BECOMES the slope's derivative</li>
+      </ul>
+    </li>
+    <li>This is the two sided difference (as opposed to one sided difference, which would be [J(Θ + ε) - J(Θ)] /ε)</li>
+    <li>If Θ is a vector with n elements we can use a similar approach to look at the partial derivatives</li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>&#x2248;</mo><mfrac><mrow><mi>J</mi><mo>(</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>+</mo><mi>&#x3F5;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mn>2</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>3</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>)</mo><mo>&#x2212;</mo><mi>J</mi><mo>(</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>&#x2212;</mo><mi>&#x3F5;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mn>2</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>3</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>)</mo></mrow><mrow><mn>2</mn><mi>&#x3F5;</mi></mrow></mfrac></mrow></math>
+<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mn>2</mn></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>&#x2248;</mo><mfrac><mrow><mi>J</mi><mo>(</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>2</mn></msub><mo>+</mo><mi>&#x3F5;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mn>3</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>)</mo><mo>&#x2212;</mo><mi>J</mi><mo>(</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>2</mn></msub><mo>&#x2212;</mo><mi>&#x3F5;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mn>3</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>)</mo></mrow><mrow><mn>2</mn><mi>&#x3F5;</mi></mrow></mfrac></mrow></math>
+<math display="block"><mrow><mi>&#x22EE;</mi></mrow></math>
+<math display="block"><mrow><mfrac><mrow><mo>&#x2202;</mo></mrow><mrow><mo>&#x2202;</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub></mrow></mfrac><mi>J</mi><mo form="prefix">(</mo><mi>&#x3B8;</mi><mo form="postfix">)</mo><mo>&#x2248;</mo><mfrac><mrow><mi>J</mi><mo>(</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>2</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>3</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub><mo>+</mo><mi>&#x3F5;</mi><mo>)</mo><mo>&#x2212;</mo><mi>J</mi><mo>(</mo><msub><mi>&#x3B8;</mi><mn>1</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>2</mn></msub><mo>,</mo><msub><mi>&#x3B8;</mi><mn>3</mn></msub><mo>,</mo><mi>&#x2026;</mi><mo>,</mo><msub><mi>&#x3B8;</mi><mi>n</mi></msub><mo>&#x2212;</mo><mi>&#x3F5;</mi><mo>)</mo></mrow><mrow><mn>2</mn><mi>&#x3F5;</mi></mrow></mfrac></mrow></math>
+<span class="eqn-note">Each partial derivative is checked by nudging one parameter and leaving the rest alone.</span>
+</div>
+<div class="code-eg">
+<pre>def J(theta):                  <span class="comment"># a simple stand-in cost: J = sum of squares</span>
+    return (theta ** 2).sum()
+
+theta = np.array([1.0, -2.0, 3.0])
+EPSILON = 1e-4
+
+grad_approx = np.zeros(3)
+for i in range(3):
+    theta_plus  = theta.copy(); theta_plus[i]  += EPSILON
+    theta_minus = theta.copy(); theta_minus[i] -= EPSILON
+    grad_approx[i] = (J(theta_plus) - J(theta_minus)) / (2 * EPSILON)
+
+grad_approx   <span class="comment"># [2., -4., 6.]  - the analytic gradient of sum-of-squares is 2*theta</span></pre>
+<p class="eqn-note">Gradient checking on a cost simple enough to differentiate by hand: the two-sided differences land on 2θ to ten decimal places.</p>
+</div>
+  <ul>
+    <li>So, in Python we use the following code to numerically compute the derivatives</li>
+  </ul>
+  <pre>for i in range(n):
+    theta_plus = theta.copy()
+    theta_plus[i] += EPSILON
+    theta_minus = theta.copy()
+    theta_minus[i] -= EPSILON
+    grad_approx[i] = (J(theta_plus) - J(theta_minus)) \
+                     / (2 * EPSILON)</pre>
+  <ul>
+    <li>
+      So on each loop theta_plus equals theta except in position i
+      <ul>
+        <li>The .copy() resets theta_plus on each loop - without it you would be nudging theta itself</li>
+      </ul>
+    </li>
+    <li>Create a vector of partial derivative approximations</li>
+    <li>
+      Using the vector of gradients from backprop (DVec)
+      <ul>
+        <li>Check that grad_approx is basically equal to DVec</li>
+        <li>Gives confidence that the Backprop implementation is correct</li>
+      </ul>
+    </li>
+    <li>
+      Implementation note
+      <ul>
+        <li>Implement back propagation to compute DVec</li>
+        <li>Implement numerical gradient checking to compute grad_approx</li>
+        <li>Check they're basically the same (up to a few decimal places)</li>
+        <li>
+          Before using the code for learning turn off gradient checking
+          <ul>
+            <li>
+              Why?
+              <ul>
+                <li>The grad_approx computation is very computationally expensive</li>
+                <li>In contrast backprop is much more efficient (just more fiddly)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="random-initialization">
+  <h2>Random initialization</h2>
+  <ul>
+    <li>
+      Pick random small initial values for all the theta values
+      <ul>
+        <li>If you start them on zero (which does work for linear regression) then the algorithm fails - all activation values for each layer are the same</li>
+      </ul>
+    </li>
+    <li>
+      So choose random values!
+      <ul>
+        <li>Between 0 and 1, then scale by epsilon (where epsilon is a constant)</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="putting-it-all-together">
+  <h2>Putting it all together</h2>
+  <ul>
+    <li>
+      <strong>1) - pick a network architecture</strong>
+      <ul>
+        <li>
+          Number of
+          <ul>
+            <li><strong><span class="term">Input units</span></strong> - number of dimensions x (dimensions of feature vector)</li>
+            <li><strong><span class="term">Output units</span></strong> - number of classes in classification problem</li>
+            <li>
+              <strong><span class="term">Hidden units</span></strong>
+              <ul>
+                <li>
+                  Default might be
+                  <ul>
+                    <li>1 hidden layer</li>
+                  </ul>
+                </li>
+                <li>
+                  Should probably have
+                  <ul>
+                    <li>Same number of units in each layer</li>
+                    <li>Or 1.5-2 x number of input features</li>
+                  </ul>
+                </li>
+                <li>Normally</li>
+              </ul>
+            </li>
+            <li>More hidden units is better</li>
+            <li>But more is more computationally expensive</li>
+          </ul>
+        </li>
+        <li>We'll discuss architecture more later</li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [34].png"/></figure>
+  <ul>
+    <li>
+      <strong>2) - Training a neural network</strong>
+      <ul>
+        <li>
+          <strong>2.1)</strong> Randomly initialize the weights
+          <ul>
+            <li>Small values near 0</li>
+          </ul>
+        </li>
+        <li><strong>2.2) </strong>Implement forward propagation to get h<sub>Θ</sub>(x)<sup>i</sup> for any x<sup>i</sup></li>
+        <li><strong>2.3) </strong>Implement code to compute the cost function J(Θ)</li>
+        <li><strong>2.4) </strong>Implement back propagation to compute the partial derivatives</li>
+        <li>General implementation below</li>
+      </ul>
+    </li>
+  </ul>
+  <pre>for i in range(m):
+    forward propagation on (x<sup>i</sup>, y<sup>i</sup>)   <span class="comment"># get activation (a) terms</span>
+    back propagation on (x<sup>i</sup>, y<sup>i</sup>)      <span class="comment"># get delta (δ) terms</span>
+    compute Δ<sup>l</sup> := Δ<sup>l</sup> + δ<sup>l+1</sup>(a<sup>l</sup>)<sup>T</sup></pre>
+  <h3>With this done compute the partial derivative terms</h3>
+  <ul>
+    <li>
+      Notes on implementation
+      <ul>
+        <li>Usually done with a for loop over training examples (for forward and back propagation)</li>
+        <li><em>Can</em> be done without a for loop, but this is a much more complicated way of doing things</li>
+        <li>Be careful</li>
+      </ul>
+    </li>
+    <li>
+      <strong>2.5) </strong>Use gradient checking to compare the partial derivatives computed using the above algorithm and numerical estimation of gradient of J(Θ)
+      <ul>
+        <li>Disable the gradient checking code for when you actually run it</li>
+      </ul>
+    </li>
+    <li>
+      <strong>2.6)</strong> Use gradient descent or an advanced optimization method with back propagation to try to minimize J(Θ) as a function of parameters Θ
+      <ul>
+        <li>
+          Here J(Θ) is non-convex
+          <ul>
+            <li>Can be susceptible to local minimum</li>
+            <li>In practice this is not usually a huge problem</li>
+            <li>Can't guarantee programs will find global optimum should find good local optimum at least</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <figure><img alt="" loading="lazy" src="09_Neural_Networks_Learning_files/Image [35].png"/></figure>
+  <ul>
+    <li>
+      e.g. above pretending data only has two features to easily display what's going on
+      <ul>
+        <li>Our minimum here represents a hypothesis output which is pretty close to y</li>
+        <li>If you took one of the peaks hypothesis is far from y</li>
+      </ul>
+    </li>
+    <li>
+      Gradient descent will start from some random point and move downhill
+      <ul>
+        <li>Back propagation calculates gradient down that hill</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="08_Neural_Networks_Representation.html" rel="prev">&larr; 08: Neural networks I</a>
+  <a href="index.html">Index</a>
+  <a href="10_Advice_for_applying_machine_learning.html" rel="next">10: Applying ML &rarr;</a>
+</nav>
+</main>
 </body>
 </html>

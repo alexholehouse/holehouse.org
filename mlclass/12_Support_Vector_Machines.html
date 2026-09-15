@@ -2,11 +2,1541 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=../mlcourse/12_Support_Vector_Machines.html">
-<link rel="canonical" href="../mlcourse/12_Support_Vector_Machines.html">
-<title>Moved</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12: Support Vector Machines (SVMs) &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<p>These notes have moved. If you are not forwarded automatically, <a href="../mlcourse/12_Support_Vector_Machines.html">follow this link</a>.</p>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>12: Support Vector Machines (SVMs)</h1>
+
+<nav class="chapter-nav">
+  <a href="11_Machine_Learning_System_Design.html" rel="prev">&larr; 11: System design</a>
+  <a href="index.html">Index</a>
+  <a href="13_Clustering.html" rel="next">13: Clustering &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#support-vector-machine-svm-optimization-objective">Support Vector Machine (SVM) - Optimization objective</a></li>
+    <li><a href="#large-margin-intuition">Large margin intuition</a></li>
+    <li><a href="#large-margin-classification-mathematics-optional">Large margin classification mathematics (optional)</a></li>
+    <li><a href="#kernels-1-adapting-svm-to-non-linear-classifiers">Kernels - 1: Adapting SVM to non-linear classifiers</a></li>
+    <li><a href="#kernels-ii">Kernels II</a></li>
+    <li><a href="#svm-implementation-and-use">SVM - implementation and use</a></li>
+  </ul>
+</nav>
+<section id="support-vector-machine-svm-optimization-objective">
+  <h2>Support Vector Machine (SVM) - Optimization objective</h2>
+  <ul>
+    <li>
+      So far, we've seen a range of different algorithms
+      <ul>
+        <li>
+          With supervised learning algorithms - performance is pretty similar
+          <ul>
+            <li>
+              What matters more often is;
+              <ul>
+                <li>The amount of training data</li>
+                <li>Skill of applying algorithms</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      One final supervised learning algorithm that is widely used - <strong><span class="term">support vector machine (SVM)</span></strong>
+      <ul>
+        <li>Compared to both logistic regression and neural networks, a SVM sometimes gives a cleaner way of learning non-linear functions</li>
+        <li>Later in the course we'll do a survey of different supervised learning algorithms</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>An alternative view of logistic regression</h3>
+  <ul>
+    <li>
+      Start with logistic regression, see how we can modify it to get the SVM
+      <ul>
+        <li>
+          As before, the logistic regression hypothesis is as follows
+          <div class="eqn">
+<math display="block"><mrow><msub><mi>h</mi><mi>&#x3b8;</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo form="prefix">&#x2212;</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><mi>x</mi></mrow></msup></mrow></mfrac></mrow></math>
+</div>
+        </li>
+        <li>
+          And the sigmoid activation function looks like this
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [1].png"/></figure>
+        </li>
+        <li>In order to explain the math, we use z as defined above</li>
+      </ul>
+    </li>
+    <li>
+      What do we want logistic regression to do?
+      <ul>
+        <li>
+          We have an example where y = 1
+          <ul>
+            <li>Then we hope h<sub>θ</sub>(x) is close to 1</li>
+            <li>
+              With h<sub>θ</sub>(x) close to 1, (θ<sup><em>T</em></sup> x) must be <strong><span class="term">much larger</span></strong> than 0
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [2].png"/></figure>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Similarly, when y = 0
+          <ul>
+            <li>Then we hope h<sub>θ</sub>(x) is close to 0</li>
+            <li>With h<sub>θ</sub>(x) close to 0, (θ<sup><em>T</em></sup> x) must be <strong><span class="term">much less</span></strong> than 0</li>
+          </ul>
+        </li>
+        <li>
+          This is our classic view of logistic regression
+          <ul>
+            <li>Let's consider another way of thinking about the problem</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Alternative view of logistic regression
+      <ul>
+        <li>
+          If you look at cost function, each example contributes a term like the one below to the overall cost function
+          <div class="eqn">
+<math display="block"><mrow><mo form="prefix">&#x2212;</mo><mo stretchy="false">(</mo><mi>y</mi><mspace width="0.2em"/><mi>log</mi><mspace width="0.2em"/><msub><mi>h</mi><mi>&#x3b8;</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><mi>y</mi><mo stretchy="false">)</mo><mspace width="0.2em"/><mi>log</mi><mo form="prefix">(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>h</mi><mi>&#x3b8;</mi></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo form="postfix">)</mo><mo form="postfix">)</mo></mrow></math>
+</div>
+          <ul>
+            <li>For the overall cost function, we sum over all the training examples using the above function, and have a 1/m term</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If you then plug in the hypothesis definition (h<sub>θ</sub>(x)), you get an expanded cost function equation;
+      <div class="eqn">
+<math display="block"><mrow><mo>=</mo><mo form="prefix">&#x2212;</mo><mi>y</mi><mspace width="0.2em"/><mi>log</mi><mspace width="0.25em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo form="prefix">&#x2212;</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><mi>x</mi></mrow></msup></mrow></mfrac><mo>&#x2212;</mo><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><mi>y</mi><mo stretchy="false">)</mo><mspace width="0.2em"/><mi>log</mi><mo form="prefix">(</mo><mn>1</mn><mo>&#x2212;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo form="prefix">&#x2212;</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><mi>x</mi></mrow></msup></mrow></mfrac><mo form="postfix">)</mo></mrow></math>
+</div>
+      <ul>
+        <li>So each training example contributes that term to the cost function for logistic regression</li>
+      </ul>
+    </li>
+    <li>
+      If y = 1 then only the first term in the objective matters
+      <ul>
+        <li>
+          If we plot the functions vs. z we get the following graph
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [5].png"/></figure>
+          <ul>
+            <li>
+              This plot shows the cost contribution of an example when y = 1 given z
+              <ul>
+                <li>So if z is big, the cost is low - this is good!</li>
+                <li>But if z is 0 or negative the cost contribution is high</li>
+                <li>This is why, when logistic regression sees a positive example, it tries to set θ<sup><em>T</em></sup> x to be a very large term</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If y = 0 then only the second term matters
+      <ul>
+        <li>
+          We can again plot it and get a similar graph
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [6].png"/></figure>
+          <ul>
+            <li>
+              Same deal, if z is small then the cost is low
+              <ul>
+                <li>But if z is large then the cost is massive</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>SVM cost functions from logistic regression cost functions</h3>
+  <ul>
+    <li>
+      To build a SVM we must redefine our cost functions
+      <ul>
+        <li>
+          When y = 1
+          <ul>
+            <li>Take the y = 1 function and create a new cost function</li>
+            <li>
+              Instead of a curved line create two straight lines (magenta) which acts as an approximation to the logistic regression y = 1 function
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [7].png"/></figure>
+              <ul>
+                <li>
+                  Take point (1) on the z axis
+                  <ul>
+                    <li>Flat from 1 onwards</li>
+                    <li>Grows when we reach 1 or a lower number</li>
+                  </ul>
+                </li>
+                <li>
+                  This means we have two straight lines
+                  <ul>
+                    <li>Flat when cost is 0</li>
+                    <li>Straight growing line after 1</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              So this is the new y=1 cost function
+              <ul>
+                <li>Gives the SVM a computational advantage and an easier optimization problem</li>
+                <li>We call this function <span class="term"><strong>cost</strong><strong><sub>1</sub>(z)</strong> </span></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Similarly
+      <ul>
+        <li>
+          When y = 0
+          <ul>
+            <li>
+              Do the equivalent with the y=0 function plot
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [8].png"/></figure>
+            </li>
+            <li>We call this function <span class="term"><strong>cost</strong><strong><sub>0</sub>(z)</strong></span></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So here we define the two cost function terms for our SVM graphically
+      <ul>
+        <li>How do we implement this?</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>The complete SVM cost function</h3>
+  <ul>
+    <li>
+      As a comparison/reminder we have logistic regression below
+      <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>&#x3b8;</mi></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><mo form="prefix">[</mo><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mi>log</mi><mspace width="0.2em"/><msub><mi>h</mi><mi>&#x3b8;</mi></msub><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo form="postfix">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mi>log</mi><mo form="prefix">(</mo><mn>1</mn><mo>&#x2212;</mo><msub><mi>h</mi><mi>&#x3b8;</mi></msub><mo stretchy="false">(</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo form="postfix">)</mo><mo form="postfix">)</mo><mo form="postfix">]</mo><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+</div>
+      <ul>
+        <li>If this looks unfamiliar its because we previously had the - sign outside the expression</li>
+      </ul>
+    </li>
+    <li>
+      For the SVM we take our two logistic regression y=1 and y=0 terms described previously and replace with
+      <ul>
+        <li>cost<sub>1</sub>(θ<sup><em>T</em></sup> x)</li>
+        <li>cost<sub>0</sub>(θ<sup><em>T</em></sup> x)</li>
+      </ul>
+    </li>
+    <li>
+      So we get
+      <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>&#x3b8;</mi></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mo form="prefix">[</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><msub><mtext>cost</mtext><mn>1</mn></msub><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><msub><mtext>cost</mtext><mn>0</mn></msub><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo form="postfix">]</mo><mo>+</mo><mfrac><mrow><mi>&#x3bb;</mi></mrow><mrow><mn>2</mn><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+<span class="eqn-note">The slide indexes the regularisation sum over i = 1 &#x2026; n while its summand is &#x3b8;<sub>j</sub>; the index has to be j, as it is on the previous slide. Corrected here.</span>
+</div>
+    </li>
+  </ul>
+  <h3>SVM notation is slightly different</h3>
+  <ul>
+    <li>In convention with SVM notation we rename a few things here</li>
+    <li>
+      <u>1) Get rid of the 1/m terms</u>
+      <ul>
+        <li>This is just a slightly different convention</li>
+        <li>
+          By removing 1/m we should get the same optimal values for
+          <ul>
+            <li>1/m is a constant, so should get same optimization</li>
+            <li>
+              e.g. say you have a minimization problem which minimizes to u = 5
+              <ul>
+                <li>If your cost function * by a constant, you still generate the minimal value</li>
+                <li>That minimal value is different, but that's irrelevant</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <u>2) For logistic regression we had two terms;</u>
+      <ul>
+        <li>Training data set term (i.e. that we sum over m) = <strong>A</strong></li>
+        <li>
+          Regularization term (i.e. that we sum over n) = <strong>B</strong>
+          <ul>
+            <li>So we could describe it as A + λB</li>
+            <li>Need some way to deal with the trade-off between regularization and data set terms</li>
+            <li>Set different values for λ to parametrize this trade-off</li>
+          </ul>
+        </li>
+        <li>
+          Instead of parameterizing this as A + λB
+          <ul>
+            <li>For SVMs the convention is to use a different parameter called C</li>
+            <li>So do CA + B</li>
+            <li>If C were equal to 1/λ then the two functions (CA + B and A + λB) would give the same value</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So, our overall equation is
+      <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>&#x3b8;</mi></munder><mspace width="0.35em"/><mi>C</mi><mspace width="0.2em"/><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mo form="prefix">[</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><msub><mtext>cost</mtext><mn>1</mn></msub><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><msub><mtext>cost</mtext><mn>0</mn></msub><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo form="postfix">]</mo><mo>+</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+<span class="eqn-note">Same correction to the regularisation index as on the previous slide.</span>
+</div>
+    </li>
+    <li>
+      Unlike logistic, h<sub>θ</sub>(x) doesn't give us a probability, but instead we get a direct prediction of 1 or 0
+      <ul>
+        <li>So if θ<sup><em>T</em></sup> x is equal to or greater than 0 --&gt; h<sub>θ</sub>(x) = 1</li>
+        <li>Else --&gt; h<sub>θ</sub>(x) = 0</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="large-margin-intuition">
+  <h2>Large margin intuition</h2>
+  <ul>
+    <li>
+      Sometimes people refer to SVM as <strong><span class="term">large margin classifiers</span></strong>
+      <ul>
+        <li>We'll consider what that means and what an SVM hypothesis looks like</li>
+        <li>
+          The SVM cost function is as above, and we've drawn out the cost terms below
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [12].png"/></figure>
+<div class="eqn">
+<math display="block"><mtable><mtr><mtd columnalign="left"><mtext>If y = 1, we want</mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>&#x3b8;</mi><mi>T</mi></msup><mi>x</mi><mo>&#x2265;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>(not just</mtext><mspace width="0.3em"/><mo>&#x2265;</mo><mn>0</mn><mtext>)</mtext></mtd></mtr><mtr><mtd columnalign="left"><mtext>If y = 0, we want</mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>&#x3b8;</mi><mi>T</mi></msup><mi>x</mi><mo>&#x2264;</mo><mo form="prefix">&#x2212;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>(not just</mtext><mspace width="0.3em"/><mo>&lt;</mo><mn>0</mn><mtext>)</mtext></mtd></mtr></mtable></math>
+<span class="eqn-note">Left: y = 1, where the cost is zero once &#x3b8;<sup>T</sup>x reaches 1. Right: y = 0, where it is zero once &#x3b8;<sup>T</sup>x drops to &#x2212;1. The SVM asks for a margin, not merely the right side of zero.</span>
+</div>
+<div class="code-eg">
+<pre>import numpy as np
+
+def cost1(z):   <span class="comment"># the y = 1 cost: zero once z >= 1</span>
+    return np.maximum(0, 1 - z)
+
+def cost0(z):   <span class="comment"># the y = 0 cost: zero once z &lt;= -1</span>
+    return np.maximum(0, 1 + z)
+
+cost1(np.array([-1.0, 0, 1, 2]))   <span class="comment"># [2., 1., 0., 0.]</span>
+cost0(np.array([-2.0, -1, 0, 1]))  <span class="comment"># [0., 0., 1., 2.]</span></pre>
+<p class="eqn-note">The two straight-line costs drawn above: flat at zero beyond the margin, growing linearly inside it.</p>
+</div>
+        </li>
+        <li>Left is cost<sub>1</sub> and right is cost<sub>0</sub></li>
+        <li>
+          What does it take to make terms small
+          <ul>
+            <li>
+              If y =1
+              <ul>
+                <li>cost<sub>1</sub>(z) = 0 only when z &gt;= 1</li>
+              </ul>
+            </li>
+            <li>
+              If y = 0
+              <ul>
+                <li>cost<sub>0</sub>(z) = 0 only when z &lt;= -1</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Interesting property of SVM
+          <ul>
+            <li>
+              If you have a positive example, you only really <em>need</em> z to be greater or equal to 0
+              <ul>
+                <li>If this is the case then you predict 1</li>
+              </ul>
+            </li>
+            <li>
+              SVM wants a bit more than that - doesn't want to *just* get it right, but have the value be quite a bit bigger than zero
+              <ul>
+                <li>Throws in an extra safety margin factor</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Logistic regression does something similar</li>
+    <li>
+      What are the consequences of this?
+      <ul>
+        <li>
+          Consider a case where we set C to be huge
+          <ul>
+            <li>C = 100,000</li>
+            <li>
+              So considering we're minimizing CA + B
+              <ul>
+                <li>If C is huge we're going to pick an A value so that A is equal to zero</li>
+                <li>What is the optimization problem here - how do we make A = 0?</li>
+              </ul>
+            </li>
+            <li>
+              Making A = 0
+              <ul>
+                <li>
+                  If y = 1
+                  <ul>
+                    <li>Then to make our "A" term 0 need to find a value of θ so (θ<sup><em>T</em></sup> x) is greater than or equal to 1</li>
+                  </ul>
+                </li>
+                <li>
+                  Similarly, if y = 0
+                  <ul>
+                    <li>Then we want to make "A" = 0 so we need to find a value of θ so (θ<sup><em>T</em></sup> x) is equal to or less than -1</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              So - if we think of our optimization problem a way to ensure that this first "A" term is equal to 0, we re-factor our optimization problem into just minimizing the "B" (regularization) term, because
+              <ul>
+                <li>When A = 0 --&gt; A*C = 0</li>
+              </ul>
+            </li>
+            <li>
+              So we're minimizing B, under the constraints shown below
+              <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>&#x3b8;</mi></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+<math display="block"><mtable><mtr><mtd columnalign="left"><mtext>s.t.</mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2265;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>if</mtext><mspace width="0.35em"/><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mn>1</mn></mtd></mtr><mtr><mtd columnalign="left"><mtext></mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2264;</mo><mo form="prefix">&#x2212;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>if</mtext><mspace width="0.35em"/><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mn>0</mn></mtd></mtr></mtable></math>
+</div>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Turns out when you solve this problem you get interesting decision boundaries
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [14].png"/></figure>
+        </li>
+        <li>
+          The green and magenta lines are functional decision boundaries which could be chosen by logistic regression
+          <ul>
+            <li>But they probably don't generalize too well</li>
+          </ul>
+        </li>
+        <li>
+          The black line, by contrast is the one chosen by the SVM because of this safety net imposed by the optimization graph
+          <ul>
+            <li>More robust separator</li>
+          </ul>
+        </li>
+        <li>
+          Mathematically, that black line has a larger minimum distance (margin) from any of the training examples
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [15].png"/></figure>
+        </li>
+        <li>By separating with the largest margin you incorporate robustness into your decision making process</li>
+      </ul>
+    </li>
+    <li>
+      We looked at this at when C is very large
+      <ul>
+        <li>
+          SVM is more sophisticated than the large margin might look
+          <ul>
+            <li>
+              If you were just using large margin then SVM would be very sensitive to outliers
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [16].png"/></figure>
+            </li>
+            <li>
+              You would risk letting a single ridiculous outlier hugely impact your classification boundary
+              <ul>
+                <li>A single example might not represent a good reason to change an algorithm</li>
+                <li>
+                  If C is very large then we <em>do</em> use this quite naive maximize the margin approach
+                  <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [17].png"/></figure>
+                </li>
+                <li>So we'd change the black to the magenta</li>
+              </ul>
+            </li>
+            <li>But if C is reasonably small, or a not too large, then you stick with the black decision boundary</li>
+          </ul>
+        </li>
+        <li>
+          What about non-linearly separable data?
+          <ul>
+            <li>Then SVM still does the right thing if you use a normal size C</li>
+            <li>So the idea of SVM being a large margin classifier is only really relevant when you have no outliers and you have easily linearly separable data</li>
+          </ul>
+        </li>
+        <li>Means we ignore a few outliers</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="large-margin-classification-mathematics-optional">
+  <h2>Large margin classification mathematics (optional)</h2>
+  <h3>Vector inner products</h3>
+  <ul>
+    <li>
+      Have two (2D) vectors u and v - what is the inner product (<em>u</em><sup><em>T</em></sup> <em>v</em>)?
+      <div class="eqn">
+<math display="block"><mrow><mi>u</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msub><mi>u</mi><mn>1</mn></msub></mtd></mtr><mtr><mtd><msub><mi>u</mi><mn>2</mn></msub></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="1.4em"/><mi>v</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><msub><mi>v</mi><mn>1</mn></msub></mtd></mtr><mtr><mtd><msub><mi>v</mi><mn>2</mn></msub></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+      <ul>
+        <li>
+          Plot <em>u</em> on graph
+          <ul>
+            <li>i.e <em>u</em><sub>1</sub> vs. <em>u</em><sub>2<figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [19].png"/></figure></sub></li>
+          </ul>
+        </li>
+        <li>
+          One property which is good to have is the <span class="term"><strong>norm</strong> </span>of a vector
+          <ul>
+            <li>
+              Written as ||u||
+              <ul>
+                <li>This is the euclidean length of vector u</li>
+              </ul>
+            </li>
+            <li>
+              So ||u|| = SQRT(<em>u</em><sub>1</sub><sup><em>2</em></sup> + <em>u</em><sub>2</sub><sup><em>2</em></sup>) = real number
+              <ul>
+                <li>i.e. length of the arrow above</li>
+                <li>Can show via Pythagoras</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          For the inner product, take <em>v</em> and orthogonally project down onto u
+          <ul>
+            <li>First we can plot v on the same axis in the same way (<em>v</em><sub>1 </sub>vs <em>v</em><sub>2</sub>)</li>
+            <li>
+              Measure the length/magnitude of the projection
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [20].png"/></figure>
+            </li>
+            <li>
+              So here, the green line is the projection
+              <ul>
+                <li>p = length along u to the intersection</li>
+                <li>p is the magnitude of the projection of vector <em>v</em> onto vector <em>u</em></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Possible to show that
+          <ul>
+            <li>
+              <em>u</em><sup><em>T</em></sup> <em>v</em> = p * ||u||
+              <ul>
+                <li>So this is one way to compute the inner product</li>
+              </ul>
+            </li>
+            <li><em>u</em><sup><em>T</em></sup> <em>v = </em><em>u</em><sub>1</sub><em>v</em><sub>1</sub>+ <em>u</em><sub>2</sub><em>v</em><sub>2</sub></li>
+            <li>
+              So therefore
+              <ul>
+                <li><strong><span class="hl-red">p * ||u|| = <em>u</em><sub>1</sub><em>v</em><sub>1</sub>+ <em>u</em><sub>2</sub><em>v</em><sub>2</sub></span></strong></li>
+                <li>This is an important rule in linear algebra</li>
+              </ul>
+            </li>
+            <li>
+              We can reverse this too
+              <ul>
+                <li>
+                  So we could do
+                  <ul>
+                    <li><em>v</em><sup><em>T</em></sup> <em>u = v</em><sub>1</sub><em>u</em><sub>1</sub>+ v<sub>2</sub><em>u</em><sub>2</sub></li>
+                    <li>Which would obviously give you the same number</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          p can be negative if the angle between them is more than 90 degrees
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [21].png"/></figure>
+          <ul>
+            <li>So here p is negative</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Use the vector inner product theory to try and understand SVMs a little better</li>
+  </ul>
+  <h3>SVM decision boundary</h3>
+  <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>&#x3b8;</mi></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+<math display="block"><mtable><mtr><mtd columnalign="left"><mtext>s.t.</mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2265;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>if</mtext><mspace width="0.35em"/><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mn>1</mn></mtd></mtr><mtr><mtd columnalign="left"><mtext></mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2264;</mo><mo form="prefix">&#x2212;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>if</mtext><mspace width="0.35em"/><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mn>0</mn></mtd></mtr></mtable></math>
+</div>
+  <ul>
+    <li>
+      For the following explanation - two simplification
+      <ul>
+        <li>Set θ<sub>0</sub>= 0 (i.e. ignore intercept terms)</li>
+        <li>
+          Set n = 2 - (x<sub>1</sub>, x<sub>2</sub>)
+          <ul>
+            <li>i.e. each example has only 2 features</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Given we only have two parameters we can simplify our function to
+      <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo form="prefix">(</mo><msubsup><mi>&#x3b8;</mi><mn>1</mn><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>&#x3b8;</mi><mn>2</mn><mn>2</mn></msubsup><mo form="postfix">)</mo></mrow></math>
+</div>
+    </li>
+    <li>
+      And, can be re-written as
+      <div class="eqn">
+<math display="block"><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo>(</mo><msqrt><msubsup><mi>&#x3b8;</mi><mn>1</mn><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>&#x3b8;</mi><mn>2</mn><mn>2</mn></msubsup></msqrt><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+      <ul>
+        <li>Should give same thing</li>
+      </ul>
+    </li>
+    <li>
+      We may notice that
+      <div class="eqn">
+<math display="block"><mrow><msqrt><msubsup><mi>&#x3b8;</mi><mn>1</mn><mn>2</mn></msubsup><mo>+</mo><msubsup><mi>&#x3b8;</mi><mn>2</mn><mn>2</mn></msubsup></msqrt><mo>=</mo><mrow><mo stretchy="false">&#x2016;</mo><mi>&#x3b8;</mi><mo stretchy="false">&#x2016;</mo></mrow></mrow></math>
+<span class="eqn-note">The slide rings the square root on the line above and labels it &#x2016;&#x3b8;&#x2016; &#x2014; the length of the vector &#x3b8;. That is the step that turns the sum of squares into a norm.</span>
+</div>
+      <ul>
+        <li>
+          The term in red is the norm of θ
+          <ul>
+            <li>If we take θ as a 2x1 vector</li>
+            <li>If we assume θ<sub>0</sub> = 0 its still true</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So, finally, this means our optimization function can be re-defined as
+      <div class="eqn">
+<math display="block"><mrow><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">&#x2016;</mo><mi>&#x3b8;</mi><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+    </li>
+    <li>So the SVM is minimizing the squared norm</li>
+    <li>
+      Given this, what are the (θ<sup><em>T</em></sup> x) parameters doing?
+      <ul>
+        <li>
+          Given θ and given example x what is this equal to
+          <ul>
+            <li>We can look at this in a comparable manner to how we just looked at u and v</li>
+          </ul>
+        </li>
+        <li>
+          Say we have a single positive training example (red cross below)
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [27].png"/></figure>
+        </li>
+        <li>
+          Although we haven't been thinking about examples as vectors it can be described as such
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [28].png"/></figure>
+        </li>
+        <li>
+          Now, say we have our parameter vector θ and we plot that on the same axis
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [29].png"/></figure>
+        </li>
+        <li>
+          The next question is what is the inner product of these two vectors
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [30].png"/></figure>
+          <ul>
+            <li>
+              p, is in fact p<sup>i</sup>, because it's the length of p for example i
+              <ul>
+                <li>Given our previous discussion we know <br/>(θ<sup><em>T</em></sup> x<sup><em>i</em> </sup>) = p<sup><em>i</em> </sup>* ||θ||<br/> = θ<sub>1</sub>x<sup>i</sup><sub>1</sub> + θ<sub>2</sub>x<sup>i</sup><sub>2</sub></li>
+                <li>So these are both equally valid ways of computing θ<sup><em>T</em></sup> x<sup><em>i</em></sup></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      What does this mean?
+      <ul>
+        <li>
+          The constraints we defined earlier
+          <ul>
+            <li>(θ<sup><em>T</em></sup> x) &gt;= 1 if y = 1</li>
+            <li>(θ<sup><em>T</em></sup> x) &lt;= -1 if y = 0</li>
+          </ul>
+        </li>
+        <li>
+          Can be replaced/substituted with the constraints
+          <ul>
+            <li>p<sup><em>i</em> </sup>* ||θ|| &gt;= 1 if y = 1</li>
+            <li>p<sup><em>i</em> </sup>* ||θ|| &lt;= -1 if y = 0</li>
+          </ul>
+        </li>
+        <li>
+          Writing that into our optimization objective
+          <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>&#x3b8;</mi></munder><mspace width="0.35em"/><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><msup><mrow><mo stretchy="false">&#x2016;</mo><mi>&#x3b8;</mi><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup></mrow></math>
+<math display="block"><mtable><mtr><mtd columnalign="left"><mtext>s.t.</mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>p</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x22c5;</mo><mrow><mo stretchy="false">&#x2016;</mo><mi>&#x3b8;</mi><mo stretchy="false">&#x2016;</mo></mrow><mo>&#x2265;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>if</mtext><mspace width="0.35em"/><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mn>1</mn></mtd></mtr><mtr><mtd columnalign="left"><mtext></mtext></mtd><mtd columnalign="left"><mspace width="0.6em"/><msup><mi>p</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x22c5;</mo><mrow><mo stretchy="false">&#x2016;</mo><mi>&#x3b8;</mi><mo stretchy="false">&#x2016;</mo></mrow><mo>&#x2264;</mo><mo form="prefix">&#x2212;</mo><mn>1</mn></mtd><mtd columnalign="left"><mspace width="1.2em"/><mtext>if</mtext><mspace width="0.35em"/><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>=</mo><mn>0</mn></mtd></mtr></mtable></math>
+<span class="eqn-note">The slide gives the condition on the second constraint as y = 1, which is the case the first constraint already covers. It must be y = 0. Corrected here.</span>
+</div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So, given we've redefined these functions let us now consider the training example below
+      <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [32].png"/></figure>
+      <ul>
+        <li>
+          Given this data, what boundary will the SVM choose? Note that we're still assuming θ<sub>0</sub> = 0, which means the boundary has to pass through the origin (0,0)
+          <ul>
+            <li>
+              Green line - small margins
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [33].png"/></figure>
+              <ul>
+                <li>
+                  SVM would not choose this line
+                  <ul>
+                    <li>Decision boundary comes very close to examples</li>
+                    <li>Lets discuss <em>why</em> the SVM would <strong>not</strong> choose this decision boundary</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Looking at this line
+          <ul>
+            <li>
+              We can show that θ is at 90 degrees to the decision boundary
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [34].png"/></figure>
+              <ul>
+                <li><strong><span class="hl-red">θ is always at 90 degrees to the decision boundary</span></strong> (can show with linear algebra, although we're not going to!)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So now lets look at what this implies for the optimization objective
+      <ul>
+        <li>
+          Look at first example (x<sup>1</sup>)
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [35].png"/></figure>
+        </li>
+        <li>
+          Project a line from x<sup>1 </sup>on to the θ vector (so it hits at 90 degrees)
+          <ul>
+            <li>The distance between the intersection and the origin is (<strong><span class="hl-red">p<sup>1</sup></span></strong>)</li>
+          </ul>
+        </li>
+        <li>
+          Similarly, look at second example (x<sup>2</sup>)
+          <ul>
+            <li>Project a line from x<sup>2</sup> on to the θ vector</li>
+            <li>This is the magenta line, which will be <strong><span class="hl-purple">negative </span></strong>(<strong><span class="hl-purple">p<sup>2</sup></span></strong>)</li>
+          </ul>
+        </li>
+        <li>
+          If we overview these two lines below we see a graphical representation of what's going on;
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [36].png"/></figure>
+        </li>
+        <li>We find that both these p values are going to be pretty small</li>
+        <li>
+          If we look back at our optimization objective
+          <ul>
+            <li>
+              We know we need p<sup>1</sup> * ||θ|| to be bigger than or equal to 1 for positive examples
+              <ul>
+                <li>
+                  If p is small
+                  <ul>
+                    <li><span class="hl-red">Means that ||θ|| must be pretty large</span></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              Similarly, for negative examples we need p<sup>2</sup> * ||θ|| to be smaller than or equal to -1
+              <ul>
+                <li>
+                  We saw in this example p<sup>2</sup> is a small negative number
+                  <ul>
+                    <li><span class="hl-red">So ||θ|| must be a large number</span></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Why is this a problem?
+          <ul>
+            <li>
+              The optimization objective is trying to find a set of parameters where the norm of theta is small
+              <ul>
+                <li>
+                  So this doesn't seem like a good direction for the parameter vector (because as p values get smaller ||θ|| must get larger to compensate)
+                  <ul>
+                    <li>So we should make p values larger which allows ||θ|| to become smaller</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So lets choose a different boundary
+      <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [37].png"/></figure>
+      <ul>
+        <li>Now if you look at the projection of the examples to θ we find that p<sup>1 </sup>becomes large and ||θ|| can become small</li>
+        <li>
+          So with some values drawn in
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [38].png"/></figure>
+        </li>
+        <li>
+          This means that by choosing this second decision boundary we can make ||θ|| smaller
+          <ul>
+            <li>Which is why the SVM chooses this hypothesis as better</li>
+            <li>
+              This is how we generate the large margin effect
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [39].png"/></figure>
+            </li>
+            <li>
+              The magnitude of this margin is a function of the p values
+              <ul>
+                <li>So by maximizing these p values we minimize ||θ||</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Finally, we did this derivation assuming θ<sub>0</sub> = 0,
+      <ul>
+        <li>If this is the case we're entertaining only decision boundaries which pass through (0,0)</li>
+        <li>If you allow θ<sub>0</sub> to be other values then this simply means you can have decision boundaries which cross through the x and y values at points other than (0,0)</li>
+        <li>Can show with basically same logic that this works, and even when θ<sub>0</sub> is non-zero when you have optimization objective described above (when C is very large) that the SVM is looking for a large margin separator between the classes</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="kernels-1-adapting-svm-to-non-linear-classifiers">
+  <h2>Kernels - 1: Adapting SVM to non-linear classifiers</h2>
+  <ul>
+    <li>
+      What are kernels and how do we use them
+      <ul>
+        <li>We have a training set</li>
+        <li>
+          We want to find a non-linear boundary
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [40].png"/></figure>
+        </li>
+        <li>
+          Come up with a complex set of polynomial features to fit the data
+          <ul>
+            <li>
+              Have h<sub>θ</sub>(x) which
+              <ul>
+                <li>Returns 1 if the combined weighted sum of vectors (weighted by the parameter vector) is greater than or equal to 0</li>
+                <li>Else return 0</li>
+              </ul>
+            </li>
+            <li>
+              Another way of writing this (new notation) is
+              <ul>
+                <li>That a hypothesis computes a decision boundary by taking the sum of the parameter vector multiplied by a <strong><span class="term">new feature vector f</span></strong>, which simply contains the various high order x terms</li>
+                <li>
+                  e.g.
+                  <ul>
+                    <li>h<sub>θ</sub>(x) = θ<sub>0</sub>+ θ<sub>1</sub>f<sub>1</sub>+ θ<sub>2</sub>f<sub>2 </sub>+ θ<sub>3</sub>f<sub>3</sub></li>
+                    <li>
+                      Where
+                      <ul>
+                        <li>f<sub>1</sub>= x<sub>1</sub></li>
+                        <li>f<sub>2 </sub>= x<sub>1</sub>x<sub>2</sub></li>
+                        <li>f<sub>3 </sub>= ...</li>
+                        <li>i.e. not specific values, but each of the terms from your complex polynomial function</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              Is there a better choice of feature f than the high order polynomials?
+              <ul>
+                <li>As we saw with computer imaging, high order polynomials become computationally expensive</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      New features
+      <ul>
+        <li>Define three features in this example (ignore x<sub>0</sub>)</li>
+        <li>Have a graph of x<sub>1 </sub>vs. x<sub>2 </sub>(don't plot the values, just define the space)</li>
+        <li>
+          Pick three points in that space
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [41].png"/></figure>
+        </li>
+        <li>
+          These points l<sup>1</sup>, l<sup>2</sup>, and l<sup>3</sup>, were chosen manually and are called <strong><span class="term">landmarks</span></strong>
+          <ul>
+            <li>
+              Given x, define f1 as the similarity between (x, l<sup>1</sup>)
+              <ul>
+                <li>
+                  = exp(- (|| x - l<sup>1 </sup>||<sup>2</sup> ) / 2σ<sup>2</sup>)<br/> =
+                  <div class="eqn">
+<math display="block"><mrow><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><msup><mrow><mo stretchy="false">&#x2016;</mo><mi>x</mi><mo>&#x2212;</mo><msup><mi>l</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>&#x3c3;</mi><mn>2</mn></msup></mrow></mfrac><mo form="postfix">)</mo></mrow></math>
+</div>
+<div class="code-eg">
+<pre>def kernel(x, l, sigma2=1.0):   <span class="comment"># the Gaussian kernel</span>
+    return np.exp(-((x - l) ** 2).sum() / (2 * sigma2))
+
+l1 = np.array([3, 5])              <span class="comment"># a landmark</span>
+
+kernel(np.array([3, 5]), l1)   <span class="comment"># 1.0     - x on the landmark</span>
+kernel(np.array([6, 9]), l1)   <span class="comment"># 3.7e-06 - x far away: effectively zero</span></pre>
+<p class="eqn-note">The similarity function computed: 1 on the landmark, and it dies off to nothing within a few &sigma; of it.</p>
+</div>
+                </li>
+                <li>
+                  <strong><span class="hl-red">|| x - </span></strong><strong><span class="hl-red">l<sup>1 </sup></span></strong><strong><span class="hl-red">||</span></strong> is the euclidean distance between the point x and the landmark l<sup>1 </sup>squared
+                  <ul>
+                    <li>Discussed more later</li>
+                  </ul>
+                </li>
+                <li>
+                  If we remember our statistics, we know that
+                  <ul>
+                    <li>σ is the <strong><span class="term">standard </span></strong><strong><span class="term">deviation</span></strong></li>
+                    <li>σ<sup>2 </sup>is commonly called the <strong><span class="term">variance</span></strong></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              Remember, that as discussed
+              <div class="eqn">
+<math display="block"><mrow><msup><mrow><mo stretchy="false">&#x2016;</mo><mi>x</mi><mo>&#x2212;</mo><msup><mi>l</mi><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup><mo>=</mo><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msup><mrow><mo>(</mo><msub><mi>x</mi><mi>j</mi></msub><mo>&#x2212;</mo><msup><msub><mi>l</mi><mi>j</mi></msub><mrow><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msup><mo>)</mo></mrow><mn>2</mn></msup></mrow></math>
+</div>
+            </li>
+          </ul>
+        </li>
+        <li>
+          So, f2 is defined as
+          <ul>
+            <li>f2 = similarity(x, l<sup>2</sup>) = exp(- (|| x - l<sup>2 </sup>||<sup>2 </sup>) / 2σ<sup>2</sup>)</li>
+          </ul>
+        </li>
+        <li>
+          And similarly
+          <ul>
+            <li>f3 = similarity(x, l<sup>3</sup>) = exp(- (|| x - l<sup>3 </sup>||<sup>2 </sup>) / 2σ<sup>2</sup>)</li>
+          </ul>
+        </li>
+        <li>
+          This similarity function is called a <strong><span class="term">kernel</span></strong>
+          <ul>
+            <li>This function is a <strong><span class="term">Gaussian Kernel</span></strong></li>
+          </ul>
+        </li>
+        <li>
+          So, instead of writing similarity between x and l we might write
+          <ul>
+            <li>f1 = k(x, l<sup>1</sup>)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Diving deeper into the kernel</h3>
+  <ul>
+    <li>
+      So lets see what these kernels do and why the functions defined make sense
+      <ul>
+        <li>
+          Say x is close to a landmark
+          <ul>
+            <li>
+              Then the squared distance will be ~0
+              <ul>
+                <li>
+                  So
+                  <div class="eqn">
+<math display="block"><mrow><msub><mi>f</mi><mn>1</mn></msub><mo>&#x2248;</mo><mi>exp</mi><mo form="prefix">(</mo><mo form="prefix">&#x2212;</mo><mfrac><mrow><msup><mn>0</mn><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>&#x3c3;</mi><mn>2</mn></msup></mrow></mfrac><mo form="postfix">)</mo></mrow></math>
+<span class="eqn-note">When x sits on the landmark the distance is zero, so the exponent is zero and f&#x2081; &#x2248; 1.</span>
+</div>
+                  <ul>
+                    <li>
+                      Which is basically e<sup>-0</sup>
+                      <ul>
+                        <li>Which is close to 1</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              Say x is far from a landmark
+              <ul>
+                <li>
+                  Then the squared distance is big
+                  <ul>
+                    <li>
+                      Gives e<sup>-large number</sup>
+                      <ul>
+                        <li>Which is close to zero</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>Each landmark defines a new features</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If we plot f1 vs the kernel function we get a plot like this
+      <ul>
+        <li>Notice that when x = [3,5] then f1 = 1</li>
+        <li>As x moves away from [3,5] then the feature takes on values close to zero</li>
+        <li>
+          So this measures how close x is to this landmark
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [45].png"/></figure>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>What does σ do?</h3>
+  <ul>
+    <li>
+      <strong><span class="term">σ<sup>2 </sup></span></strong>is a parameter of the Gaussian kernel
+      <ul>
+        <li>Defines the steepness of the rise around the landmark</li>
+      </ul>
+    </li>
+    <li>Above example σ<sup>2</sup> = 1</li>
+    <li>
+      Below σ<sup>2</sup> = 0.5
+      <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [46].png"/></figure>
+      <ul>
+        <li>We see here that as you move away from 3,5 the feature f1 falls to zero much more rapidly</li>
+      </ul>
+    </li>
+    <li>
+      The inverse can be seen if σ<sup>2</sup> = 3
+      <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [47].png"/></figure>
+    </li>
+    <li>
+      Given this definition, what kinds of hypotheses can we learn?
+      <ul>
+        <li>With training examples x we predict "1" when</li>
+        <li>
+          θ<sub>0</sub>+ θ<sub>1</sub>f<sub>1</sub>+ θ<sub>2</sub>f<sub>2 </sub>+ θ<sub>3</sub>f<sub>3</sub> &gt;= 0
+          <ul>
+            <li>
+              For our example, lets say we've already run an algorithm and got the
+              <ul>
+                <li>θ<sub>0 </sub>= -0.5</li>
+                <li>θ<sub>1 </sub>= 1</li>
+                <li>θ<sub>2 </sub>= 1</li>
+                <li>θ<sub>3 </sub>= 0</li>
+              </ul>
+            </li>
+            <li>
+              Given our placement of three examples, what happens if we evaluate an example at the <strong><span class="hl-purple">magenta dot</span></strong> below?
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [48].png"/></figure>
+            </li>
+            <li>
+              Looking at our formula, we know f1 will be close to 1, but f2 and f3 will be close to 0
+              <ul>
+                <li>
+                  So if we look at the formula we have
+                  <ul>
+                    <li>θ<sub>0</sub>+ θ<sub>1</sub>f<sub>1</sub>+ θ<sub>2</sub>f<sub>2 </sub>+ θ<sub>3</sub>f<sub>3</sub> &gt;= 0</li>
+                    <li>
+                      -0.5 + 1 + 0 + 0 = 0.5
+                      <ul>
+                        <li>0.5 is greater than 0
+<div class="code-eg">
+<pre>theta = np.array([-0.5, 1, 1, 0])   <span class="comment"># theta0..theta3 from above</span>
+
+f_near = np.array([1, 1, 0, 0])     <span class="comment"># near l1: f1 ~ 1, f2 and f3 ~ 0</span>
+theta @ f_near                      <span class="comment"># 0.5  >= 0 -> predict y = 1</span>
+
+f_far = np.array([1, 0, 0, 0])      <span class="comment"># far from all three landmarks</span>
+theta @ f_far                       <span class="comment"># -0.5 &lt; 0 -> predict y = 0</span></pre>
+<p class="eqn-note">The worked example as arithmetic: near l<sup>1</sup> the hypothesis clears zero and predicts 1; far from every landmark only θ<sub>0</sub> is left, and it predicts 0.</p>
+</div></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              If we had <strong><span class="hl">another point</span></strong> far away from all three
+              <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [49].png"/></figure>
+              <ul>
+                <li>
+                  This equates to -0.5
+                  <ul>
+                    <li>So we predict 0</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>Considering our parameter, for points near l<sup>1</sup> and l<sup>2</sup> you predict 1, but for points near l<sup>3 </sup>you predict 0</li>
+        <li>
+          Which means we create a non-linear decision boundary that goes a lil' something like this;
+          <figure><img alt="" loading="lazy" src="12_Support_Vector_Machines_files/Image [50].png"/></figure>
+          <ul>
+            <li>Inside we predict y = 1</li>
+            <li>Outside we predict y = 0</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      So this show how we can create a non-linear boundary with landmarks and the kernel function in the support vector machine
+      <ul>
+        <li>
+          But
+          <ul>
+            <li>How do we get/choose the landmarks</li>
+            <li>What other kernels can we use (other than the Gaussian kernel)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="kernels-ii">
+  <h2>Kernels II</h2>
+  <ul>
+    <li>Filling in missing detail and practical implications regarding kernels</li>
+    <li>
+      Spoke about picking landmarks manually, defining the kernel, and building a hypothesis function
+      <ul>
+        <li>Where do we get the landmarks from?</li>
+        <li>For complex problems we probably want lots of them</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Choosing the landmarks</h3>
+  <ul>
+    <li>Take the training data</li>
+    <li>For each example place a landmark at exactly the same location</li>
+    <li>
+      So end up with m landmarks
+      <ul>
+        <li>One landmark per location per training example</li>
+        <li>Means our features measure how close to a training set example something is</li>
+      </ul>
+    </li>
+    <li>
+      Given a new example, compute all the f values
+      <ul>
+        <li>
+          Gives you a feature vector f (f<sub>0</sub> to f<sub>m</sub>)
+          <ul>
+            <li>f<sub>0</sub> = 1 always</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      A more detailed look at generating the f vector
+      <ul>
+        <li>
+          If we had a training example - features we compute would be using (x<sup>i</sup>, y<sup>i</sup>)
+          <ul>
+            <li>
+              So we just cycle through each landmark, calculating how close to that landmark actually x<sup>i</sup> is
+              <ul>
+                <li>f<sub>1</sub><sup>i</sup> = k(x<sup>i</sup>, l<sup>1</sup>)</li>
+                <li>f<sub>2</sub><sup>i</sup> = k(x<sup>i</sup>, l<sup>2</sup>)</li>
+                <li>...</li>
+                <li>f<sub>m</sub><sup>i</sup> = k(x<sup>i</sup>, l<sup>m</sup>)</li>
+              </ul>
+            </li>
+            <li>
+              Somewhere in the list we compare x to itself... (i.e. when we're at f<sub>i</sub><sup>i</sup>)
+              <ul>
+                <li>So because we're using the Gaussian Kernel this evaluates to 1</li>
+              </ul>
+            </li>
+            <li>
+              Take these m features (f<sub>1</sub>, f<sub>2</sub> ... f<sub>m</sub>) group them into an [m +1 x 1] dimensional vector called f
+              <ul>
+                <li>f<sup>i</sup> is the f feature vector for the ith example</li>
+                <li>And add a 0th term = 1</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Given these kernels, how do we use a support vector machine</li>
+  </ul>
+  <h3>SVM hypothesis prediction with kernels</h3>
+  <ul>
+    <li>
+      Predict y = 1 if (θ<sup><em>T</em></sup> f) &gt;= 0
+      <ul>
+        <li>Because θ = [m+1 x 1]</li>
+        <li>And f = [m +1 x 1]</li>
+      </ul>
+    </li>
+    <li>
+      So, this is how you make a prediction assuming you already have θ
+      <ul>
+        <li>How do you get θ?</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>SVM training with kernels</h3>
+  <ul>
+    <li>
+      Use the SVM learning algorithm
+      <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>&#x3b8;</mi></munder><mspace width="0.35em"/><mi>C</mi><mspace width="0.2em"/><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><mo form="prefix">[</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><msub><mtext>cost</mtext><mn>1</mn></msub><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>f</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>&#x2212;</mo><msup><mi>y</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><msub><mtext>cost</mtext><mn>0</mn></msub><mo stretchy="false">(</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><msup><mi>f</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo stretchy="false">)</mo><mo form="postfix">]</mo><mo>+</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup></mrow></math>
+<span class="eqn-note">The slide omits the square brackets, leaving it unclear how far the sum runs; they are restored here to match the same cost function as it was written before kernels were introduced.</span>
+</div>
+      <ul>
+        <li>Now, we minimize using f as the feature vector instead of x</li>
+        <li>By solving this minimization problem you get the parameters for your SVM</li>
+      </ul>
+    </li>
+    <li>
+      In this setup, m = n
+      <ul>
+        <li>Because number of features is the number of training data examples we have</li>
+      </ul>
+    </li>
+    <li>
+      One final mathematic detail (not crucial to understand)
+      <ul>
+        <li>
+          If we ignore θ<sub>0</sub> then the following is true
+          <div class="eqn">
+<math display="block"><mrow><munderover><mo>&#x2211;</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msubsup><mi>&#x3b8;</mi><mi>j</mi><mn>2</mn></msubsup><mo>=</mo><msup><mi>&#x3b8;</mi><mi>T</mi></msup><mi>&#x3b8;</mi></mrow></math>
+</div>
+        </li>
+        <li>
+          What many implementations do is
+          <div class="eqn">
+<math display="block"><mrow><msup><mi>&#x3b8;</mi><mi>T</mi></msup><mi>M</mi><mi>&#x3b8;</mi></mrow></math>
+<span class="eqn-note">Most SVM implementations replace &#x3b8;<sup>T</sup>&#x3b8; with &#x3b8;<sup>T</sup>M&#x3b8;, where M depends on the kernel. It is a rescaled inner product, and it is what lets the SVM scale to much larger feature counts.</span>
+</div>
+          <ul>
+            <li>Where the matrix M depends on the kernel you use</li>
+            <li>Gives a slightly different minimization - means we determine a rescaled version of θ</li>
+            <li>Allows more efficient computation, and scale to much bigger training sets</li>
+            <li>
+              If you have a training set with 10 000 values, means you get 10 000 features
+              <ul>
+                <li>Solving for all these parameters can become expensive</li>
+                <li>So by adding this in we avoid a for loop and use a matrix multiplication algorithm instead</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      You can apply kernels to other algorithms
+      <ul>
+        <li>But they tend to be very computationally expensive</li>
+        <li>But the SVM is far more efficient - so more practical</li>
+      </ul>
+    </li>
+    <li>Lots of good off the shelf software to minimize this function</li>
+    <li>
+      <strong>SVM parameters (C)</strong>
+      <ul>
+        <li>Bias and variance trade off</li>
+        <li>
+          Must choose C
+          <ul>
+            <li>C plays a role similar to 1/LAMBDA (where LAMBDA is the regularization parameter)</li>
+          </ul>
+        </li>
+        <li>Large C gives a hypothesis of <strong><span class="term">low bias high variance</span></strong> --&gt; overfitting</li>
+        <li>Small C gives a hypothesis of <strong><span class="term">high bias low variance</span></strong> --&gt; underfitting</li>
+      </ul>
+    </li>
+    <li>
+      <strong>SVM parameters (σ<sup>2</sup>)</strong>
+      <ul>
+        <li>
+          Parameter for calculating f values
+          <ul>
+            <li>Large σ<sup>2</sup> - f features vary more smoothly - higher bias, lower variance</li>
+            <li>Small σ<sup>2</sup> - f features vary abruptly - low bias, high variance</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="svm-implementation-and-use">
+  <h2>SVM - implementation and use</h2>
+  <ul>
+    <li>So far spoken about SVM in a very abstract manner</li>
+    <li>
+      What do you need to do this
+      <ul>
+        <li>Use SVM software packages (e.g. scikit-learn's LinearSVC and SVC, built on the classic liblinear and libsvm libraries) to solve parameters θ</li>
+        <li>
+          Need to specify
+          <ul>
+            <li>Choice of parameter C</li>
+            <li>Choice of kernel</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Choosing a kernel</h3>
+  <ul>
+    <li>
+      We've looked at the <strong><span class="term">Gaussian kernel</span></strong>
+      <ul>
+        <li>
+          Need to define σ (σ<sup>2</sup>)
+          <ul>
+            <li>Discussed σ<sup>2</sup></li>
+          </ul>
+        </li>
+        <li>
+          When would you choose a Gaussian?
+          <ul>
+            <li>
+              If n is small and/or m is large
+              <ul>
+                <li>e.g. 2D training set that's large</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          If you're using a Gaussian kernel then you may need to implement the kernel function
+          <ul>
+            <li>
+              e.g. a function<br/> f_i = kernel(x1, x2)
+              <ul>
+                <li>Returns a real number</li>
+              </ul>
+            </li>
+            <li>Some SVM packages will expect you to define kernel</li>
+            <li>
+              Although, some SVM implementations include the Gaussian and a few others
+              <ul>
+                <li>Gaussian is probably most popular kernel</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          NB - make sure you perform <strong><span class="term">feature scaling</span></strong> before using a Gaussian kernel
+          <ul>
+            <li>If you don't features with a large value will dominate the f value</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Could use no kernel - <strong><span class="term">linear kernel</span></strong>
+      <ul>
+        <li>
+          Predict y = 1 if (θ<sup><em>T</em></sup> x) &gt;= 0
+          <ul>
+            <li>So no f vector</li>
+            <li>Get a standard linear classifier</li>
+          </ul>
+        </li>
+        <li>
+          Why do this?
+          <ul>
+            <li>
+              If n is large and m is small then
+              <ul>
+                <li>Lots of features, few examples</li>
+                <li>Not enough data - risk overfitting in a high dimensional feature-space</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Other choice of kernel
+      <ul>
+        <li>Linear and Gaussian are most common</li>
+        <li>
+          Not all similarity functions you develop are valid kernels
+          <ul>
+            <li>Must satisfy <strong><span class="hl-red">Mercer's Theorem</span></strong></li>
+            <li>
+              SVM use numerical optimization tricks
+              <ul>
+                <li>Mean certain optimizations can be made, but they must follow the theorem</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong><span class="term">Polynomial Kernel</span></strong>
+          <ul>
+            <li>
+              We measure the similarity of x and l by doing one of
+              <ul>
+                <li>(x<sup><em>T</em></sup> l)<sup>2</sup></li>
+                <li>(x<sup><em>T</em></sup> l)<sup>3</sup></li>
+                <li>(x<sup><em>T</em></sup> l+1)<sup>3</sup></li>
+              </ul>
+            </li>
+            <li>
+              General form is
+              <ul>
+                <li>(x<sup><em>T</em></sup> l+Con)<sup>D</sup></li>
+              </ul>
+            </li>
+            <li>If they're similar then the inner product tends to be large</li>
+            <li>Not used that often</li>
+            <li>
+              Two parameters
+              <ul>
+                <li>Degree of polynomial (D)</li>
+                <li>Number you add to l (Con)</li>
+              </ul>
+            </li>
+            <li>Usually performs worse than the Gaussian kernel</li>
+            <li>Used when x and l are both non-negative</li>
+          </ul>
+        </li>
+        <li>
+          <strong><span class="term">String kernel</span></strong>
+          <ul>
+            <li>Used if input is text strings</li>
+            <li>Use for text classification</li>
+          </ul>
+        </li>
+        <li><strong><span class="term">Chi-squared kernel</span></strong></li>
+        <li><strong><span class="term">Histogram intersection kernel</span></strong></li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Multi-class classification for SVM</h3>
+  <ul>
+    <li>Many packages have built in multi-class classification packages</li>
+    <li>Otherwise use one-vs all method</li>
+    <li>Not a big issue</li>
+  </ul>
+  <h3>Logistic regression vs. SVM</h3>
+  <ul>
+    <li>When should you use SVM and when is logistic regression more applicable</li>
+    <li>
+      If n (features) is large vs. m (training set)
+      <ul>
+        <li>
+          e.g. text classification problem
+          <ul>
+            <li>Feature vector dimension is 10 000</li>
+            <li>Training set is 10 - 1000</li>
+            <li>Then use logistic regression or SVM with a linear kernel</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If n is small and m is intermediate
+      <ul>
+        <li>n = 1 - 1000</li>
+        <li>m = 10 - 10 000</li>
+        <li>Gaussian kernel is good</li>
+      </ul>
+    </li>
+    <li>
+      If n is small and m is large
+      <ul>
+        <li>n = 1 - 1000</li>
+        <li>
+          m = 50 000+
+          <ul>
+            <li>SVM will be slow to run with Gaussian kernel</li>
+          </ul>
+        </li>
+        <li>
+          In that case
+          <ul>
+            <li>Manually create or add more features</li>
+            <li>Use logistic regression or SVM with a linear kernel</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Logistic regression and SVM with a linear kernel are pretty similar
+      <ul>
+        <li>Do similar things</li>
+        <li>Get similar performance</li>
+      </ul>
+    </li>
+    <li>A lot of SVM's power is using different kernels to learn complex non-linear functions</li>
+    <li>
+      For all these regimes a well designed NN should work
+      <ul>
+        <li>But, for some of these problems a NN might be slower - SVM well implemented would be faster</li>
+      </ul>
+    </li>
+    <li>SVM has a convex optimization problem - so you get a global minimum</li>
+    <li>
+      It's not always clear how to choose an algorithm
+      <ul>
+        <li>Often more important to get enough data</li>
+        <li>Designing new features</li>
+        <li>Debugging the algorithm</li>
+      </ul>
+    </li>
+    <li>SVM is widely perceived as a very powerful learning algorithm</li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="11_Machine_Learning_System_Design.html" rel="prev">&larr; 11: System design</a>
+  <a href="index.html">Index</a>
+  <a href="13_Clustering.html" rel="next">13: Clustering &rarr;</a>
+</nav>
+</main>
 </body>
 </html>

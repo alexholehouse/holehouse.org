@@ -2,11 +2,726 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=../mlcourse/03_Linear_algebra_review.html">
-<link rel="canonical" href="../mlcourse/03_Linear_algebra_review.html">
-<title>Moved</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03: Linear Algebra - Review &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<p>These notes have moved. If you are not forwarded automatically, <a href="../mlcourse/03_Linear_algebra_review.html">follow this link</a>.</p>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>03: Linear Algebra - Review</h1>
+
+<nav class="chapter-nav">
+  <a href="02_Linear_Regression_with_One_Variable.html" rel="prev">&larr; 02: Linear regression</a>
+  <a href="index.html">Index</a>
+  <a href="04_Linear_Regression_with_multiple_variables.html" rel="next">04: Multivariate regression &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#matrices-overview">Matrices - overview</a></li>
+    <li><a href="#vectors-overview">Vectors - overview</a></li>
+    <li><a href="#matrix-manipulation">Matrix manipulation</a></li>
+    <li><a href="#implementationuse">Implementation/use</a></li>
+    <li><a href="#matrix-multiplication-properties">Matrix multiplication properties</a></li>
+    <li><a href="#inverse-and-transpose-operations">Inverse and transpose operations</a></li>
+  </ul>
+</nav>
+<section id="matrices-overview">
+  <h2>Matrices - overview</h2>
+  <ul>
+    <li>
+      Rectangular array of numbers written between square brackets
+      <ul>
+        <li>2D array</li>
+        <li>Named as capital letters (A,B,X,Y)</li>
+      </ul>
+    </li>
+    <li>
+      Dimension of a matrix are [Rows x Columns]
+      <ul>
+        <li>Start at top left</li>
+        <li>To bottom left</li>
+        <li>To bottom right</li>
+        <li>
+          R<sup>[r x c]</sup> means a matrix which has r rows and c columns
+          <div class="eqn">
+<math display="block"><mrow><mi>A</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1402</mn></mtd><mtd><mn>191</mn></mtd></mtr><mtr><mtd><mn>1371</mn></mtd><mtd><mn>821</mn></mtd></mtr><mtr><mtd><mn>949</mn></mtd><mtd><mn>1437</mn></mtd></mtr><mtr><mtd><mn>147</mn></mtd><mtd><mn>1448</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+<div class="code-eg">
+<pre>import numpy as np
+
+A = np.array([[1402,  191],
+              [1371,  821],
+              [ 949, 1437],
+              [ 147, 1448]])
+
+A.shape          <span class="comment"># (4, 2)  -&gt; rows, columns</span></pre>
+</div>
+          <ul>
+            <li>Is a [4 x 2] matrix</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Matrix elements
+      <ul>
+        <li>A<sub>(i,j)</sub> = entry in i<sup>th</sup> row and jth column</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>A</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1402</mn></mtd><mtd><mn>191</mn></mtd></mtr><mtr><mtd><mn>1371</mn></mtd><mtd><mn>821</mn></mtd></mtr><mtr><mtd><mn>949</mn></mtd><mtd><mn>1437</mn></mtd></mtr><mtr><mtd><mn>147</mn></mtd><mtd><mn>1448</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<math display="block"><mrow><msub><mi>A</mi><mrow><mn>11</mn></mrow></msub><mo>=</mo><mn>1402</mn><mspace width="1.5em"/><msub><mi>A</mi><mrow><mn>12</mn></mrow></msub><mo>=</mo><mn>191</mn></mrow></math>
+<math display="block"><mrow><msub><mi>A</mi><mrow><mn>32</mn></mrow></msub><mo>=</mo><mn>1437</mn><mspace width="1.5em"/><msub><mi>A</mi><mrow><mn>41</mn></mrow></msub><mo>=</mo><mn>147</mn></mrow></math>
+<span class="eqn-note">A<sub>ij</sub> is the entry in the i<sup>th</sup> row and j<sup>th</sup> column.</span>
+</div>
+<div class="code-eg">
+<pre>A[0, 0]          <span class="comment"># 1402   the notes&#x27; A11</span>
+A[0, 1]          <span class="comment"># 191    the notes&#x27; A12</span>
+A[2, 1]          <span class="comment"># 1437   the notes&#x27; A32</span>
+A[3, 0]          <span class="comment"># 147    the notes&#x27; A41</span></pre>
+<span class="eqn-note">NumPy indexes from <strong>0</strong>, so the notes' A<sub>32</sub> is <code>A[2, 1]</code> &mdash; subtract one from each index.</span>
+</div>
+  <ul>
+    <li>Provides a way to organize, index and access a lot of data</li>
+  </ul>
+</section>
+<section id="vectors-overview">
+  <h2>Vectors - overview</h2>
+  <ul>
+    <li>
+      Is an n by 1 matrix
+      <ul>
+        <li>Usually referred to as a lower case letter</li>
+        <li>n rows</li>
+        <li>1 column</li>
+        <li>e.g.</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>y</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>460</mn></mtd></mtr><mtr><mtd><mn>232</mn></mtd></mtr><mtr><mtd><mn>315</mn></mtd></mtr><mtr><mtd><mn>178</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+<div class="code-eg">
+<pre>y = np.array([460, 232, 315, 178])
+y.shape          <span class="comment"># (4,)    a 1-D array, not a column</span>
+
+y_col = y.reshape(4, 1)
+y_col.shape      <span class="comment"># (4, 1)  an explicit column vector</span></pre>
+<span class="eqn-note">A 1-D array has no orientation &mdash; it is neither a row nor a column. Reshape when the distinction matters.</span>
+</div>
+  <ul>
+    <li>
+      Is a 4 dimensional vector
+      <ul>
+        <li>Refer to this as a vector R4</li>
+      </ul>
+    </li>
+    <li>
+      Vector elements
+      <ul>
+        <li>v<sub>i</sub> = i<sup>th </sup>element of the vector</li>
+        <li>Vectors can be 0-indexed (Python, C++) or 1-indexed (maths notation)</li>
+        <li>
+          In math 1-indexed is most common
+          <ul>
+            <li>But in machine learning 0-index is useful</li>
+          </ul>
+        </li>
+        <li>Normally assume using 1-index vectors, but be aware sometimes these will (explicitly) be 0 index ones</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="matrix-manipulation">
+  <h2>Matrix manipulation</h2>
+  <ul>
+    <li>
+      <strong><em>Addition</em></strong>
+      <ul>
+        <li>Add up elements one at a time</li>
+        <li>
+          Can only add matrices of the <em>same dimensions</em>
+          <ul>
+            <li>Creates a new matrix of the same dimensions of the ones added</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>+</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>4</mn></mtd><mtd><mn>0.5</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>5</mn></mtd><mtd><mn>0.5</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+<div class="code-eg">
+<pre>M = np.array([[1, 0], [2, 5], [3, 1]])
+N = np.array([[4, 0.5], [2, 5], [0, 1]])
+
+M + N            <span class="comment"># [[5, 0.5], [4, 10], [3, 2]]</span></pre>
+</div>
+  <ul>
+    <li>
+      <strong><em>Multiplication by scalar</em></strong>
+      <ul>
+        <li>Scalar = real number</li>
+        <li>Multiply each element by the scalar</li>
+        <li>Generates a matrix of the same size as the original matrix</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mn>3</mn><mo>&#x00D7;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>3</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>6</mn></mtd><mtd><mn>15</mn></mtd></mtr><mtr><mtd><mn>9</mn></mtd><mtd><mn>3</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+<div class="code-eg">
+<pre>3 * M            <span class="comment"># [[3, 0], [6, 15], [9, 3]]</span></pre>
+</div>
+  <ul>
+    <li>
+      <strong><em>Division by a scalar</em></strong>
+      <ul>
+        <li>Same as multiplying a matrix by 1/4</li>
+        <li>Each element is divided by the scalar</li>
+      </ul>
+    </li>
+    <li>
+      <strong><em>Combination of operands</em></strong>
+      <ul>
+        <li>Evaluate multiplications first</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mn>3</mn><mo>&#x00D7;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>+</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x2212;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>/</mo><mn>3</mn></mrow></math>
+</div>
+<div class="code-eg">
+<pre>a = np.array([1, 4, 2])
+b = np.array([0, 0, 5])
+c = np.array([3, 0, 2])
+
+3 * a + b - c / 3    <span class="comment"># [2.,  12.,  10.33333333]</span></pre>
+<span class="eqn-note">Multiplication and division bind tighter than addition, so this evaluates in the order the maths above shows.</span>
+</div>
+  <ul>
+    <li>
+      <strong>Matrix by vector multiplication</strong>
+      <ul>
+        <li>
+          [3 x 2] matrix * [2 x 1] vector
+          <ul>
+            <li>
+              New matrix is [3 x 1]
+              <ul>
+                <li>
+                  More generally if [a x b] * [b x c]
+                  <ul>
+                    <li>Then new matrix is [a x c]</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              How do you do it?
+              <ul>
+                <li>
+                  Take the two vector numbers and multiply them with the first row of the matrix
+                  <ul>
+                    <li>Then add results together - this number is the first number in the new vector</li>
+                  </ul>
+                </li>
+                <li>Then multiply second row by vector and add the results together</li>
+                <li>Then multiply final row by vector and add them together</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x00D7;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>16</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>7</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<math display="block"><mrow><mn>1</mn><mo>&#x00D7;</mo><mn>1</mn><mo>+</mo><mn>3</mn><mo>&#x00D7;</mo><mn>5</mn><mo>=</mo><mn>16</mn></mrow></math>
+<math display="block"><mrow><mn>4</mn><mo>&#x00D7;</mo><mn>1</mn><mo>+</mo><mn>0</mn><mo>&#x00D7;</mo><mn>5</mn><mo>=</mo><mn>4</mn></mrow></math>
+<math display="block"><mrow><mn>2</mn><mo>&#x00D7;</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo>&#x00D7;</mo><mn>5</mn><mo>=</mo><mn>7</mn></mrow></math>
+<span class="eqn-note">A [3 x 2] matrix times a [2 x 1] vector gives a [3 x 1] vector.</span>
+</div>
+<div class="code-eg">
+<pre>P = np.array([[1, 3], [4, 0], [2, 1]])   <span class="comment"># [3 x 2]</span>
+v = np.array([[1], [5]])                 <span class="comment"># [2 x 1]</span>
+
+P @ v            <span class="comment"># [[16], [4], [7]]</span></pre>
+<span class="eqn-note"><code>@</code> is matrix multiplication. <code>*</code> multiplies element by element and is <em>not</em> the same thing.</span>
+</div>
+  <ul>
+    <li>
+      Detailed explanation
+      <ul>
+        <li>
+          A * x = y
+          <ul>
+            <li>A is m x n matrix</li>
+            <li>x is n x 1 matrix</li>
+            <li>
+              n must match between vector and matrix
+              <ul>
+                <li>i.e. inner dimensions must match</li>
+              </ul>
+            </li>
+            <li>Result is an m-dimensional vector</li>
+          </ul>
+        </li>
+        <li>To get y<sub>i</sub> - multiply A's i<sup>th </sup>row with all the elements of vector x and add them up</li>
+      </ul>
+    </li>
+    <li>
+      Neat trick
+      <ul>
+        <li>Say we have a data set with four values</li>
+        <li>
+          Say we also have a hypothesis h<sub>θ</sub>(x) = -40 + 0.25x
+          <ul>
+            <li>Create your data as a matrix which can be multiplied by a vector</li>
+            <li>Have the parameters in a vector which your matrix can be multiplied by</li>
+          </ul>
+        </li>
+        <li>
+          Means we can do
+          <ul>
+            <li>
+              Prediction = Data Matrix * Parameters
+              <div class="eqn">
+<math display="block"><mrow><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mn>40</mn><mo>+</mo><mn>0.25</mn><mi>x</mi></mrow></math>
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>2104</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1416</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1534</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>852</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x00D7;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mrow><mo>&#x2212;</mo><mn>40</mn></mrow></mtd></mtr><mtr><mtd><mn>0.25</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mrow><mo>&#x2212;</mo><mn>40</mn><mo>&#x00D7;</mo><mn>1</mn><mo>+</mo><mn>0.25</mn><mo>&#x00D7;</mo><mn>2104</mn></mrow></mtd></mtr><mtr><mtd><mrow><mo>&#x2212;</mo><mn>40</mn><mo>&#x00D7;</mo><mn>1</mn><mo>+</mo><mn>0.25</mn><mo>&#x00D7;</mo><mn>1416</mn></mrow></mtd></mtr><mtr><mtd><mrow><mo>&#x2212;</mo><mn>40</mn><mo>&#x00D7;</mo><mn>1</mn><mo>+</mo><mn>0.25</mn><mo>&#x00D7;</mo><mn>1534</mn></mrow></mtd></mtr><mtr><mtd><mrow><mo>&#x2212;</mo><mn>40</mn><mo>&#x00D7;</mo><mn>1</mn><mo>+</mo><mn>0.25</mn><mo>&#x00D7;</mo><mn>852</mn></mrow></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Prediction = data matrix &#x00D7; parameters. A [4 x 2] matrix times a [2 x 1] vector gives the four predictions as a [4 x 1] vector.</span>
+</div>
+<div class="code-eg">
+<pre>X = np.array([[1, 2104],
+              [1, 1416],
+              [1, 1534],
+              [1,  852]])          <span class="comment"># data, with a column of 1s for theta_0</span>
+theta = np.array([[-40], [0.25]])  <span class="comment"># parameters</span>
+
+X @ theta        <span class="comment"># [[486.], [314.], [343.5], [173.]]</span></pre>
+<span class="eqn-note">The column of 1s is what lets &#x3B8;<sub>0</sub> be carried through the multiplication.</span>
+</div>
+            </li>
+            <li>Here we add an extra column to the data with 1s - this means our θ<sub>0 </sub>values can be calculated and expressed</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      The diagram above shows how this works
+      <ul>
+        <li>This can be far more efficient computationally than lots of for loops</li>
+        <li>This is also easier and cleaner to code (assuming you have appropriate libraries to do matrix multiplication)</li>
+      </ul>
+    </li>
+    <li>
+      <strong><em>Matrix-matrix multiplication</em></strong>
+      <ul>
+        <li>
+          General idea
+          <ul>
+            <li>Step through the second matrix one column at a time</li>
+            <li>Multiply each column vector from second matrix by the entire first matrix, each time generating a vector</li>
+            <li>The final product is these vectors combined (not added or summed, but literally just put together)</li>
+          </ul>
+        </li>
+        <li>
+          Details
+          <ul>
+            <li>
+              A x B = C
+              <ul>
+                <li>A = [m x n]</li>
+                <li>B = [n x o]</li>
+                <li>
+                  C = [m x o]
+                  <ul>
+                    <li>With vector multiplications o = 1</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>Can only multiply matrix where columns in A match rows in B</li>
+          </ul>
+        </li>
+        <li>
+          Mechanism
+          <ul>
+            <li>Take column 1 of B, treat as a vector</li>
+            <li>Multiply A by that column - generates an [m x 1] vector</li>
+            <li>
+              Repeat for each column in B
+              <ul>
+                <li>There are o columns in B, so we get o columns in C</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Summary
+          <ul>
+            <li><em><span class="hl-red">The</span><span class="hl-red"> i <sup>th </sup>column of matrix C is obtained by multiplying A with the <em><span class="hl-red">i <sup>th </sup></span></em>column of B</span></em></li>
+          </ul>
+        </li>
+        <li>Start with an example</li>
+        <li>A x B</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd><mtd><mn>2</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+</div>
+<div class="code-eg">
+<pre>A2 = np.array([[1, 3, 2], [4, 0, 1]])    <span class="comment"># [2 x 3]</span>
+B2 = np.array([[1, 3], [0, 1], [5, 2]])  <span class="comment"># [3 x 2]</span>
+
+A2 @ B2          <span class="comment"># [[11, 10], [9, 14]]   a [2 x 2]</span></pre>
+</div>
+  <ul>
+    <li>
+      Initially
+      <ul>
+        <li>Take matrix A and multiply by the first column vector from B</li>
+        <li>Take the matrix A and multiply by the second column vector from B</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x00D7;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>5</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>11</mn></mtd></mtr><mtr><mtd><mn>9</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd><mtd><mn>2</mn></mtd></mtr><mtr><mtd><mn>4</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x00D7;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>10</mn></mtd></mtr><mtr><mtd><mn>14</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">Each column of the result comes from multiplying A by the corresponding column of B.</span>
+</div>
+<div class="code-eg">
+<pre>A2 @ B2[:, [0]]  <span class="comment"># [[11], [9]]   first column of B</span>
+A2 @ B2[:, [1]]  <span class="comment"># [[10], [14]]  second column of B</span></pre>
+<span class="eqn-note">Each column of the product is A times the corresponding column of B, exactly as above.</span>
+</div>
+  <ul>
+    <li>2 x 3 times 3 x 2 gives you a 2 x 2 matrix</li>
+  </ul>
+</section>
+<section id="implementationuse">
+  <h2>Implementation/use</h2>
+  <ul>
+    <li>House prices, but now we have three hypotheses and the same data set</li>
+    <li>
+      To apply all three hypotheses to all data we can do this efficiently using matrix-matrix multiplication
+      <ul>
+        <li>
+          Have
+          <ul>
+            <li>Data matrix</li>
+            <li>Parameter matrix</li>
+          </ul>
+        </li>
+        <li>
+          Example
+          <ul>
+            <li>Four houses, where we want to predict the price</li>
+            <li>Three competing hypotheses</li>
+            <li>Because our hypotheses are one variable, to make the matrices match up we make our data (house sizes) vector into a 4x2 matrix by adding an extra column of 1s</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mn>1.</mn><mspace width="0.4em"/><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mn>40</mn><mo>+</mo><mn>0.25</mn><mi>x</mi></mrow></math>
+<math display="block"><mrow><mn>2.</mn><mspace width="0.4em"/><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><mn>200</mn><mo>+</mo><mn>0.1</mn><mi>x</mi></mrow></math>
+<math display="block"><mrow><mn>3.</mn><mspace width="0.4em"/><msub><mi>h</mi><mi>&#x3B8;</mi></msub><mo form="prefix">(</mo><mi>x</mi><mo form="postfix">)</mo><mo>=</mo><mo form="prefix">&#x2212;</mo><mn>150</mn><mo>+</mo><mn>0.4</mn><mi>x</mi></mrow></math>
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>2104</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1416</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>1534</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd><mtd><mn>852</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>&#x00D7;</mo><mrow><mo>[</mo><mtable><mtr><mtd><mrow><mo>&#x2212;</mo><mn>40</mn></mrow></mtd><mtd><mn>200</mn></mtd><mtd><mrow><mo>&#x2212;</mo><mn>150</mn></mrow></mtd></mtr><mtr><mtd><mn>0.25</mn></mtd><mtd><mn>0.1</mn></mtd><mtd><mn>0.4</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>486</mn></mtd><mtd><mn>410</mn></mtd><mtd><mn>692</mn></mtd></mtr><mtr><mtd><mn>314</mn></mtd><mtd><mn>342</mn></mtd><mtd><mn>416</mn></mtd></mtr><mtr><mtd><mn>344</mn></mtd><mtd><mn>353</mn></mtd><mtd><mn>464</mn></mtd></mtr><mtr><mtd><mn>173</mn></mtd><mtd><mn>285</mn></mtd><mtd><mn>191</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">One column of predictions per hypothesis &mdash; twelve predictions from a single matrix multiplication. Values are rounded to whole numbers, as on the original slide.</span>
+</div>
+<div class="code-eg">
+<pre>thetas = np.array([[-40, 200, -150],
+                   [0.25, 0.1,  0.4]])   <span class="comment"># one column per hypothesis</span>
+
+np.round(X @ thetas)
+<span class="comment"># [[486., 410., 692.],</span>
+<span class="comment">#  [314., 342., 416.],</span>
+<span class="comment">#  [344., 353., 464.],</span>
+<span class="comment">#  [173., 285., 191.]]</span></pre>
+<span class="eqn-note">Twelve predictions from one call &mdash; this is why the vectorized form matters.</span>
+</div>
+  <ul>
+    <li>
+      What does this mean
+      <ul>
+        <li>Can quickly apply three hypotheses at once, making 12 predictions</li>
+        <li>Lots of good linear algebra libraries to do this kind of thing very efficiently</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="matrix-multiplication-properties">
+  <h2>Matrix multiplication properties</h2>
+  <ul>
+    <li>
+      Can pack a lot into one operation
+      <ul>
+        <li>However, should be careful of how you use those operations</li>
+        <li>Some interesting properties</li>
+      </ul>
+    </li>
+    <li>
+      <strong>Commutativity</strong>
+      <ul>
+        <li>
+          When working with raw numbers/scalars multiplication is commutative
+          <ul>
+            <li>3 * 5 == 5 * 3</li>
+          </ul>
+        </li>
+        <li>
+          This is not true for matrices
+          <ul>
+            <li>A x B != B x A</li>
+            <li><strong><span class="hl-red">Matrix multiplication is not commutative</span></strong></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <strong>Associativity</strong>
+      <ul>
+        <li>
+          3 x 5 x 2 == 3 x 10 = 15 x 2
+          <ul>
+            <li>Associative property</li>
+          </ul>
+        </li>
+        <li>
+          <strong><span class="hl-red">Matrix multiplications is associative</span></strong>
+          <ul>
+            <li>A x (B x C) == (A x B) x C</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <strong>Identity matrix</strong>
+      <ul>
+        <li>
+          1 is the identity for any scalar
+          <ul>
+            <li>
+              i.e. 1 x z = z
+              <ul>
+                <li>for any real number</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          In matrices we have an identity matrix called <em>I</em>
+          <ul>
+            <li>
+              Sometimes called <em>I<sub>{n x n}</sub></em>
+              <div class="eqn">
+<math display="block"><mrow><msub><mi>I</mi><mrow><mn>2</mn><mo>&#x00D7;</mo><mn>2</mn></mrow></msub><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<math display="block"><mrow><msub><mi>I</mi><mrow><mn>3</mn><mo>&#x00D7;</mo><mn>3</mn></mrow></msub><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<math display="block"><mrow><msub><mi>I</mi><mrow><mn>4</mn><mo>&#x00D7;</mo><mn>4</mn></mrow></msub><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">A different identity matrix for each set of dimensions: 1s down the diagonal, 0s everywhere else.</span>
+</div>
+<div class="code-eg">
+<pre>np.eye(2)        <span class="comment"># [[1., 0.], [0., 1.]]</span>
+np.eye(3)        <span class="comment"># 3 x 3 identity</span>
+np.eye(4)        <span class="comment"># 4 x 4 identity</span>
+
+A2 @ np.eye(3)   <span class="comment"># unchanged: [[1., 3., 2.], [4., 0., 1.]]</span></pre>
+</div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      See some identity matrices above
+      <ul>
+        <li>Different identity matrix for each set of dimensions</li>
+        <li>
+          Has
+          <ul>
+            <li>1s along the diagonals</li>
+            <li>0s everywhere else</li>
+          </ul>
+        </li>
+        <li>1x1 matrix is just "1"</li>
+      </ul>
+    </li>
+    <li>
+      Has the property that any matrix A which can be multiplied by an identity matrix gives you matrix A back
+      <ul>
+        <li>
+          So if A is [m x n] then
+          <ul>
+            <li>
+              A * I
+              <ul>
+                <li>I = n x n</li>
+              </ul>
+            </li>
+            <li>
+              I * A
+              <ul>
+                <li>I = m x m</li>
+              </ul>
+            </li>
+            <li>(To make inside dimensions match to allow multiplication)</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Identity matrix dimensions are implicit</li>
+    <li>
+      Remember that matrices are not commutative AB != BA
+      <ul>
+        <li>Except when B is the identity matrix</li>
+        <li>Then AB == BA</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="inverse-and-transpose-operations">
+  <h2>Inverse and transpose operations</h2>
+  <ul>
+    <li>
+      <strong>Matrix inverse</strong>
+      <ul>
+        <li>
+          How does the concept of "the inverse" relate to real numbers?
+          <ul>
+            <li>
+              1 = "identity element" (as mentioned above)
+              <ul>
+                <li>
+                  Each number has an inverse
+                  <ul>
+                    <li>This is the number you multiply a number by to get the identity element</li>
+                    <li>i.e. if you have x, x * 1/x = 1</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              e.g. given the number 3
+              <ul>
+                <li>3 * 3<sup>-1</sup> = 1 (the identity number/matrix)</li>
+              </ul>
+            </li>
+            <li>
+              In the space of real numbers <strong><span class="hl-red">not everything has an inverse</span></strong>
+              <ul>
+                <li>e.g. 0 does not have an inverse</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          What is the inverse of a matrix
+          <ul>
+            <li>If A is an m x m matrix, then A inverse = A<sup>-1</sup></li>
+            <li>So A*A<sup>-1</sup> = <em>I</em></li>
+            <li>
+              Only matrices which are m x m have inverses
+              <ul>
+                <li>Square matrices only!</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Example
+          <ul>
+            <li>
+              2 x 2 matrix
+              <div class="eqn">
+<math display="block"><mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>3</mn></mtd><mtd><mn>4</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>16</mn></mtd></mtr></mtable><mo>]</mo></mrow><mrow><mo>[</mo><mtable><mtr><mtd><mn>0.4</mn></mtd><mtd><mrow><mo>&#x2212;</mo><mn>0.1</mn></mrow></mtd></mtr><mtr><mtd><mrow><mo>&#x2212;</mo><mn>0.05</mn></mrow></mtd><mtd><mn>0.075</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow><mo>=</mo><msub><mi>I</mi><mrow><mn>2</mn><mo>&#x00D7;</mo><mn>2</mn></mrow></msub></mrow></math>
+<span class="eqn-note">A &#x00D7; A<sup>&#x2212;1</sup> = I</span>
+</div>
+<div class="code-eg">
+<pre>C = np.array([[3, 4], [2, 16]])
+C_inv = np.linalg.inv(C)
+
+np.round(C_inv, 3)     <span class="comment"># [[ 0.4  , -0.1  ], [-0.05 ,  0.075]]</span>
+np.round(C @ C_inv)    <span class="comment"># [[1., 0.], [0., 1.]]  -&gt; the identity</span></pre>
+<span class="eqn-note">In practice prefer <code>np.linalg.solve(C, b)</code> to <code>inv(C) @ b</code> &mdash; it is faster and numerically better behaved. A singular matrix raises <code>LinAlgError</code>.</span>
+</div>
+            </li>
+            <li>
+              How did you find the inverse
+              <ul>
+                <li>Turns out that you can sometimes do it by hand, although this is very hard</li>
+                <li>
+                  Numerical software for computing a matrix's inverse
+                  <ul>
+                    <li>Lots of open source libraries</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          If A is all zeros then there is no inverse matrix
+          <ul>
+            <li>Some others don't, intuition should be matrices that don't have an inverse are a singular matrix or a degenerate matrix (i.e. when it's too close to 0)</li>
+            <li>So if all the values of a matrix reach zero, this can be described as reaching singularity</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <strong>Matrix transpose</strong>
+      <ul>
+        <li>
+          Have matrix A (which is [n x m]) how do you change it to become [m x n] while keeping the same values
+          <ul>
+            <li>i.e. swap rows and columns!</li>
+          </ul>
+        </li>
+        <li>
+          How you do it;
+          <ul>
+            <li>Take first row of A - becomes 1st column of A<sup><em>T</em></sup></li>
+            <li>Second row of A - becomes 2nd column...</li>
+          </ul>
+        </li>
+        <li>
+          A is an m x n matrix
+          <ul>
+            <li>B is a transpose of A</li>
+            <li>Then B is an n x m matrix</li>
+            <li>A<sub>(i,j)</sub> = B<sub>(j,i)</sub></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <div class="eqn">
+<math display="block"><mrow><mi>A</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>2</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>3</mn></mtd><mtd><mn>5</mn></mtd><mtd><mn>9</mn></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="2em"/><msup><mi>A</mi><mi>T</mi></msup><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>1</mn></mtd><mtd><mn>3</mn></mtd></mtr><mtr><mtd><mn>2</mn></mtd><mtd><mn>5</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd><mtd><mn>9</mn></mtd></mtr></mtable><mo>]</mo></mrow></mrow></math>
+<span class="eqn-note">The first row of A becomes the first column of A<sup>T</sup>, and so on.</span>
+</div>
+<div class="code-eg">
+<pre>D = np.array([[1, 2, 0], [3, 5, 9]])
+
+D.T              <span class="comment"># [[1, 3], [2, 5], [0, 9]]</span>
+D.shape, D.T.shape   <span class="comment"># ((2, 3), (3, 2))</span></pre>
+</div>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="02_Linear_Regression_with_One_Variable.html" rel="prev">&larr; 02: Linear regression</a>
+  <a href="index.html">Index</a>
+  <a href="04_Linear_Regression_with_multiple_variables.html" rel="next">04: Multivariate regression &rarr;</a>
+</nav>
+</main>
 </body>
 </html>

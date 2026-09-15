@@ -2,11 +2,774 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=../mlcourse/11_Machine_Learning_System_Design.html">
-<link rel="canonical" href="../mlcourse/11_Machine_Learning_System_Design.html">
-<title>Moved</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11: Machine Learning System Design &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<p>These notes have moved. If you are not forwarded automatically, <a href="../mlcourse/11_Machine_Learning_System_Design.html">follow this link</a>.</p>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>11: Machine Learning System Design</h1>
+
+<nav class="chapter-nav">
+  <a href="10_Advice_for_applying_machine_learning.html" rel="prev">&larr; 10: Applying ML</a>
+  <a href="index.html">Index</a>
+  <a href="12_Support_Vector_Machines.html" rel="next">12: SVMs &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#machine-learning-systems-design">Machine learning systems design</a></li>
+    <li><a href="#prioritizing-what-to-work-on-spam-classification-example">Prioritizing what to work on - spam classification example</a></li>
+    <li><a href="#error-metrics-for-skewed-classes">Error metrics for skewed classes</a></li>
+    <li><a href="#trading-off-precision-and-recall">Trading off precision and recall</a></li>
+    <li><a href="#data-for-machine-learning">Data for machine learning</a></li>
+  </ul>
+</nav>
+<section id="machine-learning-systems-design">
+  <h2>Machine learning systems design</h2>
+  <ul>
+    <li>In this section we'll touch on how to put together a system</li>
+    <li>Previous sections have looked at a wide range of different issues in significant focus</li>
+    <li>
+      This section is less mathematical, but material will be very useful none-the-less
+      <ul>
+        <li>Consider the system approach</li>
+        <li>You can understand all the algorithms, but if you don't understand how to make them work in a complete system that's no good!</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="prioritizing-what-to-work-on-spam-classification-example">
+  <h2>Prioritizing what to work on - spam classification example</h2>
+  <ul>
+    <li>
+      The idea of prioritizing what to work on is perhaps the most important skill programmers typically need to develop
+      <ul>
+        <li>
+          It's so easy to have many ideas you want to work on, and as a result do none of them well, because doing one well is harder than doing six superficially
+          <ul>
+            <li>So you need to make sure you complete projects</li>
+            <li>Get something "shipped" - even if it doesn't have all the bells and whistles, that final 20% getting it ready is often the toughest</li>
+            <li>If you only release when you're totally happy you rarely get practice doing that final 20%</li>
+          </ul>
+        </li>
+        <li>So, back to machine learning...</li>
+      </ul>
+    </li>
+    <li>Building a spam classifier</li>
+    <li>
+      Spam is email advertising
+      <div class="two-up">
+  <div>
+    <p class="eg-label">Spam (y = 1)</p>
+    <pre>From: cheapsales@buystufffromme.com
+To: ang@cs.stanford.edu
+Subject: Buy now!
+
+Deal of the week! Buy now!
+Rolex <u>w4tchs</u> - $100
+<u>Med1cine</u> (any kind) - $50
+Also low cost M0rgages available.</pre>
+  </div>
+  <div>
+    <p class="eg-label">Non-spam (y = 0)</p>
+    <pre>From: Alfred Ng
+To: ang@cs.stanford.edu
+Subject: Christmas dates?
+
+Hey Andrew,
+Was talking to Mom about plans
+for Xmas. When do you get off
+work. Meet Dec 22?
+Alf</pre>
+  </div>
+</div>
+<p class="eqn-note">The misspellings are deliberate &#x2014; w4tchs and Med1cine are
+underlined on the slide, and M0rgages is a third. Substituting digits for letters is
+how spam gets past a filter that matches on exact words, which is exactly why
+&#x201c;misspelled word&#x201d; is proposed as a feature on the next slide.</p>
+    </li>
+    <li>
+      What kind of features might we define
+      <ul>
+        <li>
+          Spam (1)
+          <ul>
+            <li>Misspelled word</li>
+          </ul>
+        </li>
+        <li>
+          Not spam (0)
+          <ul>
+            <li>Real content</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      How do we build a classifier to distinguish between the two
+      <ul>
+        <li>
+          Feature representation
+          <ul>
+            <li>
+              How do we represent x (features of the email)?
+              <ul>
+                <li>y = spam (1) or not spam (0)</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>One approach - choosing your own features</h3>
+  <ul>
+    <li>
+      Choose 100 words which are indicative of an email being spam or not spam
+      <ul>
+        <li>Spam --&gt; e.g. buy, discount, deal</li>
+        <li>Non spam --&gt; Andrew, now</li>
+        <li>All these words go into one long vector</li>
+      </ul>
+    </li>
+    <li>
+      Encode this into a <strong><span class="term">reference vector</span></strong>
+      <ul>
+        <li>See which words appear in a message</li>
+      </ul>
+    </li>
+    <li>
+      Define a feature vector x
+      <ul>
+        <li>
+          Which is 0 or 1 if a corresponding word in the reference vector is present or not
+          <ul>
+            <li>This is a bitmap of the word content of your email</li>
+          </ul>
+        </li>
+        <li>
+          i.e. don't recount if a word appears more than once
+          <div class="eqn">
+<math display="block"><mrow><mi>x</mi><mo>=</mo><mrow><mo>[</mo><mtable><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd></mtr><mtr><mtd><mn>1</mn></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd></mtr></mtable><mo>]</mo></mrow><mspace width="0.8em"/><mtable><mtr><mtd><mtext>andrew</mtext></mtd></mtr><mtr><mtd><mtext>buy</mtext></mtd></mtr><mtr><mtd><mtext>deal</mtext></mtd></mtr><mtr><mtd><mtext>discount</mtext></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd></mtr><mtr><mtd><mtext>now</mtext></mtd></mtr><mtr><mtd><mo>&#x22ee;</mo></mtd></mtr></mtable></mrow></math>
+<span class="eqn-note">One entry per word in the reference vocabulary, set to 1 if that word appears anywhere in the email and 0 if it does not. It is a bitmap, not a count &#x2014; a word appearing five times still contributes a single 1.</span>
+</div>
+        </li>
+        <li>
+          In practice it's more common to have a training set and pick the most frequent n words, where n is 10 000 to 50 000
+          <ul>
+            <li>So here you're not specifically choosing your own features, but you are choosing <em>how</em> you select them from the training set data</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>What's the best use of your time to improve system accuracy?</h3>
+  <ul>
+    <li>
+      Natural inclination is to collect lots of data
+      <ul>
+        <li>Honey pot anti-spam projects try and get fake email addresses into spammers' hands, collect loads of spam</li>
+        <li>This doesn't always help though</li>
+      </ul>
+    </li>
+    <li>
+      Develop sophisticated features based on email routing information (contained in email header)
+      <ul>
+        <li>Spammers often try and obscure origins of email</li>
+        <li>Send through unusual routes</li>
+      </ul>
+    </li>
+    <li>
+      Develop sophisticated features for message body analysis
+      <ul>
+        <li>Discount == discounts?</li>
+        <li>DEAL == deal?</li>
+      </ul>
+    </li>
+    <li>
+      Develop sophisticated algorithm to detect misspelling
+      <ul>
+        <li>Spammers use misspelled word to get around detection systems</li>
+      </ul>
+    </li>
+    <li>
+      Often a research group <strong><span class="hl-red">randomly focus on one option</span></strong>
+      <ul>
+        <li>May not be the most fruitful way to spend your time</li>
+        <li>
+          If you brainstorm a set of options this is <strong>really good</strong>
+          <ul>
+            <li>Very tempting to just try something</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Error analysis</h3>
+  <ul>
+    <li>
+      When faced with a ML problem lots of ideas of how to improve a problem
+      <ul>
+        <li>Talk about error analysis - how to better make decisions</li>
+      </ul>
+    </li>
+    <li>
+      If you're building a machine learning system often good to start by building a simple algorithm which you can implement quickly
+      <ul>
+        <li>
+          Spend at most 24 hours developing an initially bootstrapped algorithm
+          <ul>
+            <li>Implement and test on cross validation data</li>
+          </ul>
+        </li>
+        <li>
+          Plot learning curves to decide if more data, features etc will help algorithmic optimization
+          <ul>
+            <li>Hard to tell in advance what is important</li>
+            <li>Learning curves really help with this</li>
+            <li>
+              Way of avoiding <strong><span class="term">premature optimization</span></strong>
+              <ul>
+                <li>We should let evidence guide decision making regarding development trajectory</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong><span class="term">Error analysis</span></strong>
+          <ul>
+            <li>Manually examine the samples (in cross validation set) that your algorithm made errors on</li>
+            <li>
+              See if you can work out why
+              <ul>
+                <li>Systematic patterns - help design new features to avoid these shortcomings</li>
+              </ul>
+            </li>
+            <li>
+              e.g.
+              <ul>
+                <li>
+                  Built a spam classifier with 500 examples in CV set
+                  <ul>
+                    <li>Here, error rate is high - gets 100 wrong</li>
+                  </ul>
+                </li>
+                <li>
+                  Manually look at 100 and categorize them depending on features
+                  <ul>
+                    <li>e.g. type of email</li>
+                  </ul>
+                </li>
+                <li>
+                  Looking at those emails
+                  <ul>
+                    <li>
+                      May find <strong>most common type</strong> of spam emails are pharmacy emails, phishing emails
+                      <ul>
+                        <li>See which type is most common - focus your work on those ones</li>
+                      </ul>
+                    </li>
+                    <li>
+                      What <strong>features would have helped</strong> classify them correctly
+                      <ul>
+                        <li>e.g. deliberate misspelling</li>
+                        <li>Unusual email routing</li>
+                        <li>Unusual punctuation</li>
+                        <li>
+                          May find some "spammer technique" is causing a lot of your misses
+                          <ul>
+                            <li>Guide a way around it</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Importance of <strong><span class="term">numerical evaluation</span></strong>
+          <ul>
+            <li>Have a way of numerically evaluating the algorithm</li>
+            <li>If you're developing an algorithm, it's really good to have some performance calculation which gives a single real number to tell you how well it's doing</li>
+            <li>
+              e.g.
+              <ul>
+                <li>Say we're deciding if we should treat a set of similar words as the same word</li>
+                <li>This is done by stemming in NLP (e.g. "Porter stemmer" looks at the etymological stem of a word)</li>
+                <li>
+                  This may make your algorithm better or worse
+                  <ul>
+                    <li>
+                      Also worth considering weighting error (false positive vs. false negative)
+                      <ul>
+                        <li>e.g. is a false positive really bad, or is it worth having a few of one to improve performance a lot</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  Can use numerical evaluation to compare the changes
+                  <ul>
+                    <li>See if a change improves an algorithm or not</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              A single real number may be hard/complicated to compute
+              <ul>
+                <li>But makes it much easier to evaluate how changes impact your algorithm</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>You should do error analysis on the cross validation set instead of the test set</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="error-metrics-for-skewed-classes">
+  <h2>Error metrics for skewed classes</h2>
+  <ul>
+    <li>One case where it's hard to come up with good error metric - skewed classes</li>
+    <li>
+      Example
+      <ul>
+        <li>
+          Cancer classification
+          <ul>
+            <li>
+              Train logistic regression model h<sub>θ</sub>(x) where
+              <ul>
+                <li>Cancer means y = 1</li>
+                <li>Otherwise y = 0</li>
+              </ul>
+            </li>
+            <li>
+              Test classifier on test set
+              <ul>
+                <li>
+                  Get 1% error
+                  <ul>
+                    <li>So this looks pretty good..</li>
+                  </ul>
+                </li>
+                <li>
+                  But only 0.5% have cancer
+                  <ul>
+                    <li>Now, 1% error looks very bad!</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          So when one number of examples is very small this is an example of skewed classes
+          <ul>
+            <li>LOTS more of one class than another</li>
+            <li>So standard error metrics aren't so good</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Another example
+      <ul>
+        <li>Algorithm has 99.2% accuracy</li>
+        <li>
+          Make a change, now get 99.5% accuracy
+          <ul>
+            <li>Does this really represent an improvement to the algorithm?</li>
+          </ul>
+        </li>
+        <li>
+          Did we do something useful, or did we just create something which predicts y = 0 more often
+          <ul>
+            <li>Get very low error, but classifier is still not great</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Precision and recall</h3>
+  <ul>
+    <li>
+      Two new metrics - <strong><span class="term">precision </span></strong>and <strong><span class="term">recall</span></strong>
+      <ul>
+        <li>Both give a value between 0 and 1</li>
+        <li>Evaluating classifier on a test set</li>
+        <li>For a test set, the actual class is 1 or 0</li>
+        <li>
+          Algorithm predicts some value for class, predicting a value for each example in the test set
+          <ul>
+            <li>
+              Considering this, classification can be
+              <ul>
+                <li><span class="hl-green">True positive (we guessed 1, it was 1)</span></li>
+                <li><span class="hl-red">False positive (we guessed 1, it was 0)</span></li>
+                <li><span class="hl-green">True negative (we guessed 0, it was 0)</span></li>
+                <li><span class="hl-red">False negative (we guessed 0, it was 1)</span></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong>Precision</strong>
+          <ul>
+            <li><em>How often does our algorithm cause a false alarm?</em></li>
+            <li>
+              Of all patients we predicted have cancer, what fraction of them <em>actually</em> have cancer
+              <ul>
+                <li>= true positives / # predicted positive</li>
+                <li>= true positives / (true positive + false positive)</li>
+              </ul>
+            </li>
+            <li>
+              High precision is good (i.e. closer to 1)
+              <ul>
+                <li>You want a big number, because you want false positive to be as close to 0 as possible</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong>Recall</strong>
+          <ul>
+            <li><em>How sensitive is our algorithm?</em></li>
+            <li>
+              Of all patients in set that actually have cancer, what fraction did we correctly detect
+              <ul>
+                <li>= true positives / # actual positives</li>
+                <li>= true positive / (true positive + false negative)
+<div class="code-eg">
+<pre>tp, fp, fn = 80, 20, 40   <span class="comment"># counts from a classifier's test run</span>
+
+P = tp / (tp + fp)        <span class="comment"># 0.8   - of everything we called 1, how much was</span>
+R = tp / (tp + fn)        <span class="comment"># 0.667 - of everything that was 1, how much we found</span>
+2 * P * R / (P + R)       <span class="comment"># 0.727 - the F1 score, defined in the next section</span></pre>
+<p class="eqn-note">Precision and recall from raw counts &mdash; the two definitions above, one line each.</p>
+</div></li>
+              </ul>
+            </li>
+            <li>
+              High recall is good (i.e. closer to 1)
+              <ul>
+                <li>You want a big number, because you want false negative to be as close to 0 as possible</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          By computing precision and recall get a better sense of how an algorithm is doing
+          <ul>
+            <li>This can't really be gamed</li>
+            <li>Means we're much more sure that an algorithm is good</li>
+          </ul>
+        </li>
+        <li>Typically we say the presence of a rare class is what we're trying to determine (e.g. positive (1) is the existence of the rare thing)</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="trading-off-precision-and-recall">
+  <h2>Trading off precision and recall</h2>
+  <ul>
+    <li>For many applications we want to control the trade-off between precision and recall</li>
+    <li>
+      Example
+      <ul>
+        <li>
+          Trained a logistic regression classifier
+          <ul>
+            <li>Predict 1 if h<sub>θ</sub>(x) &gt;= 0.5</li>
+            <li>Predict 0 if h<sub>θ</sub>(x) &lt; 0.5</li>
+          </ul>
+        </li>
+        <li>This classifier may give some value for precision and some value for recall</li>
+        <li>
+          Predict 1 only if very confident
+          <ul>
+            <li>
+              One way to do this is to modify the algorithm - we could modify the prediction threshold
+              <ul>
+                <li>Predict 1 if h<sub>θ</sub>(x) &gt;= 0.8</li>
+                <li>Predict 0 if h<sub>θ</sub>(x) &lt; 0.8</li>
+              </ul>
+            </li>
+            <li>Now we can be more confident a 1 is a true positive</li>
+            <li>
+              But classifier has lower recall - predict y = 1 for a smaller number of patients
+              <ul>
+                <li>Risk of false negatives</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Another example - avoid false negatives
+          <ul>
+            <li>
+              This is probably worse for the cancer example
+              <ul>
+                <li>
+                  Now we may set to a lower threshold
+                  <ul>
+                    <li>
+                      Predict 1 if h<sub>θ</sub>(x) &gt;= 0.3
+                      <ul>
+                        <li>Predict 0 if h<sub>θ</sub>(x) &lt; 0.3</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+                <li>i.e. 30% chance they have cancer</li>
+                <li>
+                  So now we have a higher recall, but lower precision
+                  <ul>
+                    <li>Risk of false positives, because we're less discriminating in deciding what means the person has cancer</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      This threshold defines the trade-off
+      <ul>
+        <li>
+          We can show this graphically by plotting precision vs. recall
+          <figure><img alt="" loading="lazy" src="11_Machine_Learning_System_Design_files/Image [2].png"/></figure>
+        </li>
+        <li>This curve can take many different shapes depending on classifier details</li>
+        <li>
+          Is there a way to automatically choose the threshold
+          <ul>
+            <li>
+              Or, if we have a few algorithms, how do we compare different algorithms or parameter sets?
+              <table>
+  <caption>Three classifiers, each better on one measure than the others.</caption>
+  <tr><th scope="col"></th><th scope="col">Precision (P)</th><th scope="col">Recall (R)</th></tr>
+  <tr><th scope="row">Algorithm 1</th><td>0.5</td><td>0.4</td></tr>
+  <tr><th scope="row">Algorithm 2</th><td>0.7</td><td>0.1</td></tr>
+  <tr><th scope="row">Algorithm 3</th><td>0.02</td><td>1.0</td></tr>
+</table>
+            </li>
+          </ul>
+        </li>
+        <li>
+          How do we decide which of these algorithms is best?
+          <ul>
+            <li>We spoke previously about using a single real number evaluation metric</li>
+            <li>By switching to precision/recall we have two numbers</li>
+            <li>
+              Now comparison becomes harder
+              <ul>
+                <li>Better to have just one number</li>
+              </ul>
+            </li>
+            <li>
+              How can we convert P &amp; R into one number?
+              <ul>
+                <li>
+                  One option is the average - (P + R)/2
+                  <ul>
+                    <li>
+                      This is not such a good solution
+                      <ul>
+                        <li>Means if we have a classifier which predicts y = 1 all the time you get a high recall and low precision</li>
+                        <li>Similarly, if we predict Y rarely get high precision and low recall</li>
+                        <li>
+                          So averages here would be 0.45, 0.4 and 0.51
+                          <ul>
+                            <li>0.51 is best, despite having a recall of 1 - i.e. predict y=1 for everything</li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>So average isn't great</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong><span class="term">F<sub>1</sub>Score</span></strong> (<strong><span class="term">fscore</span></strong>)
+                  <ul>
+                    <li>
+<div class="eqn">
+<math display="block"><mrow><msub><mi>F</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mn>2</mn><mi>P</mi><mi>R</mi></mrow><mrow><mi>P</mi><mo>+</mo><mi>R</mi></mrow></mfrac></mrow></math>
+</div>
+<div class="code-eg">
+<pre>import numpy as np
+
+P = np.array([0.5, 0.7, 0.02])   <span class="comment"># the three algorithms in the table above</span>
+R = np.array([0.4, 0.1, 1.0])
+
+(P + R) / 2          <span class="comment"># [0.45, 0.4, 0.51]   - the average picks algorithm 3</span>
+2 * P * R / (P + R)  <span class="comment"># [0.444, 0.175, 0.039] - F1 picks algorithm 1</span></pre>
+<p class="eqn-note">The table above, scored both ways. Averaging rewards the predict-1-for-everything classifier; the F1 score puts it last, which is the point.</p>
+</div>
+</li>
+                    <li>Fscore is like taking the average of precision and recall giving a higher weight to the lower value</li>
+                  </ul>
+                </li>
+                <li>
+                  Many formulas for computing comparable precision/accuracy values
+                  <ul>
+                    <li>If P = 0 or R = 0 the Fscore = 0</li>
+                    <li>If P = 1 and R = 1 then Fscore = 1</li>
+                    <li>The remaining values lie between 0 and 1</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>Threshold offers a way to control trade-off between precision and recall</li>
+    <li>
+      Fscore gives a single real number evaluation metric
+      <ul>
+        <li>
+          If you're trying to automatically set the threshold, one way is to try a range of threshold values and evaluate them on your cross validation set
+          <ul>
+            <li>Then pick the threshold which gives the best fscore.</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="data-for-machine-learning">
+  <h2>Data for machine learning</h2>
+  <ul>
+    <li>Now switch tracks and look at how much data to train on</li>
+    <li>
+      On early videos caution on just blindly getting more data
+      <ul>
+        <li>Turns out under certain conditions getting more data is a very effective way to improve performance</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Designing a high accuracy learning system</h3>
+  <ul>
+    <li>
+      There have been studies of using different algorithms on data
+      <ul>
+        <li>Data - confusing words (e.g. two, to or too)</li>
+        <li>
+          Algorithms
+          <ul>
+            <li>Perceptron (logistic regression)</li>
+            <li>
+              Winnow
+              <ul>
+                <li>Like logistic regression</li>
+                <li>Used less now</li>
+              </ul>
+            </li>
+            <li>
+              Memory based
+              <ul>
+                <li>Used less now</li>
+                <li>Talk about this later</li>
+              </ul>
+            </li>
+            <li>
+              Naive Bayes
+              <ul>
+                <li>Covered in chapter 05</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Varied training set size and tried algorithms on a range of sizes
+          <figure><img alt="" loading="lazy" src="11_Machine_Learning_System_Design_files/Image [4].png"/></figure>
+        </li>
+        <li>
+          What can we conclude
+          <ul>
+            <li>Algorithms give remarkably similar performance</li>
+            <li>As training set sizes increases accuracy increases</li>
+            <li>Take an algorithm, give it more data, should beat a "better" one with less data</li>
+            <li>
+              Shows that
+              <ul>
+                <li>Algorithm choice is pretty similar</li>
+                <li>More data helps</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      When is this true and when is it not?
+      <ul>
+        <li>
+          If we can correctly assume that features <em>x </em>have enough information to predict <em>y</em> accurately, then more data will probably help
+          <ul>
+            <li>A useful test to determine if this is true can be, "given <em>x</em>, can a human expert predict <em>y</em>?"</li>
+          </ul>
+        </li>
+        <li>
+          So lets say we use a learning algorithm with many parameters such as logistic regression or linear regression with many features, or neural networks with many hidden units
+          <ul>
+            <li>
+              These are powerful learning algorithms with many parameters which can fit complex functions
+              <ul>
+                <li>
+                  Such algorithms are low bias algorithms
+                  <ul>
+                    <li>Little systemic bias in their description - flexible</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              Use a small training set
+              <ul>
+                <li>Training error should be small</li>
+              </ul>
+            </li>
+            <li>
+              Use a very large training set
+              <ul>
+                <li>If the training set error is close to the test set error</li>
+                <li>Unlikely to over fit with our complex algorithms</li>
+                <li>So the test set error should also be small</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          Another way to think about this is we want our algorithm to have low bias and low variance
+          <ul>
+            <li>Low bias --&gt; use complex algorithm</li>
+            <li>Low variance --&gt; use large training set</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="10_Advice_for_applying_machine_learning.html" rel="prev">&larr; 10: Applying ML</a>
+  <a href="index.html">Index</a>
+  <a href="12_Support_Vector_Machines.html" rel="next">12: SVMs &rarr;</a>
+</nav>
+</main>
 </body>
 </html>

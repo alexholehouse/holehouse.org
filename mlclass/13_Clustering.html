@@ -2,11 +2,534 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=../mlcourse/13_Clustering.html">
-<link rel="canonical" href="../mlcourse/13_Clustering.html">
-<title>Moved</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13: Clustering &mdash; Stanford Machine Learning</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<p>These notes have moved. If you are not forwarded automatically, <a href="../mlcourse/13_Clustering.html">follow this link</a>.</p>
+<header class="topbar">
+  <a href="index.html">Notes index</a>
+  <a href="https://holehouse.org">holehouse.org</a>
+</header>
+
+<main>
+<h1>13: Clustering</h1>
+
+<nav class="chapter-nav">
+  <a href="12_Support_Vector_Machines.html" rel="prev">&larr; 12: SVMs</a>
+  <a href="index.html">Index</a>
+  <a href="14_Dimensionality_Reduction.html" rel="next">14: Dimensionality reduction &rarr;</a>
+</nav>
+<nav class="toc" aria-label="On this page">
+  <h2>On this page</h2>
+  <ul>
+    <li><a href="#unsupervised-learning-introduction">Unsupervised learning - introduction</a></li>
+    <li><a href="#k-means-algorithm">K-means algorithm</a></li>
+    <li><a href="#k-means-optimization-objective">K means optimization objective</a></li>
+    <li><a href="#how-do-we-choose-the-number-of-clusters">How do we choose the number of clusters?</a></li>
+  </ul>
+</nav>
+<section id="unsupervised-learning-introduction">
+  <h2>Unsupervised learning - introduction</h2>
+  <ul>
+    <li>
+      Talk about <strong><span class="term">clustering</span></strong>
+      <ul>
+        <li><strong><span class="hl-red">Learning from unlabeled data</span></strong></li>
+      </ul>
+    </li>
+    <li>
+      Unsupervised learning
+      <ul>
+        <li>Useful to contrast with supervised learning</li>
+      </ul>
+    </li>
+    <li>
+      Compare and contrast
+      <ul>
+        <li>
+          Supervised learning
+          <ul>
+            <li>Given a set of labels, fit a hypothesis to it</li>
+          </ul>
+        </li>
+        <li>
+          Unsupervised learning
+          <ul>
+            <li>Try and determine structure in the data</li>
+            <li>Clustering algorithm groups data together based on data features</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      What is clustering good for
+      <ul>
+        <li><strong>Market segmentation</strong> - group customers into different market segments</li>
+        <li><strong>Social network analysis</strong> - Facebook "smartlists"</li>
+        <li><strong>Organizing computer clusters</strong> and data centers for network layout and location</li>
+        <li><strong>Astronomical data analysis</strong> - Understanding galaxy formation</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="k-means-algorithm">
+  <h2>K-means algorithm</h2>
+  <ul>
+    <li>Want an algorithm to automatically group the data into coherent clusters</li>
+    <li>K-means is <strong><span class="term">by far</span></strong> the most widely used clustering algorithm</li>
+  </ul>
+  <h3>Overview</h3>
+  <ul>
+    <li>
+      Take unlabeled data and group into two clusters
+      <figure><img alt="" loading="lazy" src="13_Clustering_files/Image.png"/></figure>
+    </li>
+    <li>
+      Algorithm overview
+      <ul>
+        <li>
+          1) Randomly allocate two points as the <strong><span class="term">cluster centroids</span></strong>
+          <ul>
+            <li>Have as many cluster centroids as clusters you want to do (<em>K</em> cluster centroids, in fact)</li>
+            <li>In our example we just have two clusters</li>
+          </ul>
+        </li>
+        <li>
+          2) Cluster assignment step
+          <ul>
+            <li>Go through each example and depending on if it's closer to the red or blue centroid assign each point to one of the two clusters</li>
+            <li>
+              To demonstrate this, we've gone through the data and "colour" each point red or blue
+              <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [1].png"/></figure>
+            </li>
+          </ul>
+        </li>
+        <li>
+          3) Move centroid step
+          <ul>
+            <li>
+              Take each centroid and move to the average of the correspondingly assigned data-points
+              <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [2].png"/></figure>
+            </li>
+            <li>Repeat 2) and 3) until convergence</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      More formal definition
+      <ul>
+        <li>
+          <strong>Input:</strong>
+          <ul>
+            <li>K (number of clusters in the data)</li>
+            <li>Training set {x<sup>1</sup>, x<sup>2</sup><em>, </em>x<sup>3</sup><em> </em>..., x<sup>n</sup>)</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Algorithm:</strong>
+          <ul>
+            <li>
+              Randomly initialize K cluster centroids as {μ<sub>1</sub>, μ<sub>2</sub>, μ<sub>3</sub> ... μ<sub>K</sub>}
+              <div class="eqn pseudocode">
+<math display="block"><mrow><mtext>Repeat {</mtext></mrow></math>
+<math display="block"><mrow><mspace width="1.6em"/><mtext>for</mtext><mspace width="0.35em"/><mi>i</mi><mo>=</mo><mn>1</mn><mspace width="0.35em"/><mtext>to</mtext><mspace width="0.35em"/><mi>m</mi></mrow></math>
+<math display="block"><mrow><mspace width="3.2em"/><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mspace width="0.4em"/><mo>:=</mo><mspace width="0.4em"/><mtext>index (from 1 to</mtext><mspace width="0.3em"/><mi>K</mi><mspace width="0.3em"/><mtext>) of cluster centroid</mtext></mrow></math>
+<math display="block"><mrow><mspace width="5.4em"/><mtext>closest to</mtext><mspace width="0.4em"/><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></mrow></math>
+<math display="block"><mrow><mspace width="1.6em"/><mtext>for</mtext><mspace width="0.35em"/><mi>k</mi><mo>=</mo><mn>1</mn><mspace width="0.35em"/><mtext>to</mtext><mspace width="0.35em"/><mi>K</mi></mrow></math>
+<math display="block"><mrow><mspace width="3.2em"/><msub><mi>&#x3bc;</mi><mi>k</mi></msub><mspace width="0.4em"/><mo>:=</mo><mspace width="0.4em"/><mtext>average (mean) of points assigned to cluster</mtext><mspace width="0.3em"/><mi>k</mi></mrow></math>
+<math display="block"><mrow><mtext>}</mtext></mrow></math>
+<span class="eqn-note">The two halves are the whole algorithm: the first loop assigns every example to its nearest centroid, the second moves every centroid to the mean of the examples just assigned to it. Repeat until nothing moves.</span>
+</div>
+<div class="code-eg">
+<pre>import numpy as np
+
+X = np.array([[1.0, 1], [1.5, 2], [1, 1.5],   <span class="comment"># three points near (1, 1.5)</span>
+              [8, 8], [8.5, 9], [8, 8.5]])    <span class="comment"># three points near (8, 8.5)</span>
+mu = X[[0, 3]].copy()                          <span class="comment"># init on two random examples</span>
+
+for _ in range(10):
+    c  = np.array([((x - mu) ** 2).sum(1).argmin() for x in X])   <span class="comment"># assignment step</span>
+    mu = np.array([X[c == k].mean(0) for k in range(2)])          <span class="comment"># move step</span>
+
+c    <span class="comment"># [0, 0, 0, 1, 1, 1]           - the two clusters, found</span>
+mu   <span class="comment"># [[1.17, 1.5], [8.17, 8.5]]  - each centroid at its cluster's mean</span></pre>
+<p class="eqn-note">The whole algorithm on six points: the assignment step is the argmin from the box above, the move step is the mean, and two clusters fall out.</p>
+</div>
+              <ul>
+                <li>
+                  Loop 1
+                  <ul>
+                    <li>This inner loop repeatedly sets the c<sup>(i) </sup>variable to be the index of the cluster centroid closest to x<sup>i </sup></li>
+                    <li>
+                      i.e. take i<sup>th</sup> example, measure squared distance to each cluster centroid, assign c<sup>(i)</sup>to the cluster closest
+                      <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mi>k</mi></munder><mspace width="0.35em"/><msup><mrow><mo stretchy="false">&#x2016;</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msub><mi>&#x3bc;</mi><mi>k</mi></msub><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup></mrow></math>
+<span class="eqn-note">The slide draws an arrow from the minimisation to c<sup>(i)</sup>: what gets stored is not the distance but the k that attains it, so this is strictly an argmin. Squaring makes no difference to which k wins, and it is the form that matches the cost function below.</span>
+</div>
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  Loop 2
+                  <ul>
+                    <li>Loops over each centroid calculating the average mean based on all the points associated with each centroid from c<sup>(i)</sup></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li>
+              What if there's a centroid with no data
+              <ul>
+                <li>Remove that centroid, so end up with K-1 classes</li>
+                <li>
+                  Or, randomly reinitialize it
+                  <ul>
+                    <li>Not sure when though...</li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+  <h3>K-means for non-separated clusters</h3>
+  <ul>
+    <li>So far looking at K-means where we have well defined clusters</li>
+    <li>
+      But often K-means is applied to datasets where there aren't well defined clusters
+      <ul>
+        <li>
+          e.g. T-shirt sizing
+          <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [5].png"/></figure>
+        </li>
+      </ul>
+    </li>
+    <li>Not obvious discrete groups</li>
+    <li>
+      Say you want to have three sizes (S,M,L) how big do you make these?
+      <ul>
+        <li>One way would be to run K-means on this data</li>
+        <li>
+          May do the following
+          <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [6].png"/></figure>
+        </li>
+        <li>So creates three clusters, even though they aren't really there</li>
+        <li>
+          Look at first population of people
+          <ul>
+            <li>Try and design a small T-shirt which fits the 1st population</li>
+            <li>And so on for the other two</li>
+          </ul>
+        </li>
+        <li>
+          This is an example of market segmentation
+          <ul>
+            <li>Build products which suit the needs of your subpopulations</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="k-means-optimization-objective">
+  <h2>K means optimization objective</h2>
+  <ul>
+    <li>
+      Supervised learning algorithms have an optimization objective (cost function)
+      <ul>
+        <li>K-means does too</li>
+      </ul>
+    </li>
+    <li>
+      K-means has an optimization objective like the supervised learning functions we've seen
+      <ul>
+        <li>Why is this good?</li>
+        <li>Knowing this is useful because it helps for debugging</li>
+        <li>Helps find better clusters</li>
+      </ul>
+    </li>
+    <li>
+      While K-means is running we keep track of two sets of variables
+      <ul>
+        <li>
+          c<sup>i</sup> is the index of clusters {1,2, ..., K} to which x<sup>i</sup> is currently assigned
+          <ul>
+            <li>i.e. there are <em>m</em> c<sup>i</sup> values, as each example has a c<sup>i</sup> value, and that value is one of the clusters (i.e. can only be one of K different values)</li>
+          </ul>
+        </li>
+        <li>
+          μ<sub>k</sub>, is the cluster associated with centroid <em>k</em>
+          <ul>
+            <li>Locations of cluster centroid k</li>
+            <li>So there are K</li>
+            <li>So these the centroids which exist in the training data space</li>
+          </ul>
+        </li>
+        <li>
+          μ<sub>c</sub><sup>i</sup>, is the cluster centroid of the cluster to which example x<sup>i</sup> has been assigned
+          <ul>
+            <li>
+              This is more for convenience than anything else
+              <ul>
+                <li>You could look up that example i is indexed to cluster j (using the c vector), where j is between 1 and K</li>
+                <li>Then look up the value associated with cluster j in the μ vector (i.e. what are the features associated with μ<sub>j</sub>)</li>
+                <li>But instead, for easy description, we have this variable which gets exactly the same value</li>
+              </ul>
+            </li>
+            <li>
+              Lets say x<sup>i </sup>has been assigned to cluster 5
+              <ul>
+                <li>
+                  Means that
+                  <ul>
+                    <li>c<sup>i</sup> = 5</li>
+                    <li>μ<sub>c</sub><sup>i</sup>, = μ<sub>5</sub></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Using this notation we can write the optimization objective;
+      <div class="eqn">
+<math display="block"><mrow><mi>J</mi><mo stretchy="false">(</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>1</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msub><mi>&#x3bc;</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>&#x3bc;</mi><mi>K</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>m</mi></mrow></mfrac><munderover><mo>&#x2211;</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>m</mi></munderover><msup><mrow><mo stretchy="false">&#x2016;</mo><msup><mi>x</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup><mo>&#x2212;</mo><msub><mi>&#x3bc;</mi><mrow><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>i</mi><mo stretchy="false">)</mo></mrow></msup></mrow></msub><mo stretchy="false">&#x2016;</mo></mrow><mn>2</mn></msup></mrow></math>
+<span class="eqn-note">The mean squared distance from each example to the centroid it was assigned to. Both steps of the algorithm above reduce it, which is why K-means converges.</span>
+</div>
+<div class="code-eg">
+<pre>((X - mu[c]) ** 2).sum(1).mean()   <span class="comment"># J = 0.222 - the distortion at convergence</span></pre>
+<p class="eqn-note">The distortion of the clustering just found &mdash; mu[c] lines each example up against its own centroid, so the whole cost is one line.</p>
+</div>
+      <ul>
+        <li>
+          i.e. squared distances between training example x<sup>i </sup>and the cluster centroid to which x<sup>i </sup>has been assigned
+          <ul>
+            <li>
+              This is just what we've been doing, as the visual description below shows;
+              <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [8].png"/></figure>
+            </li>
+            <li>
+              The red line here shows the distances between the example x<sup>i </sup>and the cluster to which that example has been assigned
+              <ul>
+                <li>Means that when the example is very close to the cluster, this value is small</li>
+                <li>When the cluster is very far away from the example, the value is large</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>This is sometimes called the <strong><span class="term">distortion</span></strong> (or <strong><span class="term">distortion cost function</span></strong>)</li>
+        <li>
+          So we are finding the values which minimizes this function;
+          <div class="eqn">
+<math display="block"><mrow><munder><mo movablelimits="false">min</mo><mtable><mtr><mtd><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>1</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo></mtd></mtr><mtr><mtd><msub><mi>&#x3bc;</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>&#x3bc;</mi><mi>K</mi></msub></mtd></mtr></mtable></munder><mspace width="0.5em"/><mi>J</mi><mo stretchy="false">(</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>1</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msub><mi>&#x3bc;</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>&#x3bc;</mi><mi>K</mi></msub><mo stretchy="false">)</mo></mrow></math>
+<span class="eqn-note">Minimised over both sets of variables at once &#x2014; the assignments and the centroid positions.</span>
+</div>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If we consider the k-means algorithm
+      <ul>
+        <li>
+          The <strong><span class="hl-red">cluster assigned step</span></strong> is minimizing J(...) with respect to c<sup>1</sup>, c<sup>2</sup> ... c<sup>i</sup>
+          <ul>
+            <li>i.e. find the centroid closest to each example</li>
+            <li>Doesn't change the centroids themselves</li>
+          </ul>
+        </li>
+        <li>
+          The <strong><span class="hl-red">move centroid step</span></strong>
+          <ul>
+            <li>We can show this step is choosing the values of μ which minimizes J(...) with respect to μ</li>
+          </ul>
+        </li>
+        <li>
+          So, we're partitioning the algorithm into two parts
+          <ul>
+            <li>First part minimizes the c variables</li>
+            <li>Second part minimizes the μ variables</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>We can use this knowledge to help debug our K-means algorithm</li>
+  </ul>
+  <h3>Random initialization</h3>
+  <ul>
+    <li>
+      How we initialize K-means
+      <ul>
+        <li>And how to avoid local optimum</li>
+      </ul>
+    </li>
+    <li>
+      Consider clustering algorithm
+      <ul>
+        <li>
+          Never spoke about how we initialize the centroids
+          <ul>
+            <li>A few ways - one method is most recommended</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Have number of centroids set to less than number of examples (K &lt; m) (if K &gt; m we have a problem)
+      <ul>
+        <li>Randomly pick K training examples</li>
+        <li>Set μ<sub>1</sub> up to μ<sub>K</sub> to these example's values</li>
+      </ul>
+    </li>
+    <li>
+      K means can converge to different solutions depending on the initialization setup
+      <ul>
+        <li>
+          Risk of local optimum
+          <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [10].png"/></figure>
+        </li>
+        <li>The local optimum are valid convergence, but local optimum not global ones</li>
+      </ul>
+    </li>
+    <li>
+      If this is a concern
+      <ul>
+        <li>
+          We can do multiple random initializations
+          <ul>
+            <li>See if we get the same result - many same results are likely to indicate a global optimum</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      Algorithmically we can do this as follows;
+      <div class="eqn pseudocode">
+<math display="block"><mrow><mtext>For</mtext><mspace width="0.35em"/><mi>i</mi><mo>=</mo><mn>1</mn><mspace width="0.35em"/><mtext>to</mtext><mspace width="0.35em"/><mn>100</mn><mspace width="0.4em"/><mtext>{</mtext></mrow></math>
+<math display="block"><mrow><mspace width="1.6em"/><mtext>Randomly initialize K-means.</mtext></mrow></math>
+<math display="block"><mrow><mspace width="1.6em"/><mtext>Run K-means. Get</mtext><mspace width="0.5em"/><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>1</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msub><mi>&#x3bc;</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>&#x3bc;</mi><mi>K</mi></msub></mrow></math>
+<math display="block"><mrow><mspace width="1.6em"/><mtext>Compute cost function (distortion)</mtext></mrow></math>
+<math display="block"><mrow><mspace width="3.2em"/><mi>J</mi><mo stretchy="false">(</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>1</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msup><mi>c</mi><mrow><mo stretchy="false">(</mo><mi>m</mi><mo stretchy="false">)</mo></mrow></msup><mo>,</mo><msub><mi>&#x3bc;</mi><mn>1</mn></msub><mo>,</mo><mo>&#x2026;</mo><mo>,</mo><msub><mi>&#x3bc;</mi><mi>K</mi></msub><mo stretchy="false">)</mo></mrow></math>
+<math display="block"><mrow><mtext>}</mtext></mrow></math>
+<span class="eqn-note">K-means only finds a local optimum, and which one depends on where the centroids start. Running it many times and keeping the clustering with the lowest distortion is the standard fix.</span>
+</div>
+      <ul>
+        <li>A typical number of times to initialize K-means is 50-1000</li>
+        <li>
+          Randomly initialize K-means
+          <ul>
+            <li>For each of the 100 random initializations run K-means</li>
+            <li>Then compute the distortion on the set of cluster assignments and centroids at convergence</li>
+            <li>End with 100 ways of clustering the data</li>
+            <li>Pick the clustering which gave the lowest distortion</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li>
+      If you're running K means with 2-10 clusters this can help find better global optimum
+      <ul>
+        <li>If K is larger than 10, then multiple random initializations are less likely to be necessary</li>
+        <li>First solution is probably good enough (better granularity of clustering)</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+<section id="how-do-we-choose-the-number-of-clusters">
+  <h2>How do we choose the number of clusters?</h2>
+  <ul>
+    <li>
+      Choosing K?
+      <ul>
+        <li>Not a great way to do this automatically</li>
+        <li>Normally use visualizations to do it manually</li>
+      </ul>
+    </li>
+    <li>What are the intuitions regarding the data?</li>
+    <li>
+      Why is this hard
+      <ul>
+        <li>
+          Sometimes very ambiguous
+          <ul>
+            <li>e.g. two clusters or four clusters</li>
+            <li>Not necessarily a correct answer</li>
+          </ul>
+        </li>
+        <li>This is why doing it automatic this is hard</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Elbow method</h3>
+  <ul>
+    <li>Vary K and compute cost function at a range of K values</li>
+    <li>
+      As K increases J(...) minimum value should decrease (i.e. you decrease the granularity so centroids can better optimize)
+      <ul>
+        <li>Plot this (K vs J())</li>
+      </ul>
+    </li>
+    <li>
+      Look for the "elbow" on the graph
+      <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [12].png"/></figure>
+    </li>
+    <li>Chose the "elbow" number of clusters</li>
+    <li>If you get a nice plot this is a reasonable way of choosing K</li>
+    <li>
+      Risks
+      <ul>
+        <li>Normally you don't get a nice line -&gt; no clear elbow on curve</li>
+        <li>Not really that helpful</li>
+      </ul>
+    </li>
+  </ul>
+  <h3>Another method for choosing K</h3>
+  <ul>
+    <li>Using K-means for market segmentation</li>
+    <li>
+      Running K-means for a later/downstream purpose
+      <ul>
+        <li>See how well different number of clusters serve your later needs</li>
+      </ul>
+    </li>
+    <li>
+      e.g.
+      <ul>
+        <li>
+          T-shirt size example
+          <ul>
+            <li>If you have three sizes (S,M,L)</li>
+            <li>Or five sizes (XS, S, M, L, XL)</li>
+            <li>Run K means where K = 3 and K = 5</li>
+          </ul>
+        </li>
+        <li>
+          How does this look
+          <figure><img alt="" loading="lazy" src="13_Clustering_files/Image [13].png"/></figure>
+        </li>
+        <li>
+          This gives a way to choose the number of clusters
+          <ul>
+            <li>Could consider the cost of making extra sizes vs. how well distributed the products are</li>
+            <li>How important are those sizes though? (e.g. more sizes might make the customers happier)</li>
+            <li>So applied problem may help guide the number of clusters</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<nav class="chapter-nav bottom">
+  <a href="12_Support_Vector_Machines.html" rel="prev">&larr; 12: SVMs</a>
+  <a href="index.html">Index</a>
+  <a href="14_Dimensionality_Reduction.html" rel="next">14: Dimensionality reduction &rarr;</a>
+</nav>
+</main>
 </body>
 </html>
